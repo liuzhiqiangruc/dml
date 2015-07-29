@@ -1,0 +1,32 @@
+set(CMAKE_C_FLAGS "-std=c99 -O3 -pipe -Wall -Wextra")
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/util ${PROJECT_SOURCE_DIR}/ts ${PROJECT_SOURCE_DIR}/dm)
+
+add_executable(breakout breakout.c)
+add_executable(pattern_detection pattern_detection.c)
+add_executable(bayesian_changepoint bayesian_changepoint.c)
+add_executable(unique unique.c)
+add_executable(jlda joint_lda.c)
+add_executable(lda lda.c)
+add_executable(blda bri_lda.c)
+add_executable(alda author_lda.c)
+add_executable(loess loess.c)
+add_executable(bseqr bseqr.c)
+add_executable(tot tot.c)
+add_executable(fits fit_newton.c)
+
+TARGET_LINK_LIBRARIES(breakout edm_static)
+TARGET_LINK_LIBRARIES(pattern_detection hash_pattern_static)
+TARGET_LINK_LIBRARIES(bayesian_changepoint bayesian_changepoint_static)
+TARGET_LINK_LIBRARIES(unique set_static)
+TARGET_LINK_LIBRARIES(jlda jlda_static)
+TARGET_LINK_LIBRARIES(lda lda_static)
+TARGET_LINK_LIBRARIES(blda blda_static)
+TARGET_LINK_LIBRARIES(alda alda_static)
+TARGET_LINK_LIBRARIES(loess loess_static)
+TARGET_LINK_LIBRARIES(bseqr modl_static m)
+TARGET_LINK_LIBRARIES(tot tot_static)
+TARGET_LINK_LIBRARIES(fits fit_newton_static)
+
+INSTALL(TARGETS breakout pattern_detection unique jlda bayesian_changepoint lda blda alda loess bseqr fits
+     RUNTIME DESTINATION bin
+)

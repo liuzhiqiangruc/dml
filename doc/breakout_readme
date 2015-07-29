@@ -1,0 +1,23 @@
+这是关于时序断点程序breakout的使用说明
+该算法是一种基于中位数分割的动态编码过程
+
+1. 输入文件为一条时序，只包含一列
+
+2. 参数说明：
+   除执行程序外，共四个参数，如下：
+   breakout filename min_size beta degree
+   filename   ： 时序文件
+   min_size   ： 时序分段后每一段的最小长度
+   beta       ： 惩罚系数
+   degree     ： 惩罚级数
+
+3. 使用范例：
+   cd bin
+   ./breakout ../data/ts 24 0.001 1
+   
+   输出结果：
+   47 86 
+   表示断点所在位置
+
+4. 其他说明：
+   在lib、include目录中分别是该算法的头文件及静态链接库文件

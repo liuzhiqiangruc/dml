@@ -40,6 +40,7 @@ int main(int argc, char *argv[]) {
     int step;
     char buffer[1024], str[1024];
     char *bfpos; //buffer point
+    char *tstr = NULL;  //tmp str
     double num;
     IdMap *im = idmap_create();
 
@@ -81,7 +82,7 @@ int main(int argc, char *argv[]) {
             }
             bfpos += 1, step += 1;
             //insert str to idmap
-            char *tstr = malloc(sizeof(char) * step);
+            tstr = malloc(sizeof(char) * step);
             memcpy(tstr, str, step - 1);
             tstr[step - 1] = '\0';
             idmap_add(im, tstr, idmap_size(im));
@@ -125,7 +126,9 @@ int main(int argc, char *argv[]) {
     }
     retx = (double *) malloc(sizeof(double) * c);
     lr(r, c, tlen, len, valid, val, y, retx);
-    for (i = 0; i < c; ++i) {
+    for (idmap_reset(im), i = 0; i < c; ++i) {
+        idmap_next(im, &tstr, NULL);
+        printf("%s:", tstr);
         printf("%lf\n", retx[i]);
     }
     free(y);

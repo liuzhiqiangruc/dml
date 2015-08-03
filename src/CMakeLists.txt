@@ -13,6 +13,8 @@ add_executable(loess loess.c)
 add_executable(bseqr bseqr.c)
 add_executable(tot tot.c)
 add_executable(fits fit_newton.c)
+add_executable(viterbi viterbi.c)
+add_executable(lr lr.c)
 
 TARGET_LINK_LIBRARIES(breakout edm_static)
 TARGET_LINK_LIBRARIES(pattern_detection hash_pattern_static)
@@ -26,7 +28,10 @@ TARGET_LINK_LIBRARIES(loess loess_static)
 TARGET_LINK_LIBRARIES(bseqr modl_static m)
 TARGET_LINK_LIBRARIES(tot tot_static)
 TARGET_LINK_LIBRARIES(fits fit_newton_static)
+TARGET_LINK_LIBRARIES(viterbi viterbi_static)
+TARGET_LINK_LIBRARIES(lr lr_static)
+TARGET_LINK_LIBRARIES(lr idmap_static)
 
-INSTALL(TARGETS breakout pattern_detection unique jlda bayesian_changepoint lda blda alda loess bseqr fits
+INSTALL(TARGETS breakout pattern_detection unique jlda bayesian_changepoint lda blda alda loess bseqr fits viterbi lr
      RUNTIME DESTINATION bin
 )

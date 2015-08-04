@@ -2,20 +2,22 @@
 *   Copyright (C) 2015 All rights reserved.
 *
 *   filename : lr.c
-*   author   : ***
+*   author   : lizeming@baidu.com
 *   date     : 2015-08-01
-*   info     : logistic regression
+*   info     : logistic regression binary
 * ======================================================== */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "lr.h"
 #include "idmap.h"
+#include "lr.h"
 
 void help() {
-    fprintf(stderr, "\nlr(logistic regression) usage:\n");
-    fprintf(stderr, "./lr -f <string>\n");
-    fprintf(stderr, "       -f  data_file                       \n");
+    fprintf(stderr, "\nlr(logistic regression) usage:         \n");
+    fprintf(stderr, "./lr -f <string> -a <double> -r <int>    \n");
+    fprintf(stderr, "     -f  data input file                 \n");
+    fprintf(stderr, "     -a  regularized paramenter          \n");
+    fprintf(stderr, "     -r  1:L1 Norm; 2: L2 Norm           \n");
 }
 
 int main(int argc, char *argv[]) {
@@ -27,6 +29,8 @@ int main(int argc, char *argv[]) {
     int i = 0;
     char *arg = NULL;
     char *filename = NULL;
+    double lambda = 0.0;
+    int    method = 0;
     double *y;
     int *len;
     int tlen;
@@ -49,10 +53,20 @@ int main(int argc, char *argv[]) {
         if (0 == strcmp(arg, "-f")) {
             filename = argv[++i];
         }
+        else if (0 == strcmp(arg, "-a")){
+            lambda = atof(argv[++i]);
+        }
+        else if (0 == strcmp(arg, "-r")){
+            method = atoi(arg[++i]);
+        }
         i += 1;
     }
     if (NULL == (f = fopen(filename, "r"))) {
         fprintf(stderr, "can not open file \"%s\"\n", filename);
+        return -1;
+    }
+    if (method != 1 && method != 2){
+        fprintf(stderr, "method must be 1, or 2.\n");
         return -1;
     }
 
@@ -125,7 +139,7 @@ int main(int argc, char *argv[]) {
         r++;
     }
     retx = (double *) malloc(sizeof(double) * c);
-    lr(r, c, tlen, len, valid, val, y, retx);
+    lr(r, c, tlen, len, valid, val, y, lambda, method, retx);
     for (idmap_reset(im), i = 0; i < c; ++i) {
         idmap_next(im, &tstr, NULL);
         printf("%s:", tstr);

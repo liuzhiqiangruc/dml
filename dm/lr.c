@@ -17,19 +17,21 @@ typedef struct _dataset {
 } Dataset;
 
 void dataset_free(Dataset *ds) {
-    if (ds->val != NULL) {
-        free(ds->val);
+    if (ds != NULL) {
+        if (ds->val != NULL) {
+            free(ds->val);
+        }
+        if (ds->id != NULL) {
+            free(ds->id);
+        }
+        if (ds->len != NULL) {
+            free(ds->len);
+        }
+        if (ds->y != NULL) {
+            free(ds->y);
+        }
+        free(ds);
     }
-    if (ds->id != NULL) {
-        free(ds->id);
-    }
-    if (ds->len != NULL) {
-        free(ds->len);
-    }
-    if (ds->y != NULL) {
-        free(ds->y);
-    }
-    free(ds);
 }
 
 double lr_eval(double *x, void *_ds) {

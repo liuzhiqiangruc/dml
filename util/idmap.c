@@ -43,29 +43,46 @@ void idmap_add(IdMap *idmap, char *key, int value) {
     set_add(idmap, p);
 }
 
-void idmap_update_value(IdMap * idmap, char * key, int value){
-    Pair * p = (Pair*)malloc(sizeof(Pair));
+void idmap_update_value(IdMap *idmap, char *key, int value) {
+    Pair *p = (Pair *) malloc(sizeof(Pair));
     p->key = key;
-    RBNode * node = node_find(idmap->rb, p);
-    if (node == NULL){
-        return ;
+    RBNode *node = node_find(idmap->rb, p);
+    if (node == NULL) {
+        return;
     }
     free(p);
-    ((Pair *)node->pData)->value = value;
+    ((Pair *) node->pData)->value = value;
 }
 
 
 int idmap_get_value(IdMap *idmap, char *key) {
-    Pair * p = (Pair*)malloc(sizeof(Pair));
+    Pair *p = (Pair *) malloc(sizeof(Pair));
     p->key = key;
     RBNode *node = node_find(idmap->rb, p);
     if (node == NULL) {
         return -1;
     }
     free(p);
-    return ((Pair *)node->pData)->value;
+    return ((Pair *) node->pData)->value;
 }
 
+void idmap_reset(IdMap *idMap) {
+    if (idMap != NULL) {
+        reset(idMap);
+    }
+}
+
+int idmap_next(IdMap *idmap, char **key, int *val) {
+    Pair *p = (Pair *) idmap->pCurrent->pData;
+    if (key != NULL) {
+        *key = p->key;
+    }
+    if (val != NULL) {
+        *val = p->value;
+    }
+    set_next(idmap);
+    return isEnd(idmap);
+}
 
 void idmap_free(IdMap *idmap) {
     set_free(idmap);

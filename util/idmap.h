@@ -26,6 +26,8 @@ void idmap_add(IdMap *idmap, char *key, int value);
 void idmap_update_value(IdMap * idmap, char * key, int value);
 int  idmap_get_value(IdMap *idmap, char *key);
 void idmap_free(IdMap *idmap);
+void idmap_reset(IdMap *idMap);
+int idmap_next(IdMap *idmap, char **key, int *val);
 
 #endif //MAP_H
 

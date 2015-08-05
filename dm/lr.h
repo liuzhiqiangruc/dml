@@ -24,6 +24,6 @@
  * method : 1: L1, 2: L2
  * x      : return coefficient
  * ----------------------------------------- */
-int lr(int r, int c, int tlen, int *len, int *id, double *val, double *y, double lambda, int method double *x);
+int lr(int r, int c, int tlen, int *len, int *id, double *val, double *y, double lambda, int method, double *x);
 
 #endif //LR

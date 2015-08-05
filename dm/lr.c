@@ -67,6 +67,7 @@ double lr_eval(double *x, void *_ds) {
     double *val = ds->val;
     int    *id  = ds->id;
     int    *len = ds->len;
+    double *y   = ds->y;
     int offs =  0, i = 0, j = 0;
 
     for (offs = i = 0; i < ds->r; i++) {
@@ -97,7 +98,7 @@ double lr_eval(double *x, void *_ds) {
       //    add = log(1 + exp(-yest));
       //}
         loss += add;
-        offs += len[i],
+        offs += len[i];
     }
 
     // add loss from regularization

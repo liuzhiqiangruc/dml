@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
             lambda = atof(argv[++i]);
         }
         else if (0 == strcmp(arg, "-r")){
-            method = atoi(arg[++i]);
+            method = atoi(argv[++i]);
         }
         i += 1;
     }
@@ -71,25 +71,23 @@ int main(int argc, char *argv[]) {
     }
 
     //get row number
-    while (fgets(buffer, 1024, f) != NULL) {
-        r += 1;
-    }
-    y = (double *) malloc(sizeof(double) * r);
-    len = (int *) malloc(sizeof(int) * r);
+//    while (fgets(buffer, 1024, f) != NULL) {
+//        r += 1;
+//    }
+//    y = (double *) malloc(sizeof(double) * r);
+//    len = (int *) malloc(sizeof(int) * r);
     //get col number
-    rewind(f);
+//    rewind(f);
     r = tlen = 0;
     while (fgets(buffer, 1024, f) != NULL) {
         bfpos = buffer;
-        sscanf(bfpos, "%lf", y + r);
         while (*bfpos != '\t') {
             bfpos += 1;
         }
         bfpos += 1;
-        len[r] = 0;
         while (*bfpos != '\0') {
             sscanf(bfpos, "%s", str);
-            len[r] += 1;
+            tlen ++;
             step = 0;
             while (*bfpos != '\t') {
                 bfpos += 1, step += 1;
@@ -105,24 +103,27 @@ int main(int argc, char *argv[]) {
             }
             if (*bfpos != '\0') bfpos += 1;
         }
-        tlen += len[r];
         r += 1;
     }
     //build data
-    rewind(f);
-    c = idmap_size(im);
+    y = (double *) malloc(sizeof(double) * r);
+    len = (int *) malloc(sizeof(int) * r);
     val = (double *)malloc(sizeof(double) * tlen);
     valid = (int *)malloc(sizeof(int) * tlen);
-    r = 0;
-    valpos = 0;
+    r = valpos  = 0;
+    rewind(f);
+    c = idmap_size(im);
     while (fgets(buffer, 1024, f) != NULL) {
         bfpos = buffer;
+        sscanf(bfpos, "%lf", y + r);
         while (*bfpos != '\t') {
             bfpos += 1;
         }
         bfpos += 1;
+        len[r] = 0;
         while (*bfpos != '\0') {
             sscanf(bfpos, "%s\t%lf", str, &num);
+            len[r] += 1;
             while (*bfpos != '\t') {
                 bfpos += 1;
             }
@@ -142,7 +143,7 @@ int main(int argc, char *argv[]) {
     lr(r, c, tlen, len, valid, val, y, lambda, method, retx);
     for (idmap_reset(im), i = 0; i < c; ++i) {
         idmap_next(im, &tstr, NULL);
-        printf("%s:", tstr);
+        printf("%s: ", tstr);
         printf("%lf\n", retx[i]);
     }
     free(y);

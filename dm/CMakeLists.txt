@@ -73,7 +73,7 @@ target_link_libraries(tot_static str_static)
 target_link_libraries(tot_static idmap_static)
 target_link_libraries(tot_static m)
 
-#lib tot
+#lib tot_gaussian
 SET(LIBtotg_SRC tot.c)
 ADD_LIBRARY(totg_static STATIC ${LIBtotg_SRC})
 SET_TARGET_PROPERTIES(totg_static PROPERTIES OUTPUT_NAME "totg")

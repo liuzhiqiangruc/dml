@@ -1,4 +1,4 @@
-set(CMAKE_C_FLAGS "-std=c99 -O3 -pipe -Wall -Wextra")
+set(CMAKE_C_FLAGS "-std=c99 -O3 -pipe -Wall -Wextra -Wno-strict-aliasing -Wno-unused-but-set-variable")
 #lib mtrace
 SET(LIBMTRACE_SRC mtrace.c)
 ADD_LIBRARY(mtrace_static STATIC ${LIBMTRACE_SRC})

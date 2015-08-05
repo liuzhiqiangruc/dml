@@ -1,7 +1,7 @@
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/util)
 
 #lib kmeans
-set(CMAKE_C_FLAGS "-std=c99 -O3 -pipe -Wall -Wextra -DPHI -DBETA")
+set(CMAKE_C_FLAGS "-std=c99 -O3 -pipe -Wall -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unused-function -Wextra")
 SET(LIBKMEANS_SRC kmeans.c)
 ADD_LIBRARY(kmeans_static STATIC ${LIBKMEANS_SRC})
 SET_TARGET_PROPERTIES(kmeans_static PROPERTIES OUTPUT_NAME "kmeans")
@@ -57,6 +57,7 @@ SET_TARGET_PROPERTIES(alda_static PROPERTIES OUTPUT_NAME "alda")
 SET_TARGET_PROPERTIES(alda_static PROPERTIES CLEAN_DIRECT_OUTPUT 1)
 INSTALL(TARGETS alda_static LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 INSTALL(FILES author_lda.h DESTINATION include)
+target_compile_definitions(alda_static PRIVATE -DPHI)
 TARGET_LINK_LIBRARIES(alda_static str_static)
 TARGET_LINK_LIBRARIES(alda_static idmap_static)
 TARGET_LINK_LIBRARIES(alda_static m)

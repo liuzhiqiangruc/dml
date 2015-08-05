@@ -144,7 +144,7 @@ int main(int argc, char *argv[]) {
     for (idmap_reset(im), i = 0; i < c; ++i) {
         idmap_next(im, &tstr, NULL);
         printf("%s: ", tstr);
-        printf("%lf\n", retx[i]);
+        printf("%.10lf\n", retx[i]);
     }
     free(y);
     free(len);

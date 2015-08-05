@@ -1,5 +1,5 @@
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/util ${PROJECT_SOURCE_DIR}/dm)
-set(CMAKE_C_FLAGS "-std=c99 -O3 -pipe -Wall -Wextra")
+set(CMAKE_C_FLAGS "-std=c99 -O3 -pipe -Wall -Wextra -Wno-unused-parameter")
 
 #lib edm
 SET(LIBEDM_SRC edm.c)
@@ -18,6 +18,7 @@ SET_TARGET_PROPERTIES(viterbi_static PROPERTIES OUTPUT_NAME "viterbi")
 SET_TARGET_PROPERTIES(viterbi_static PROPERTIES CLEAN_DIRECT_OUTPUT 1)
 INSTALL(TARGETS viterbi_static LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 INSTALL(FILES viterbi.h DESTINATION include)
+TARGET_LINK_LIBRARIES(viterbi_static m)
 
 #lib hash_pattern
 SET(LIBhash_pattern_SRC hash_pattern.c)

@@ -1,5 +1,5 @@
 CC       = gcc -std=c99
-CFBASE   = -Wall -pedantic -pipe 
+CFBASE   = -Wall -pedantic -pipe -Wno-strict-aliasing -Wno-unused-but-set-variable
 CFLAGS   = $(CFBASE) -DNDEBUG -DNPRINT -O3 -fpic
 
 LD       = gcc

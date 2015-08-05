@@ -1,15 +1,15 @@
 UTIL     = ../util
 CC       = gcc -std=c99
-CFBASE   = -Wall -pedantic -pipe
+CFBASE   = -Wall -pedantic -pipe -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unused-function
 INCS     = -I../util
 CFLAGS   = $(CFBASE) -DNDEBUG -DNPRINT -O3 -fpic
 
 LD       = gcc
 SOFLAGS  = -shared 
 
-OBJS     = kmeans.o     modl.o     lda.o     author_lda.o  bri_lda.o   joint_lda.o  tot.o       totg.o      mf.o  pmf.o   bmf.o   newton.o
-SOS      = libkmeans.so libmodl.so liblda.so libalda.so    libblda.so  libjlda.so   libtot.so   libtotg.so  libpmf.so libbmf.so   libnewt.so
-STATICS  = libkmeanss.a libmodls.a libldas.a libaldas.a    libbldas.a  libjldas.a   libtots.a   libtotgs.a  libpmfs.a libbmfs.a   libnewts.a
+OBJS     = kmeans.o     modl.o     lda.o     author_lda.o  bri_lda.o   joint_lda.o  tot.o       totg.o      mf.o  pmf.o   bmf.o   newton.o     lr.o
+SOS      = libkmeans.so libmodl.so liblda.so libalda.so    libblda.so  libjlda.so   libtot.so   libtotg.so  libpmf.so libbmf.so   libnewt.so   liblr.so
+STATICS  = libkmeanss.a libmodls.a libldas.a libaldas.a    libbldas.a  libjldas.a   libtots.a   libtotgs.a  libpmfs.a libbmfs.a   libnewts.a   liblrs.a
 
 util_lda_objs = $(UTIL)/rbtree.o $(UTIL)/set.o $(UTIL)/idmap.o $(UTIL)/str.o
 util_pmf_objs = $(util_lda_objs)
@@ -24,6 +24,9 @@ objs:   $(OBJS)
 kmeans.o       :   kmeans.h
 
 modl.o         :   modl.h
+
+lr.o           :   lr.c lr.h 
+	$(CC) $(CFLAGS) $(INCS) -c $< -o $@
 
 lda.o          :   lda.c lda.h
 	$(CC) $(CFLAGS) $(INCS) -c $< -o $@
@@ -54,6 +57,7 @@ tot.o          :   tot.c tot.h
 
 totg.o         :   tot.c tot.h
 	$(CC) $(CFLAGS) -DGAUSSIAN $(INCS) -c $< -o $@
+
 
 
 ## --------- .so --------------
@@ -91,6 +95,9 @@ libpmf.so   : pmf.o mf.o        $(util_pmf_objs)
 libbmf.so   : bmf.o mf.o        $(util_pmf_objs)
 	$(LD) $(SOFLAGS) $^ -o $@
 
+liblr.so    : lr.o newton.o
+	$(LD) $(SOFLAGS) $^ -o $@
+
 
 ## --------- .a --------------
 
@@ -101,6 +108,9 @@ libmodls.a : modl.o
 	ar cr $@ $^
 
 libnewts.a : newton.o  
+	ar cr $@ $^
+
+liblrs.a   : newton.o lr.o
 	ar cr $@ $^
 
 libldas.a  : lda.o             $(util_lda_objs)
@@ -126,6 +136,7 @@ libpmfs.a   : pmf.o  mf.o      $(util_pmf_objs)
 
 libbmfs.a   : bmf.o  mf.o      $(util_pmf_objs)
 	ar cr $@ $^
+
 
 #-----------------------------------------------------------------------
 # Clean up

@@ -68,9 +68,22 @@ SET_TARGET_PROPERTIES(tot_static PROPERTIES OUTPUT_NAME "tot")
 SET_TARGET_PROPERTIES(tot_static PROPERTIES CLEAN_DIRECT_OUTPUT 1)
 INSTALL(TARGETS tot_static LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 INSTALL(FILES tot.h DESTINATION include)
+target_compile_definitions(tot_static PRIVATE -DBETA)
 target_link_libraries(tot_static str_static)
 target_link_libraries(tot_static idmap_static)
 target_link_libraries(tot_static m)
+
+#lib tot
+SET(LIBtotg_SRC tot.c)
+ADD_LIBRARY(totg_static STATIC ${LIBtotg_SRC})
+SET_TARGET_PROPERTIES(totg_static PROPERTIES OUTPUT_NAME "totg")
+SET_TARGET_PROPERTIES(totg_static PROPERTIES CLEAN_DIRECT_OUTPUT 1)
+INSTALL(TARGETS totg_static LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+INSTALL(FILES tot.h DESTINATION include)
+target_compile_definitions(totg_static PRIVATE -DGAUSSIAN)
+target_link_libraries(totg_static str_static)
+target_link_libraries(totg_static idmap_static)
+target_link_libraries(totg_static m)
 
 #lib newton
 SET(LIBnewton_opt_SRC newton_opt.c)

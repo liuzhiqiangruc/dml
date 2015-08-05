@@ -56,26 +56,17 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    //get row number
-    while (fgets(buffer, 1024, f) != NULL) {
-        r += 1;
-    }
-    y = (double *) malloc(sizeof(double) * r);
-    len = (int *) malloc(sizeof(int) * r);
     //get col number
-    rewind(f);
     r = tlen = 0;
     while (fgets(buffer, 1024, f) != NULL) {
         bfpos = buffer;
-        sscanf(bfpos, "%lf", y + r);
         while (*bfpos != '\t') {
             bfpos += 1;
         }
         bfpos += 1;
-        len[r] = 0;
         while (*bfpos != '\0') {
             sscanf(bfpos, "%s", str);
-            len[r] += 1;
+            tlen += 1;
             step = 0;
             while (*bfpos != '\t') {
                 bfpos += 1, step += 1;
@@ -91,10 +82,11 @@ int main(int argc, char *argv[]) {
             }
             if (*bfpos != '\0') bfpos += 1;
         }
-        tlen += len[r];
         r += 1;
     }
     //build data
+    y = (double *) malloc(sizeof(double) * r);
+    len = (int *) malloc(sizeof(int) * r);
     rewind(f);
     c = idmap_size(im);
     val = (double *)malloc(sizeof(double) * tlen);
@@ -103,12 +95,15 @@ int main(int argc, char *argv[]) {
     valpos = 0;
     while (fgets(buffer, 1024, f) != NULL) {
         bfpos = buffer;
+        sscanf(bfpos, "%lf", y + r);
         while (*bfpos != '\t') {
             bfpos += 1;
         }
+        len[r] = 0;
         bfpos += 1;
         while (*bfpos != '\0') {
             sscanf(bfpos, "%s\t%lf", str, &num);
+            len[r] += 1;
             while (*bfpos != '\t') {
                 bfpos += 1;
             }

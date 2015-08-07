@@ -18,6 +18,9 @@
 #include "lr.h"
 
 
+/* -------------------------------------------
+ * Data Struct for LR 
+ * ------------------------------------------- */
 typedef struct _dataset {
     int    r;          // r instance number 
     int    c;          // c coefficient length
@@ -73,7 +76,12 @@ double lr_eval(double *x, void *_ds) {
     for (offs = i = 0; i < ds->r; i++) {
         yest = 0.0;
         for (j = 0; j < len[i]; j++) {
-            yest += val[offs + j] * x[id[offs + j]];
+            if (val){
+                yest += val[offs + j] * x[id[offs + j]];
+            }
+            else{
+                yest += x[id[offs + j]];
+            }
         }
         if (yest > 30.0){
             add = yest;
@@ -87,16 +95,6 @@ double lr_eval(double *x, void *_ds) {
         if (y[i] > 0){
             add -= yest;
         }
-      //if (ds->y[i] < 0.5) {
-      //    yest = -yest;
-      //}
-      //if (yest < -30) {
-      //    add = -yest;
-      //} else if (yest > 30) {
-      //    add = 0;
-      //} else {
-      //    add = log(1 + exp(-yest));
-      //}
         loss += add;
         offs += len[i];
     }
@@ -142,7 +140,12 @@ void lr_grad(double *x, void *_ds, double *g) {
     for (offs = i = 0; i < ds->r; i++) {
         yest = 0.0;
         for (j = 0; j < len[i]; j++) {
-            yest += val[offs + j] * x[id[offs + j]];
+            if (val){
+                yest += val[offs + j] * x[id[offs + j]];
+            }
+            else{
+                yest += x[id[offs + j]];
+            }
         }
         if (yest < -30) {
             hx = 0.0;
@@ -152,7 +155,12 @@ void lr_grad(double *x, void *_ds, double *g) {
             hx = 1.0 / (1.0 + exp(-yest));
         }
         for (j = 0; j < len[i]; j++) {
-            g[id[offs + j]] += (hx - y[i]) * val[offs + j];
+            if (val){
+                g[id[offs + j]] += (hx - y[i]) * val[offs + j];
+            }
+            else{
+                g[id[offs + j]] += (hx - y[i]);
+            }
         }
         offs += len[i];
     }
@@ -171,22 +179,25 @@ void lr_grad(double *x, void *_ds, double *g) {
  * tlen   : number of data
  * len    : length of each instance
  * id     : features ids
- * val    : features values
+ * val    : features values NULL for binary feature
  * y      : label of each instance
  * x      : return coefficient
  * ----------------------------------------- */
 int lr(int r, int c, int tlen, int *len, int *id, double *val, double *y, double lambda, int method, double *x) {
     Dataset *ds = (Dataset *) malloc(sizeof(Dataset));
+    memset(ds, 0, sizeof(Dataset));
     ds->y       = (double  *) malloc(sizeof(double) * r);
-    ds->val     = (double  *) malloc(sizeof(double) * tlen);
     ds->id      = (int *)     malloc(sizeof(int)    * tlen);
     ds->len     = (int *)     malloc(sizeof(int)    * r);
     ds->r       = r;
     ds->c       = c;
     ds->lambda  = lambda;
     ds->method  = method;
+    if (val){
+        ds->val = (double  *) malloc(sizeof(double) * tlen);
+        memcpy(ds->val, val, sizeof(double) * tlen);
+    }
     memcpy(ds->y,   y,   sizeof(double) * r);
-    memcpy(ds->val, val, sizeof(double) * tlen);
     memcpy(ds->id,  id,  sizeof(int)    * tlen);
     memcpy(ds->len, len, sizeof(int)    * r);
     if (method == 2){
@@ -199,4 +210,3 @@ int lr(int r, int c, int tlen, int *len, int *id, double *val, double *y, double
     ds = NULL;
     return 0;
 }
-

@@ -17,6 +17,7 @@ void help() {
     fprintf(stderr, "./lr -f <string> -a <double> -r <int>    \n");
     fprintf(stderr, "     -f  data input file                 \n");
     fprintf(stderr, "     -a  regularized paramenter          \n");
+    fprintf(stderr, "     -b  1:binary or else                \n");
     fprintf(stderr, "     -r  1:L1 Norm; 2: L2 Norm           \n");
 }
 
@@ -38,6 +39,7 @@ int main(int argc, char *argv[]) {
     int *valid;
     int valpos;
     double *retx;
+    int binary = 0;
 
     FILE *f = NULL;
     int r = 0, c = 0, id;
@@ -59,6 +61,9 @@ int main(int argc, char *argv[]) {
         else if (0 == strcmp(arg, "-r")){
             method = atoi(argv[++i]);
         }
+        else if (0 == strcmp(arg, "-b")){
+            binary = atoi(argv[++i]);
+        }
         i += 1;
     }
     if (NULL == (f = fopen(filename, "r"))) {
@@ -70,14 +75,6 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    //get row number
-//    while (fgets(buffer, 1024, f) != NULL) {
-//        r += 1;
-//    }
-//    y = (double *) malloc(sizeof(double) * r);
-//    len = (int *) malloc(sizeof(int) * r);
-    //get col number
-//    rewind(f);
     r = tlen = 0;
     while (fgets(buffer, 1024, f) != NULL) {
         bfpos = buffer;

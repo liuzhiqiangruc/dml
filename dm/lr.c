@@ -75,11 +75,12 @@ double lr_eval(double *x, void *_ds) {
 
     for (offs = i = 0; i < ds->r; i++) {
         yest = 0.0;
-        for (j = 0; j < len[i]; j++) {
-            if (val){
+        if (val) {
+            for (j = 0; j < len[i]; ++j) {
                 yest += val[offs + j] * x[id[offs + j]];
             }
-            else{
+        } else {
+            for (j = 0; j < len[i]; ++j) {
                 yest += x[id[offs + j]];
             }
         }
@@ -139,11 +140,12 @@ void lr_grad(double *x, void *_ds, double *g) {
     memset(g, 0, sizeof(double) * ds->c);
     for (offs = i = 0; i < ds->r; i++) {
         yest = 0.0;
-        for (j = 0; j < len[i]; j++) {
-            if (val){
+        if (val) {
+            for (j = 0; j < len[i]; j++) {
                 yest += val[offs + j] * x[id[offs + j]];
             }
-            else{
+        } else {
+            for (j = 0; j < len[i]; j++) {
                 yest += x[id[offs + j]];
             }
         }
@@ -154,11 +156,12 @@ void lr_grad(double *x, void *_ds, double *g) {
         } else {
             hx = 1.0 / (1.0 + exp(-yest));
         }
-        for (j = 0; j < len[i]; j++) {
-            if (val){
+        if (val) {
+            for (j = 0; j < len[i]; j++) {
                 g[id[offs + j]] += (hx - y[i]) * val[offs + j];
             }
-            else{
+        } else {
+            for (j = 0; j < len[i]; j++) {
                 g[id[offs + j]] += (hx - y[i]);
             }
         }

@@ -111,7 +111,6 @@ int main(int argc, char *argv[]) {
             else {
                 id = (i << 1) + 2;
             }
-            printf("%d, %s\n",id, str_array[id]);
             if (-1 == idmap_get_value(idmap, str_array[id])){
                 idmap_add(idmap, dupstr(str_array[id]), idmap_size(idmap));
             }
@@ -123,8 +122,6 @@ free_str:
         free(str_array);
     }
     c  = idmap_size(idmap);
-    printf("%d\n",c);
-
     fs = (char(*)[LR_KEY_LEN])malloc(sizeof(char[LR_KEY_LEN]) * c);
     memset(fs, 0, sizeof(char[LR_KEY_LEN]) * c);
     y    = (double*)malloc(sizeof(double) * r);
@@ -133,9 +130,7 @@ free_str:
     }
     ids  = (int*)malloc(sizeof(int) * totlen);
     len  = (int*)malloc(sizeof(int) * r);
-
     rewind(f);
-
     // second scan for loading the data into malloced space
     totlen = r = 0;
     while (NULL != fgets(buffer, LR_LINE_LEN, f)){
@@ -174,31 +169,23 @@ str_free:
         free(str_array);
     }
     fclose(f);
-
     // FREE the idmap
     idmap_free(idmap);
     idmap = NULL;
-
-
     // learn the coefficient
     retx = (double*)malloc(sizeof(double) * c);
     memset(retx, 0, sizeof(double) * c);
-
     lr(r, c, totlen, len, ids, val, y, lambda, method, retx);
-
     // print the learned coefficient
     for (i = 0; i < c; i++){
         printf("%s\t%.10f\n", fs[i], retx[i]);
     }
-
     free(y);    y    = NULL;
     free(len);  len  = NULL;
     free(ids);  ids  = NULL;
     free(retx); retx = NULL;
-
     if (0 == binary) {
         free(val);  val  = NULL;
     }
-
     return 0;
 }

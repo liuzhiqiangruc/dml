@@ -117,6 +117,7 @@ int main(int argc, char *argv[]) {
         }
         totlen += atoi(str_array[1]);
         r += 1; 
+
 free_str:
         free(str_array[0]);
         free(str_array);
@@ -130,8 +131,9 @@ free_str:
     }
     ids  = (int*)malloc(sizeof(int) * totlen);
     len  = (int*)malloc(sizeof(int) * r);
-    rewind(f);
+
     // second scan for loading the data into malloced space
+    rewind(f);
     totlen = r = 0;
     while (NULL != fgets(buffer, LR_LINE_LEN, f)){
         str_array = split(trim(buffer,3), '\t', &col_tmp);
@@ -164,22 +166,27 @@ free_str:
             totlen += 1;
         }
         r += 1;
+
 str_free:
         free(str_array[0]);
         free(str_array);
     }
     fclose(f);
+
     // FREE the idmap
     idmap_free(idmap);
     idmap = NULL;
+
     // learn the coefficient
     retx = (double*)malloc(sizeof(double) * c);
     memset(retx, 0, sizeof(double) * c);
     lr(r, c, totlen, len, ids, val, y, lambda, method, retx);
+
     // print the learned coefficient
     for (i = 0; i < c; i++){
         printf("%s\t%.10f\n", fs[i], retx[i]);
     }
+
     free(y);    y    = NULL;
     free(len);  len  = NULL;
     free(ids);  ids  = NULL;
@@ -187,5 +194,6 @@ str_free:
     if (0 == binary) {
         free(val);  val  = NULL;
     }
+
     return 0;
 }

@@ -28,40 +28,42 @@ int main(int argc, char *argv[]) {
         return -1;
     }
     int i = 0;
+    //arg parameter
     char *arg = NULL;
     char *filename = NULL;
     double lambda = 0.0;
-    int    method = 0;
+    int method = 0;
+    int binary = 0;
+
+    //data to intial and read
     double *y;
     int *len;
-    int tlen;
+    int totlen, tlen;
     double *val;
     int *valid;
     int valpos;
     double *retx;
-    int binary = 0;
-
-    FILE *f = NULL;
     int r = 0, c = 0, id;
+
+    //temp var
+    FILE *f = NULL;
     int step;
     char buffer[1024], str[1024];
-    char *bfpos; //buffer point
-    char *tstr = NULL;  //tmp str
+    char *bfpos;
+    char *tstr = NULL;
     double num;
-    IdMap *im = idmap_create();
-
     while (i < argc) {
         arg = argv[i];
         if (0 == strcmp(arg, "-f")) {
             filename = argv[++i];
         }
-        else if (0 == strcmp(arg, "-a")){
+        else if (0 == strcmp(arg, "-a")) {
             lambda = atof(argv[++i]);
         }
-        else if (0 == strcmp(arg, "-r")){
+        else if (0 == strcmp(arg, "-r")) {
             method = atoi(argv[++i]);
         }
-        else if (0 == strcmp(arg, "-b")){
+        else if (0 == strcmp(arg, "-b")) {
             binary = atoi(argv[++i]);
         }
         i += 1;
@@ -70,78 +72,66 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "can not open file \"%s\"\n", filename);
         return -1;
     }
-    if (method != 1 && method != 2){
+    if (method != 1 && method != 2) {
         fprintf(stderr, "method must be 1, or 2.\n");
         return -1;
     }
-
-    r = tlen = 0;
+    //get row number and total len;
+    r = totlen = 0;
     while (fgets(buffer, 1024, f) != NULL) {
         bfpos = buffer;
-        while (*bfpos != '\t') {
-            bfpos += 1;
-        }
-        bfpos += 1;
-        while (*bfpos != '\0') {
-            sscanf(bfpos, "%s", str);
-            tlen ++;
-            step = 0;
-            while (*bfpos != '\t') {
-                bfpos += 1, step += 1;
-            }
-            bfpos += 1, step += 1;
-            //insert str to idmap
-            tstr = malloc(sizeof(char) * step);
-            memcpy(tstr, str, step - 1);
-            tstr[step - 1] = '\0';
-            idmap_add(im, tstr, idmap_size(im));
-            while (*bfpos != '\t' && *bfpos != '\0') {
-                bfpos += 1;
-            }
-            if (*bfpos != '\0') bfpos += 1;
-        }
-        r += 1;
+        while (*bfpos != '\t') ++bfpos;
+        sscanf(bfpos, "\t%d", &tlen);
+        totlen += tlen;
+        ++r;
     }
-    //build data
+    //initial memory
+    val = binary ? NULL : (double *) malloc(sizeof(double) * totlen);
     y = (double *) malloc(sizeof(double) * r);
     len = (int *) malloc(sizeof(int) * r);
-    val = (double *)malloc(sizeof(double) * tlen);
-    valid = (int *)malloc(sizeof(int) * tlen);
-    r = valpos  = 0;
+    valid = (int *) malloc(sizeof(int) * totlen);
+    IdMap *im = idmap_create();
+    r = valpos = 0;
     rewind(f);
-    c = idmap_size(im);
+    //build data
     while (fgets(buffer, 1024, f) != NULL) {
         bfpos = buffer;
         sscanf(bfpos, "%lf", y + r);
-        while (*bfpos != '\t') {
-            bfpos += 1;
-        }
-        bfpos += 1;
-        len[r] = 0;
-        while (*bfpos != '\0') {
-            sscanf(bfpos, "%s\t%lf", str, &num);
-            len[r] += 1;
-            while (*bfpos != '\t') {
-                bfpos += 1;
+        while (*bfpos != '\t') ++bfpos;
+        ++bfpos;
+        sscanf(bfpos, "%d", len + r);
+        while (*bfpos != '\t') ++bfpos;
+        ++bfpos;
+        for (i = 0; i < len[r]; ++i) {
+            sscanf(bfpos, "%s", str);
+            step = 0;
+            while (*bfpos != '\t') ++bfpos, ++step;
+            ++bfpos, ++step;
+            tstr = malloc(sizeof(char) * step);
+            memcpy(tstr, str, step), tstr[step - 1] = '\0';
+            if (!binary) {
+                sscanf(bfpos, "%lf", &num);
+                while (*bfpos != '\t') ++bfpos;
+                ++bfpos;
+                val[valpos] = num;
             }
-            bfpos += 1;
-            id = idmap_get_value(im, str);
-            val[valpos] = num;
+            id = idmap_get_value(im, tstr);
+            if (id == -1) {
+                id = idmap_size(im);
+                idmap_add(im, tstr, idmap_size(im));
+            }
             valid[valpos] = id;
             valpos++;
-            while (*bfpos != '\t' && *bfpos != '\0') {
-                bfpos += 1;
-            }
-            if (*bfpos != '\0') bfpos += 1;
         }
-        r++;
+        ++r;
     }
+    c = idmap_size(im);
     retx = (double *) malloc(sizeof(double) * c);
-    lr(r, c, tlen, len, valid, val, y, lambda, method, retx);
+    lr(r, c, totlen, len, valid, val, y, lambda, method, retx);
     for (idmap_reset(im), i = 0; i < c; ++i) {
-        idmap_next(im, &tstr, NULL);
+        idmap_next(im, &tstr, &id);
         printf("%s: ", tstr);
-        printf("%.10lf\n", retx[i]);
+        printf("%.10lf\n", retx[id]);
     }
     free(y);
     free(len);

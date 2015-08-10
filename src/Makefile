@@ -18,7 +18,7 @@ PRGS     = breakout          \
 		   bmf               \
 		   loess             \
 		   fits              \
-                   lr                \
+           lr                \
 		   lda               \
 		   alda              \
 		   tot               \
@@ -122,7 +122,7 @@ fits: ts_fit.o
 	$(CC) $(LIBS)  $^ -lfitnts -lm -o $@
 
 lr  :   lr.o
-	$(CC) $(LIBS)  $^ -llrs -lidmaps -lm -o $@
+	$(CC) $(LIBS)  $^ -llrs -lidmaps -lm -lstrs -o $@
 
 pmf     : pmf.o
 	$(CC) $(LIBS)  $^ -lpmfs -lm -o $@

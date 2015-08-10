@@ -33,6 +33,7 @@ TARGET_LINK_LIBRARIES(fits fit_newton_static)
 TARGET_LINK_LIBRARIES(viterbi viterbi_static)
 TARGET_LINK_LIBRARIES(lr lr_static)
 TARGET_LINK_LIBRARIES(lr idmap_static)
+TARGET_LINK_LIBRARIES(lr str_static)
 
 INSTALL(TARGETS breakout pattern_detection unique jlda bayesian_changepoint lda blda alda loess bseqr tot totg fits viterbi lr
      RUNTIME DESTINATION bin

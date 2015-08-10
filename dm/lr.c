@@ -7,6 +7,7 @@
  *   date     : 2015-03-26
  *   info     : implementation for LR with L1, L2 Norm
  *              using newton method : owlqn, lbfgs
+ *              suport binary or realvalued features
  * ======================================================== */
 
 #include <math.h>
@@ -17,9 +18,8 @@
 #include "newton_opt.h"
 #include "lr.h"
 
-
 /* -------------------------------------------
- * Data Struct for LR 
+ * Data Wraper for LR 
  * ------------------------------------------- */
 typedef struct _dataset {
     int    r;          // r instance number 

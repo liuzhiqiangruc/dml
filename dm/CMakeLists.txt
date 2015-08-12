@@ -127,3 +127,12 @@ SET_TARGET_PROPERTIES(lr_static PROPERTIES CLEAN_DIRECT_OUTPUT 1)
 INSTALL(TARGETS lr_static LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 INSTALL(FILES lr.h DESTINATION include)
 target_link_libraries(lr_static newton_opt_static)
+
+#lib auc
+SET(LIBauc_SRC auc.c)
+ADD_LIBRARY(auc_static STATIC ${LIBauc_SRC})
+SET_TARGET_PROPERTIES(auc_static PROPERTIES OUTPUT_NAME "auc")
+SET_TARGET_PROPERTIES(auc_static PROPERTIES CLEAN_DIRECT_OUTPUT 1)
+INSTALL(TARGETS auc_static LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+INSTALL(FILES auc.h DESTINATION include)
+target_link_libraries(auc_static newton_opt_static)

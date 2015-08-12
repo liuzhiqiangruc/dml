@@ -16,6 +16,7 @@ add_executable(totg tot.c)
 add_executable(fits fit_newton.c)
 add_executable(viterbi viterbi.c)
 add_executable(lr lr.c)
+add_executable(auc auc.c)
 
 TARGET_LINK_LIBRARIES(breakout edm_static)
 TARGET_LINK_LIBRARIES(pattern_detection hash_pattern_static)
@@ -34,7 +35,8 @@ TARGET_LINK_LIBRARIES(viterbi viterbi_static)
 TARGET_LINK_LIBRARIES(lr lr_static)
 TARGET_LINK_LIBRARIES(lr idmap_static)
 TARGET_LINK_LIBRARIES(lr str_static)
+TARGET_LINK_LIBRARIES(auc auc_static)
 
-INSTALL(TARGETS breakout pattern_detection unique jlda bayesian_changepoint lda blda alda loess bseqr tot totg fits viterbi lr
+INSTALL(TARGETS breakout pattern_detection unique jlda bayesian_changepoint lda blda alda loess bseqr tot totg fits viterbi lr auc
      RUNTIME DESTINATION bin
 )

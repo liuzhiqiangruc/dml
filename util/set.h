@@ -11,17 +11,23 @@
 #ifndef _SET_H
 #define _SET_H
 
-#include "rbtree.h"
 #include "fn_type.h"
+#include "rbtree.h"
 
 #define set_value(st) ((st)->pCurrent->pData)
 
+/* ------------------------------
+ * Set Struct Define
+ * ------------------------------ */
 typedef struct _set {
     int size;
     RBTree * rb;
     RBNode * pCurrent;
 } Set;
 
+/* --------------------------------------
+ * Set Operation Define
+ * -------------------------------------- */
 Set * set_create(CMP_FN cmp_fn, FREE_FN free_fn);
 int   set_add(Set * st, void * pdata);
 int   set_del(Set * st, void * pdata);

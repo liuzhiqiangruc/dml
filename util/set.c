@@ -34,9 +34,10 @@ int set_in(Set *st, void *pdata) {
  * return : success 0, failed -1
  * ----------------------------------- */
 int set_add(Set *st, void *pdata) {
-    if (set_in(st, pdata) == 1) return -1;
-    if (rb_insert(st->rb, pdata) == -1) return -1;
-    st->size += 1;
+    if (set_in(st, pdata) != 1){
+        if (rb_insert(st->rb, pdata) == -1) return -1;
+        st->size += 1;
+    }
     return 0;
 }
 
@@ -45,8 +46,9 @@ int set_add(Set *st, void *pdata) {
  * return : success 0, failed -1
  * --------------------------------- */
 int set_del(Set *st, void *pdata) {
-    if (rb_delete(st->rb, pdata) == -1) return -1;
-    st->size -= 1;
+    if (rb_delete(st->rb, pdata) != -1){
+        st->size -= 1;
+    }
     return 0;
 }
 

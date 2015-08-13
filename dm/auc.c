@@ -49,7 +49,14 @@ double auc(int n, double *x, double *y) {
             tsum += 1;
         }
     }
-    auc = (rksum - (tsum * (tsum + 1)) / 2) / ((n - tsum) * tsum);
+
+    double mn, pst;
+    mn = (double) (n - tsum);
+    mn *= (double) tsum;
+    pst = (double) tsum;
+    pst *= (double) tsum + 1;
+    auc = (rksum - pst / 2.) / mn;
+
     free(rk);
     free(aucp);
     return auc;

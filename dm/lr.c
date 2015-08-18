@@ -23,12 +23,6 @@
 #define  LR_LINE_LEN  1048576 
 #define  LR_KEY_LEN   64
 
-LR * create_lr_model(){
-    LR * lr = (LR*)malloc(sizeof(LR));
-    memset(lr, 0, sizeof(LR));
-    return lr;
-}
-
 static int load_train_ds(LR * lr, IdMap * idmap){
     FILE * fp = NULL;
     if (NULL == (fp = fopen(lr->p.in_file, "r"))){
@@ -111,8 +105,8 @@ free_str:
             if (0 == lr->p.binary){
                 lr->train_ds->val[tf_cnt] = atof(str_array[id + 1]);
             }
-            tf_cnt += 1;
         }
+        tf_cnt += tlen;
         row += 1;
 str_free:
         free(str_array[0]);
@@ -211,6 +205,28 @@ str_free:
         free(str_array);
     }
     fclose(fp);
+}
+
+static void free_ds(LRDS * ds){
+    if (ds){
+        if (ds->l){
+            free(ds->l);
+            ds->l = NULL;
+        }
+        if (ds->y){
+            free(ds->y);
+            ds->y = NULL;
+        }
+        if (ds->ids){
+            free(ds->ids);
+            ds->ids = NULL;
+        }
+        if (ds->val){
+            free(ds->val);
+            ds->val = NULL;
+        }
+        free(ds);
+    }
 }
 
 /* ----------------------------------------
@@ -343,6 +359,12 @@ int lr_repo(double *x, void *_ds) {
     return 0;
 }
  
+LR * create_lr_model(){
+    LR * lr = (LR*)malloc(sizeof(LR));
+    memset(lr, 0, sizeof(LR));
+    return lr;
+}
+
 int   init_lr(LR * lr){
     IdMap * idmap = idmap_create();
     if (0 != load_train_ds(lr, idmap)) {
@@ -366,12 +388,43 @@ int  learn_lr(LR * lr){
     return 0;
 }
 
-int   save_lr(LR * lr, int n){
-    return 0;
+void save_lr(LR * lr, int n){
+    FILE * fp = NULL;
+    char out_file[512];
+    if (n < lr->p.niters){
+        sprintf(out_file, "%s/%d_coe", lr->p.out_dir, n);
+    }
+    else {
+        sprintf(out_file, "%s/%s_coe", lr->p.out_dir, "f");
+    }
+    if (NULL == (fp = fopen(out_file, "w"))){
+        fprintf(stderr, "can not write to file \"%s\"\n", out_file);
+        return;
+    }
+    for (int i = 0; i < lr->c; i++){
+        fprintf(fp, "%s\t%.10f\n", lr->id_map[i], lr->x[i]);
+    }
+    fclose(fp);
 }
 
-int   free_lr(LR * lr){
-    return 0;
+void free_lr(LR * lr){
+    if (lr->train_ds){
+        free_ds(lr->train_ds);
+        lr->train_ds = NULL;
+    }
+    if (lr->test_ds){
+        free_ds(lr->test_ds);
+        lr->test_ds = NULL;
+    }
+    if (lr->x){
+        free(lr->x);
+        lr->x = NULL;
+    }
+    if (lr->id_map){
+        free(lr->id_map);
+        lr->id_map = NULL;
+    }
+    free(lr);
 }
 
 

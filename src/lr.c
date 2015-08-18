@@ -29,7 +29,7 @@ int parse_command_line(LRParam *p, int argc, char *argv[]){
     int b = 0, r = 1, n = 10, s = 10;
     char * f = NULL;
     char * t = NULL;
-    char * o = NULL;
+    char * o = "./";
     int i = 0;
     char * arg = NULL;
 
@@ -107,7 +107,10 @@ int main(int argc, char *argv[]) {
         goto except;
     }
     fprintf(stderr, "load data done\n");
-    fprintf(stderr, "train: %d  test: %d lenx: %d\n", lr->train_ds->r, lr->test_ds->r, lr->c);
+    fprintf(stderr, "train: %d, lenx: %d\n", lr->train_ds->r, lr->c);
+    if (lr->test_ds){
+        fprintf(stderr, " test: %d\n", lr->test_ds->r);
+    }
     learn_lr(lr);
     save_lr(lr, lr->p.niters);
     free_lr(lr);

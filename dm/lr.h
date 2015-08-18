@@ -61,8 +61,8 @@ typedef struct {
 LR * create_lr_model();
 int   init_lr(LR * lr);
 int  learn_lr(LR * lr);
-int   save_lr(LR * lr, int n);
-int   free_lr(LR * lr);
+void  save_lr(LR * lr, int n);
+void  free_lr(LR * lr);
 
 
 /* -----------------------------------------

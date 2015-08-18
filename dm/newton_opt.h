@@ -17,7 +17,7 @@
 #include <fn_type.h>
 
 
-int bfgs(void *data, EVAL_FN eval_fn, GRAD_FN grad_fn, double ftol, int n, int it, double *retX);
+int  bfgs(void *data, EVAL_FN eval_fn, GRAD_FN grad_fn, double ftol, int n, int it, double *retX);
 int lbfgs(void *data, EVAL_FN eval_fn, GRAD_FN grad_fn, REPO_FN repo_fn, double ftol, int m, int n, int it, double *retX);
 int owlqn(void *data, EVAL_FN eval_fn, GRAD_FN grad_fn, REPO_FN repo_fn, double ftol, int m, int n, int it, double l1, double *retX);
 

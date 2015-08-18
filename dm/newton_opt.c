@@ -287,7 +287,7 @@ int bfgs(void *data, EVAL_FN eval_fn, GRAD_FN grad_fn, double ftol, int n, int i
     return 0;
 }
 
-int lbfgs(void *data, EVAL_FN eval_fn, GRAD_FN grad_fn, double ftol, int m, int n, int it, double *retx){
+int lbfgs(void *data, EVAL_FN eval_fn, GRAD_FN grad_fn, REPO_FN repo_fn, double ftol, int m, int n, int it, double *retx){
     double *x0  = (double *) malloc(sizeof(double) * n);
     double *x1  = (double *) malloc(sizeof(double) * n);
     double *g0  = (double *) malloc(sizeof(double) * n);
@@ -313,6 +313,9 @@ int lbfgs(void *data, EVAL_FN eval_fn, GRAD_FN grad_fn, double ftol, int m, int 
 
     // Iteration
     for (i = 1, offs = 0; i < it; i++, offs += n){
+        if (repo_fn && repo_fn(x1, data)){
+            break;
+        }
         hgini = yty = 0;
         offs = offs < block ? offs : (offs - block);
         for (j = 0; j < n; j++){
@@ -357,7 +360,7 @@ int lbfgs(void *data, EVAL_FN eval_fn, GRAD_FN grad_fn, double ftol, int m, int 
     return 0;
 }
 
-int owlqn(void *data, EVAL_FN eval_fn, GRAD_FN grad_fn, double l1, double ftol, int m, int n, int it, double *retx){
+int owlqn(void *data, EVAL_FN eval_fn, GRAD_FN grad_fn, REPO_FN repo_fn, double ftol, int m, int n, int it, double l1, double *retx){
     double *x0  = (double *) malloc(sizeof(double) * n);
     double *x1  = (double *) malloc(sizeof(double) * n);
     double *g0  = (double *) malloc(sizeof(double) * n);
@@ -386,6 +389,9 @@ int owlqn(void *data, EVAL_FN eval_fn, GRAD_FN grad_fn, double l1, double ftol, 
 
     // Iteration
     for (i = 1, offs = 0; i < it; i++, offs += n){
+        if (repo_fn && repo_fn(x1, data)){
+            break;
+        }
         hgini = yty = 0;
         offs = offs < block ? offs : (offs - block);
         for (j = 0; j < n; j++){

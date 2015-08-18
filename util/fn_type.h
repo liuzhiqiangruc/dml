@@ -13,7 +13,11 @@
 
 typedef int    (*CMP_FN)(void *, void*);
 typedef void   (*FREE_FN)(void *);
+
+
+// lr call back functions
 typedef double (*EVAL_FN)(double *x, void *data);
+typedef int    (*REPO_FN)(double *x, void *data);
 typedef void   (*GRAD_FN)(double *x, void *data, double *g);
 
 #endif //FN_TYPE_H

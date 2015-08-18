@@ -1,127 +1,218 @@
 /* ========================================================
  *   Copyright (C) 2015 All rights reserved.
  *   
- *   filename : lda.c
+ *   filename : lr.c
  *   author   : liuzhiqiang01@baidu.com
- *              lizeming@baidu.com
- *   date     : 2015-03-26
- *   info     : implementation for LR with L1, L2 Norm
- *              using newton method : owlqn, lbfgs
- *              suport binary or realvalued features
+ *   date     : 2015-08-14
+ *   info     : implementation for LR with L1 L2 norm
+ *              using newton method
+ *              support binary or realvalued features
  * ======================================================== */
 
 #include <math.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "str.h"
+#include "idmap.h"
 #include "fn_type.h"
 #include "newton_opt.h"
 #include "lr.h"
 
-/* -------------------------------------------
- * Data Wraper for LR 
- * ------------------------------------------- */
-typedef struct _dataset {
-    int    r;          // r instance number 
-    int    c;          // c coefficient length
-    int    *len;       // length of features of each instance
-    int    *id;        // feature ids
-    int    method;     // 1:L1, 2: L2
-    double *val;       // feature values
-    double *y;         // label of each instance
-    double lambda;     // regularized paramenter
-} Dataset;
+#define  LR_LINE_LEN  1048576 
+#define  LR_KEY_LEN   64
 
-/* ------------------------------------
- * brief  : free the dataset for LR
- * ds     : dataset pointer
- * ------------------------------------ */
-void dataset_free(Dataset *ds) {
-    if (ds != NULL) {
-        if (ds->val != NULL) {
-            free(ds->val);
-            ds->val = NULL;
-        }
-        if (ds->id != NULL) {
-            free(ds->id);
-            ds->id = NULL;
-        }
-        if (ds->len != NULL) {
-            free(ds->len);
-            ds->len = NULL;
-        }
-        if (ds->y != NULL) {
-            free(ds->y);
-            ds->y = NULL;
-        }
-        free(ds);
-    }
+LR * create_lr_model(){
+    LR * lr = (LR*)malloc(sizeof(LR));
+    memset(lr, 0, sizeof(LR));
+    return lr;
 }
 
-/* ----------------------------------------
- * brief : LR loss function value 
- * x     : current theta learned
- * _ds   : dataset for LR learn
- * return: current LR loss function value
- * ---------------------------------------- */
-double lr_eval(double *x, void *_ds) {
-    Dataset *ds = (Dataset *) _ds;
-    double loss = 1.0, yest = 0.0, add = 0.0, regloss = 0.0;
-    double *val = ds->val;
-    int    *id  = ds->id;
-    int    *len = ds->len;
-    double *y   = ds->y;
-    int offs =  0, i = 0, j = 0;
+static int load_train_ds(LR * lr, IdMap * idmap){
+    FILE * fp = NULL;
+    if (NULL == (fp = fopen(lr->p.in_file, "r"))){
+        fprintf(stderr, "can not open file \"%s\"\n", lr->p.in_file);
+        return -1;
+    }
+    lr->train_ds = (LRDS*)malloc(sizeof(LRDS));
+    memset(lr->train_ds, 0, sizeof(LRDS));
+    char buffer[LR_LINE_LEN];
+    char ** str_array = NULL;
+    int count = 0, col_cnt = 0, tf_cnt = 0, row = 0;
 
-    for (offs = i = 0; i < ds->r; i++) {
-        yest = 0.0;
-        if (val) {
-            for (j = 0; j < len[i]; ++j) {
-                yest += val[offs + j] * x[id[offs + j]];
+    // first scan for counting and idmapping
+    while (NULL != fgets(buffer, LR_LINE_LEN, fp)) {
+        str_array = split(trim(buffer, 3), '\t', &count);
+        if (count < 3){
+            goto free_str;
+        }
+        int tlen = atoi(str_array[1]);
+        if (1 == lr->p.binary && count != (tlen + 2)){
+            goto free_str;
+        }
+        if (0 == lr->p.binary && count != ((tlen + 1) << 1)){
+            goto free_str;
+        }
+        for (int i = 0; i < tlen; i++){
+            int id = 0;
+            if (1 == lr->p.binary) id = i + 2;
+            else id = (i << 1) + 2;
+            if (-1 == idmap_get_value(idmap, str_array[id])) {
+                idmap_add(idmap, dupstr(str_array[id]), idmap_size(idmap));
             }
-        } else {
-            for (j = 0; j < len[i]; ++j) {
-                yest += x[id[offs + j]];
-            }
         }
-        if (yest > 30.0){
-            add = yest;
-        }
-        else if (yest > -30.0){
-            add = log(1 + exp(yest));
-        }
-        else{
-            add = 0.0;
-        }
-        if (y[i] > 0){
-            add -= yest;
-        }
-        loss += add;
-        offs += len[i];
+        tf_cnt += tlen;
+        row += 1;
+free_str:
+        free(str_array[0]);
+        free(str_array);
+    }
+    col_cnt = idmap_size(idmap);
+
+    lr->id_map = (char(*)[LR_KEY_LEN])malloc(sizeof(char[LR_KEY_LEN]) * col_cnt);
+    memset(lr->id_map, 0, sizeof(char[LR_KEY_LEN]) * col_cnt);
+    lr->c = col_cnt;
+    lr->x = (double*)malloc(sizeof(double) * col_cnt);
+    memset(lr->x, 0, sizeof(double) * col_cnt);
+
+    lr->train_ds->r   = row;
+    lr->train_ds->y   = (double*)malloc(sizeof(double) * row);
+    lr->train_ds->l   = (int*)malloc(sizeof(int) * row);
+    lr->train_ds->ids = (int*)malloc(sizeof(int) * tf_cnt);
+    if (0 == lr->p.binary){
+        lr->train_ds->val = (double*)malloc(sizeof(double) * tf_cnt);
     }
 
-    // add loss from regularization
-    regloss = 0.0;
-    if (ds->method == 2){       // for L2 Norm
-        for (i = 0; i < ds->c; i++){
-            regloss += x[i] * x[i];
+    // second scan for loading the data to malloced space
+    rewind(fp);
+    tf_cnt = row = 0;
+    while (NULL != fgets(buffer, LR_LINE_LEN, fp)){
+        str_array = split(trim(buffer, 3), '\t', &count);
+        if (count < 3) {
+            goto str_free;
         }
-        loss += regloss * ds->lambda;
-    }
-    else if (ds->method == 1){  // for L1 Norm
-        for (i = 0; i < ds->c; i++){
-            if (x[i] > 0.0){
-                regloss += x[i];
-            }
-            else if (x[i] < 0.0){
-                regloss -= x[i];
-            }
+        int tlen = atoi(str_array[1]);
+        if (1 == lr->p.binary && count != (tlen + 2)){
+            goto str_free;
         }
-        loss += regloss * ds->lambda;
+        if (0 == lr->p.binary && count != ((tlen + 1) << 1)) {
+            goto str_free;
+        }
+        lr->train_ds->l[row] = tlen;
+        lr->train_ds->y[row] = atof(str_array[0]);
+        for (int i = 0; i < tlen; i++){
+            int id = 0;
+            if (1 == lr->p.binary) id = i + 2;
+            else id = (i << 1) + 2;
+            int iid = idmap_get_value(idmap, str_array[id]);
+            lr->train_ds->ids[tf_cnt] = iid;
+            strncpy(lr->id_map[iid], str_array[id], LR_KEY_LEN - 1);
+            if (0 == lr->p.binary){
+                lr->train_ds->val[tf_cnt] = atof(str_array[id + 1]);
+            }
+            tf_cnt += 1;
+        }
+        row += 1;
+str_free:
+        free(str_array[0]);
+        free(str_array);
     }
-    return loss;
+    fclose(fp);
+    return 0;
 }
- 
+
+static void load_test_ds(LR * lr, IdMap * idmap){
+    FILE * fp = NULL;
+    if (NULL == (fp = fopen(lr->p.te_file, "r"))){
+        return;
+    }
+    lr->test_ds = (LRDS*)malloc(sizeof(LRDS));
+    memset(lr->test_ds, 0, sizeof(LRDS));
+    char buffer[LR_LINE_LEN];
+    char ** str_array = NULL;
+    int count = 0, col_cnt = 0, tf_cnt = 0, row = 0;
+
+    // first scan for counting and idmapping
+    while (NULL != fgets(buffer, LR_LINE_LEN, fp)) {
+        str_array = split(trim(buffer, 3), '\t', &count);
+        if (count < 3){
+            goto free_str;
+        }
+        int tlen = atoi(str_array[1]);
+        if (1 == lr->p.binary && count != (tlen + 2)){
+            goto free_str;
+        }
+        if (0 == lr->p.binary && count != ((tlen + 1) << 1)){
+            goto free_str;
+        }
+        int rtlen = 0;
+        for (int i = 0; i < tlen; i++){
+            int id = 0;
+            if (1 == lr->p.binary) id = i + 2;
+            else id = (i << 1) + 2;
+            if (-1 != idmap_get_value(idmap, str_array[id])) {
+                rtlen += 1;
+            }
+        }
+        if (rtlen > 0){
+            tf_cnt += rtlen;
+            row += 1;
+        }
+free_str:
+        free(str_array[0]);
+        free(str_array);
+    }
+    lr->test_ds->r   = row;
+    lr->test_ds->y   = (double*)malloc(sizeof(double) * row);
+    lr->test_ds->l   = (int*)malloc(sizeof(int) * row);
+    lr->test_ds->ids = (int*)malloc(sizeof(int) * tf_cnt);
+    if (0 == lr->p.binary){
+        lr->test_ds->val = (double*)malloc(sizeof(double) * tf_cnt);
+    }
+
+    // second scan for loading the data to malloced space
+    rewind(fp);
+    tf_cnt = row = 0;
+    while (NULL != fgets(buffer, LR_LINE_LEN, fp)){
+        str_array = split(trim(buffer, 3), '\t', &count);
+        if (count < 3) {
+            goto str_free;
+        }
+        int tlen = atoi(str_array[1]);
+        if (1 == lr->p.binary && count != (tlen + 2)){
+            goto str_free;
+        }
+        if (0 == lr->p.binary && count != ((tlen + 1) << 1)) {
+            goto str_free;
+        }
+        int rtlen = 0;
+        for (int i = 0; i < tlen; i++){
+            int id = 0;
+            if (1 == lr->p.binary) id = i + 2;
+            else id = (i << 1) + 2;
+            int iid = idmap_get_value(idmap, str_array[id]);
+            if (iid != -1){
+                lr->test_ds->ids[tf_cnt] = iid;
+                if (0 == lr->p.binary){
+                    lr->test_ds->val[tf_cnt] = atof(str_array[id + 1]);
+                }
+                tf_cnt += 1;
+                rtlen  += 1;
+            }
+        }
+        if (rtlen > 0) {
+            lr->train_ds->l[row] = rtlen;
+            lr->train_ds->y[row] = atof(str_array[0]);
+            row += 1;
+        }
+str_free:
+        free(str_array[0]);
+        free(str_array);
+    }
+    fclose(fp);
+}
+
 /* ----------------------------------------
  * brief : LR gradient function
  * x     : current theta learned
@@ -130,15 +221,17 @@ double lr_eval(double *x, void *_ds) {
  * return: current LR loss function value
  * ---------------------------------------- */
 void lr_grad(double *x, void *_ds, double *g) {
-    Dataset *ds = (Dataset *) _ds;
+    LR * lr = (LR*) _ds;
     double yest = 0.0, hx = 0.0;
-    double *val = ds->val;
-    double *y   = ds->y;
-    int    *id  = ds->id;
-    int    *len = ds->len;
+    double *val = lr->train_ds->val;
+    double *y   = lr->train_ds->y;
+    int    *id  = lr->train_ds->ids;
+    int    *len = lr->train_ds->l;
+    int     col = lr->c;
+    int     row = lr->train_ds->r;
     int i = 0, j = 0, offs = 0;
-    memset(g, 0, sizeof(double) * ds->c);
-    for (offs = i = 0; i < ds->r; i++) {
+    memset(g, 0, sizeof(double) * col);
+    for (offs = i = 0; i < row; i++) {
         yest = 0.0;
         if (val) {
             for (j = 0; j < len[i]; j++) {
@@ -167,49 +260,118 @@ void lr_grad(double *x, void *_ds, double *g) {
         }
         offs += len[i];
     }
-    // Just for L2 Norm 
-    if (ds->method == 2){
-        for (i = 0; i < ds->c; i++){
-            g[i] += ds->lambda * (x[i] + x[i]);
-        }
+    // Just for L2 Norm if (lr->p.method == 2){
+    for (i = 0; i < col; i++){
+        g[i] += lr->p.lambda * (x[i] + x[i]);
     }
 }
 
-/* -----------------------------------------
- * brief  : LR function 
- * r      : r instance
- * c      : c coefficient
- * tlen   : number of data
- * len    : length of each instance
- * id     : features ids
- * val    : features values NULL for binary feature
- * y      : label of each instance
- * x      : return coefficient
- * ----------------------------------------- */
-int lr(int r, int c, int tlen, int *len, int *id, double *val, double *y, double lambda, int method, double *x) {
-    Dataset *ds = (Dataset *) malloc(sizeof(Dataset));
-    memset(ds, 0, sizeof(Dataset));
-    ds->y       = (double  *) malloc(sizeof(double) * r);
-    ds->id      = (int *)     malloc(sizeof(int)    * tlen);
-    ds->len     = (int *)     malloc(sizeof(int)    * r);
-    ds->r       = r;
-    ds->c       = c;
-    ds->lambda  = lambda;
-    ds->method  = method;
-    if (val){
-        ds->val = (double  *) malloc(sizeof(double) * tlen);
-        memcpy(ds->val, val, sizeof(double) * tlen);
+/* ----------------------------------------
+ * brief : LR loss function value 
+ * x     : current theta learned
+ * _ds   : dataset for LR learn
+ * return: current LR loss function value
+ * ---------------------------------------- */
+double lr_eval(double *x, void *_ds) {
+    LR * lr = (LR *) _ds;
+    double loss = 1.0, yest = 0.0, add = 0.0, regloss = 0.0;
+    double *val = lr->train_ds->val;
+    int    *id  = lr->train_ds->ids;
+    int    *len = lr->train_ds->l;
+    double *y   = lr->train_ds->y;
+    int     row = lr->train_ds->r;
+    int offs =  0, i = 0, j = 0;
+
+    for (offs = i = 0; i < row; i++) {
+        yest = 0.0;
+        if (val) {
+            for (j = 0; j < len[i]; ++j) {
+                yest += val[offs + j] * x[id[offs + j]];
+            }
+        } else {
+            for (j = 0; j < len[i]; ++j) {
+                yest += x[id[offs + j]];
+            }
+        }
+        if (yest > 30.0){
+            add = yest;
+        }
+        else if (yest > -30.0){
+            add = log(1 + exp(yest));
+        }
+        else{
+            add = 0.0;
+        }
+        if (y[i] > 0){
+            add -= yest;
+        }
+        loss += add;
+        offs += len[i];
     }
-    memcpy(ds->y,   y,   sizeof(double) * r);
-    memcpy(ds->id,  id,  sizeof(int)    * tlen);
-    memcpy(ds->len, len, sizeof(int)    * r);
-    if (method == 2){
-        lbfgs(ds, lr_eval, lr_grad, 1e-9, 5, c, 1000, x);
+
+    // add loss from regularization
+    regloss = 0.0;
+    if (lr->p.method == 2){       // for L2 Norm
+        for (i = 0; i < lr->c; i++){
+            regloss += x[i] * x[i];
+        }
+        loss += regloss * lr->p.lambda;
     }
-    else if (method == 1){
-        owlqn(ds, lr_eval, lr_grad, lambda, 1e-9, 5, c, 1000, x);
+    else if (lr->p.method == 1){  // for L1 Norm
+        for (i = 0; i < lr->c; i++){
+            if (x[i] > 0.0){
+                regloss += x[i];
+            }
+            else if (x[i] < 0.0){
+                regloss -= x[i];
+            }
+        }
+        loss += regloss * lr->p.lambda;
     }
-    dataset_free(ds);
-    ds = NULL;
+    return loss;
+}
+
+int lr_repo(double *x, void *_ds) {
+    LR * lr = (LR *)_ds;
+    int i = lr->p.iterno;
+    i += 1;
+    fprintf(stderr, "this is just for report iter : %d\n", i);
+    lr->p.iterno += 1;
+    if (i % lr->p.savestep == 0){
+        fprintf(stderr, "should save model here\n");
+    }
     return 0;
 }
+ 
+int   init_lr(LR * lr){
+    IdMap * idmap = idmap_create();
+    if (0 != load_train_ds(lr, idmap)) {
+        idmap_free(idmap); idmap = NULL;
+        return -1;
+    }
+    if (NULL != lr->p.te_file) {
+        load_test_ds(lr, idmap);
+    }
+    idmap_free(idmap); idmap = NULL;
+    return 0;
+}
+
+int  learn_lr(LR * lr){
+    if (lr->p.method == 2){
+        lbfgs(lr, lr_eval, lr_grad, lr_repo, 1e-6, 5, lr->c, lr->p.niters, lr->x);
+    }
+    else if (lr->p.method == 1){
+        owlqn(lr, lr_eval, lr_grad, lr_repo, 1e-6, 5, lr->c, lr->p.niters, lr->p.lambda, lr->x);
+    }
+    return 0;
+}
+
+int   save_lr(LR * lr, int n){
+    return 0;
+}
+
+int   free_lr(LR * lr){
+    return 0;
+}
+
+

@@ -119,9 +119,9 @@ void fit_newton(int n, double *datax, double l, int method, int m, int it, doubl
     }
     data->lambda = l;
     if (method == 1) {
-        owlqn(data, l1eval, l1grad, l, 1e-15, m, n, it, retx);
+        owlqn(data, l1eval, l1grad, NULL, 1e-15, m, n, it, l, retx);
     } else if(method == 2) {
-        lbfgs(data, l2eval, l2grad,    1e-15, m, n, it, retx);
+        lbfgs(data, l2eval, l2grad, NULL, 1e-15, m, n, it, retx);
     }
     dataset_free(data);
 }

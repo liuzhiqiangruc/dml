@@ -13,6 +13,7 @@ STATICS  = libkmeanss.a libmodls.a libldas.a libaldas.a    libbldas.a  libjldas.
 
 util_lda_objs = $(UTIL)/rbtree.o $(UTIL)/set.o $(UTIL)/idmap.o $(UTIL)/str.o
 util_pmf_objs = $(util_lda_objs)
+util_lr_objs  = $(util_lda_objs)
 
 
 all:	$(STATICS)
@@ -95,7 +96,7 @@ libpmf.so   : pmf.o mf.o        $(util_pmf_objs)
 libbmf.so   : bmf.o mf.o        $(util_pmf_objs)
 	$(LD) $(SOFLAGS) $^ -o $@
 
-liblr.so    : lr.o newton.o
+liblr.so    : lr.o newton.o     $(util_lr_objs)
 	$(LD) $(SOFLAGS) $^ -o $@
 
 
@@ -110,7 +111,7 @@ libmodls.a : modl.o
 libnewts.a : newton.o  
 	ar cr $@ $^
 
-liblrs.a   : newton.o lr.o
+liblrs.a   : newton.o lr.o     $(util_lr_objs)
 	ar cr $@ $^
 
 libldas.a  : lda.o             $(util_lda_objs)

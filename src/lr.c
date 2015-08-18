@@ -1,199 +1,123 @@
 /* ========================================================
-*   Copyright (C) 2015 All rights reserved.
-*
-*   filename : lr.c
-*   author   : lizeming@baidu.com
-*   date     : 2015-08-01
-*   info     : logistic regression
-*              support binary or realvalued features
-* ======================================================== */
+ *   Copyright (C) 2015 All rights reserved.
+ *   
+ *   filename : lr.c
+ *   author   : ***
+ *   date     : 2015-08-18
+ *   info     : 
+ * ======================================================== */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "idmap.h"
-#include "str.h"
 #include "lr.h"
 
-#define  LR_LINE_LEN  1048576 
-#define  LR_KEY_LEN   64
 
 void help() {
-    fprintf(stderr, "\nlr [logistic regression] usage:        \n");
+    fprintf(stderr, "\nLR [Logistic Regression] usage:        \n");
     fprintf(stderr, "\n./lr -f <string> -a <double> -r <int>  \n");
     fprintf(stderr, "     -f  data input file                 \n");
+    fprintf(stderr, "     -t  test input file                 \n");
+    fprintf(stderr, "     -o  otuput dir                      \n");
     fprintf(stderr, "     -a  regularized paramenter          \n");
     fprintf(stderr, "     -b  1:binary or else                \n");
     fprintf(stderr, "     -r  1:L1 Norm; 2: L2 Norm           \n\n");
 }
 
-int main(int argc, char *argv[]) {
-    if ((argc & 1) == 0 || argc == 1) {
+int parse_command_line(LRParam *p, int argc, char *argv[]){
+    double a = 0;
+    int b = 0, r = 1, n = 10, s = 10;
+    char * f = NULL;
+    char * t = NULL;
+    char * o = NULL;
+    int i = 0;
+    char * arg = NULL;
+
+    if ((argc & 1) == 0){
         fprintf(stderr, "command line not well formatted\n");
-        help();
         return -1;
     }
 
-    // command line parameter
-    char  *arg      = NULL;    // command line 
-    char  *filename = NULL;    // input file name
-    int    method   = 0;       // L1, L2 method
-    int    binary   = 0;       // binary feature?
-    double lambda   = 0.0;     // penaty
 
-    // parse command line
-    int i = 0;
     while (i < argc) {
         arg = argv[i];
-        if (0 == strcmp(arg, "-f")) {
-            filename = argv[++i];
+        if (0 == strcmp(arg,"-a")){
+            a = atof(argv[++i]);
         }
-        else if (0 == strcmp(arg, "-a")) {
-            lambda = atof(argv[++i]);
+        else if (0 == strcmp(arg,"-b")){
+            b = atoi(argv[++i]);
         }
-        else if (0 == strcmp(arg, "-r")) {
-            method = atoi(argv[++i]);
+        else if (0 == strcmp(arg,"-n")){
+            n = atoi(argv[++i]);
         }
-        else if (0 == strcmp(arg, "-b")) {
-            binary = atoi(argv[++i]);
+        else if (0 == strcmp(arg,"-s")){
+            s = atoi(argv[++i]);
+        }
+        else if (0 == strcmp(arg,"-r")){
+            r = atoi(argv[++i]);
+        }
+        else if (0 == strcmp(arg,"-f")){
+            f = argv[++i];
+        }
+        else if (0 == strcmp(arg,"-t")){
+            t = argv[++i];
+        }
+        else if (0 == strcmp(arg,"-o")){
+            o = argv[++i];
         }
         i += 1;
     }
-    if (method != 1 && method != 2) {
-        fprintf(stderr, "method must be 1, or 2.\n");
+    if (NULL == f) {
+        fprintf(stderr,"no input data exit(-1)\n");
         return -1;
     }
-    if (binary != 0 && binary != 1) {
-        fprintf(stderr, "binary must be 0, or 1.\n");
+    if (r != 1 && r != 2){
+        fprintf(stderr, "method must be 1, or 2\n");
         return -1;
     }
-
-    // input data 
-    char  (*fs)[LR_KEY_LEN] = NULL; // features
-    double *retx = NULL;       // lr result
-    double *y    = NULL;       // target labels
-    double *val  = NULL;       // feature values for realvalued features
-    int    *ids  = NULL;       // feature IDS
-    int    *len  = NULL;       // feature cnt for each instance
-    int  totlen  = 0;          // total input feature cnt
-    int       r  = 0;          // instance cnt
-    int       c  = 0;          // unique feature cnt
-
-    // load input data
-    FILE *f = NULL;
-    if (NULL == (f = fopen(filename, "r"))) {
-        fprintf(stderr, "can not open file \"%s\"\n", filename);
+    if (b != 0 && b != 1){
+        fprintf(stderr, "binary must be 0, or 1\n");
         return -1;
     }
-    char buffer[LR_LINE_LEN];
-    char ** str_array = NULL;
-    int  col_tmp = 0;
-    IdMap *idmap = idmap_create();
+    p->lambda   = a;
+    p->binary   = b;
+    p->method   = r;
+    p->niters   = n;
+    p->savestep = s;
+    p->in_file  = f;
+    p->te_file  = t;
+    p->out_dir  = o;
 
-    // first scan for counting and idmapping
-    while (NULL != fgets(buffer, LR_LINE_LEN, f)) {
-        str_array = split(trim(buffer, 3), '\t', &col_tmp);
-        if (col_tmp < 3){
-            goto free_str;
-        }
-        int tlen = atoi(str_array[1]);
-        if (1 == binary && col_tmp != (tlen + 2)) {
-            goto free_str;
-        }
-        if (0 == binary && col_tmp != ((tlen + 1) << 1)) {
-            goto free_str;
-        }
-        for (i = 0; i < tlen; i++){
-            int id = 0;
-            if (1 == binary){
-                id = i + 2;
-            }
-            else {
-                id = (i << 1) + 2;
-            }
-            if (-1 == idmap_get_value(idmap, str_array[id])){
-                idmap_add(idmap, dupstr(str_array[id]), idmap_size(idmap));
-            }
-        }
-        totlen += atoi(str_array[1]);
-        r += 1; 
-
-free_str:
-        free(str_array[0]);
-        free(str_array);
-    }
-    c  = idmap_size(idmap);
-    fs = (char(*)[LR_KEY_LEN])malloc(sizeof(char[LR_KEY_LEN]) * c);
-    memset(fs, 0, sizeof(char[LR_KEY_LEN]) * c);
-    y    = (double*)malloc(sizeof(double) * r);
-    if (0 == binary){
-        val = (double*)malloc(sizeof(double) * totlen);
-    }
-    ids  = (int*)malloc(sizeof(int) * totlen);
-    len  = (int*)malloc(sizeof(int) * r);
-
-    // second scan for loading the data into malloced space
-    rewind(f);
-    totlen = r = 0;
-    while (NULL != fgets(buffer, LR_LINE_LEN, f)){
-        str_array = split(trim(buffer,3), '\t', &col_tmp);
-        if (col_tmp < 3){
-            goto str_free;
-        }
-        int tlen = atoi(str_array[1]);
-        if (1 == binary && col_tmp != (tlen + 2)){
-            goto str_free;
-        }
-        if (0 == binary && col_tmp != ((tlen + 1) << 1)) {
-            goto str_free;
-        }
-        len[r] = tlen;
-        y[r]   = atof(str_array[0]);
-        for (i = 0; i < tlen; i++){
-            int id = 0;
-            if (1 == binary){
-                id = i + 2;
-            }
-            else{
-                id = (i << 1) + 2;
-            }
-            int iid = idmap_get_value(idmap, str_array[id]);
-            ids[totlen] = iid;
-            strncpy(fs[iid], str_array[id], LR_KEY_LEN - 1);   
-            if (0 == binary){
-                val[totlen] = atof(str_array[id + 1]);
-            }
-            totlen += 1;
-        }
-        r += 1;
-
-str_free:
-        free(str_array[0]);
-        free(str_array);
-    }
-    fclose(f);
-
-    // FREE the idmap
-    idmap_free(idmap);
-    idmap = NULL;
-
-    // learn the coefficient
-    retx = (double*)malloc(sizeof(double) * c);
-    memset(retx, 0, sizeof(double) * c);
-    lr(r, c, totlen, len, ids, val, y, lambda, method, retx);
-
-    // print the learned coefficient
-    for (i = 0; i < c; i++){
-        printf("%s\t%.10f\n", fs[i], retx[i]);
-    }
-
-    free(y);    y    = NULL;
-    free(len);  len  = NULL;
-    free(ids);  ids  = NULL;
-    free(retx); retx = NULL;
-    if (0 == binary) {
-        free(val);  val  = NULL;
-    }
+    fprintf(stderr, "lambda : %f\tniters : %d\tsavestep: %d\tinput : %s\toutput : %s\n", \
+            a, n, s, f, o);
 
     return 0;
+
 }
+
+
+int main(int argc, char *argv[]) {
+    LR * lr = create_lr_model();
+    if (-1 == parse_command_line(&(lr->p), argc, argv)){
+        help();
+        goto except;
+    }
+    fprintf(stderr, "command line parse done\n");
+    if (-1 == init_lr(lr)){
+        goto except;
+    }
+    fprintf(stderr, "load data done\n");
+    fprintf(stderr, "train: %d  test: %d lenx: %d\n", lr->train_ds->r, lr->test_ds->r, lr->c);
+    learn_lr(lr);
+    save_lr(lr, lr->p.niters);
+    free_lr(lr);
+    lr = NULL;
+    return 0;
+
+except:
+    free_lr(lr);
+    lr = NULL;
+    return -1;
+}
+
+

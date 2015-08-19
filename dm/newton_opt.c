@@ -287,7 +287,7 @@ int bfgs(void *data, EVAL_FN eval_fn, GRAD_FN grad_fn, double ftol, int n, int i
     return 0;
 }
 
-int lbfgs(void *data, EVAL_FN eval_fn, GRAD_FN grad_fn, REPO_FN repo_fn, double ftol, int m, int n, int it, double *retx){
+int lbfgs(void *data, EVAL_FN eval_fn, GRAD_FN grad_fn, REPO_FN repo_fn, int m, int n, int it, double *retx){
     double *x0  = (double *) malloc(sizeof(double) * n);
     double *x1  = (double *) malloc(sizeof(double) * n);
     double *g0  = (double *) malloc(sizeof(double) * n);
@@ -308,12 +308,11 @@ int lbfgs(void *data, EVAL_FN eval_fn, GRAD_FN grad_fn, REPO_FN repo_fn, double 
         hg[i] = -g0[i];
     }
     lambda = backtrack(data, eval_fn, n, x0, g0, hg, x1, 0);
-    fval = eval_fn(x1, data);
     grad_fn(x1, data, g1);
 
     // Iteration
     for (i = 1, offs = 0; i < it; i++, offs += n){
-        if (repo_fn && repo_fn(x1, data)){
+        if (repo_fn && repo_fn(x0, x1, data)){
             break;
         }
         hgini = yty = 0;
@@ -339,11 +338,6 @@ int lbfgs(void *data, EVAL_FN eval_fn, GRAD_FN grad_fn, REPO_FN repo_fn, double 
         }
 
         lambda = backtrack(data, eval_fn, n, x0, g0, hg, x1, 0);
-        prefval = fval;
-        fval = eval_fn(x1, data);
-        if (fabs(fval - prefval) < ftol || i == (it - 1)){
-            break;
-        }
         grad_fn(x1, data, g1);
     }
     memmove(retx, x1, sizeof(double) * n);
@@ -360,7 +354,7 @@ int lbfgs(void *data, EVAL_FN eval_fn, GRAD_FN grad_fn, REPO_FN repo_fn, double 
     return 0;
 }
 
-int owlqn(void *data, EVAL_FN eval_fn, GRAD_FN grad_fn, REPO_FN repo_fn, double ftol, int m, int n, int it, double l1, double *retx){
+int owlqn(void *data, EVAL_FN eval_fn, GRAD_FN grad_fn, REPO_FN repo_fn, int m, int n, int it, double l1, double *retx){
     double *x0  = (double *) malloc(sizeof(double) * n);
     double *x1  = (double *) malloc(sizeof(double) * n);
     double *g0  = (double *) malloc(sizeof(double) * n);
@@ -383,13 +377,12 @@ int owlqn(void *data, EVAL_FN eval_fn, GRAD_FN grad_fn, REPO_FN repo_fn, double 
         hg[i] = -sg[i];
     }
     lambda = backtrack(data, eval_fn, n, x0, sg, hg, x1, 1);
-    fval = eval_fn(x1, data);
     grad_fn(x1, data, g1);
     sub_grad(n, x1, g1, l1, sg);
 
     // Iteration
     for (i = 1, offs = 0; i < it; i++, offs += n){
-        if (repo_fn && repo_fn(x1, data)){
+        if (repo_fn && repo_fn(x0, x1, data)){
             break;
         }
         hgini = yty = 0;
@@ -424,11 +417,6 @@ int owlqn(void *data, EVAL_FN eval_fn, GRAD_FN grad_fn, REPO_FN repo_fn, double 
             if (x0[j] * x1[j] < 0){
                 x1[j] = 0;
             }
-        }
-        prefval = fval;
-        fval = eval_fn(x1, data);
-        if (fabs(fval - prefval) < ftol || i == (it - 1)){
-            break;
         }
         grad_fn(x1, data, g1);
         sub_grad(n, x1, g1, l1, sg);

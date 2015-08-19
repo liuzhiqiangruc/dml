@@ -26,6 +26,8 @@ kmeans.o       :   kmeans.h
 
 modl.o         :   modl.h
 
+auc.o          :   auc.h
+
 lr.o           :   lr.c lr.h 
 	$(CC) $(CFLAGS) $(INCS) -c $< -o $@
 
@@ -96,7 +98,7 @@ libpmf.so   : pmf.o mf.o        $(util_pmf_objs)
 libbmf.so   : bmf.o mf.o        $(util_pmf_objs)
 	$(LD) $(SOFLAGS) $^ -o $@
 
-liblr.so    : lr.o newton.o     $(util_lr_objs)
+liblr.so    : lr.o newton.o auc.o    $(util_lr_objs)
 	$(LD) $(SOFLAGS) $^ -o $@
 
 
@@ -111,7 +113,7 @@ libmodls.a : modl.o
 libnewts.a : newton.o  
 	ar cr $@ $^
 
-liblrs.a   : newton.o lr.o     $(util_lr_objs)
+liblrs.a   : newton.o lr.o auc.o    $(util_lr_objs)
 	ar cr $@ $^
 
 libldas.a  : lda.o             $(util_lda_objs)

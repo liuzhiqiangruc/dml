@@ -18,6 +18,7 @@
 #include "idmap.h"
 #include "fn_type.h"
 #include "newton_opt.h"
+#include "auc.h"
 #include "lr.h"
 
 #define  LR_LINE_LEN  1048576 
@@ -105,8 +106,8 @@ free_str:
             if (0 == lr->p.binary){
                 lr->train_ds->val[tf_cnt] = atof(str_array[id + 1]);
             }
+            tf_cnt += 1;
         }
-        tf_cnt += tlen;
         row += 1;
 str_free:
         free(str_array[0]);
@@ -276,9 +277,11 @@ void lr_grad(double *x, void *_ds, double *g) {
         }
         offs += len[i];
     }
-    // Just for L2 Norm if (lr->p.method == 2){
-    for (i = 0; i < col; i++){
-        g[i] += lr->p.lambda * (x[i] + x[i]);
+    // Just for L2 Norm 
+    if (lr->p.method == 2){
+        for (i = 0; i < col; i++){
+            g[i] += lr->p.lambda * (x[i] + x[i]);
+        }
     }
 }
 
@@ -347,15 +350,61 @@ double lr_eval(double *x, void *_ds) {
     return loss;
 }
 
-int lr_repo(double *x, void *_ds) {
-    LR * lr = (LR *)_ds;
-    int i = lr->p.iterno;
-    i += 1;
-    fprintf(stderr, "this is just for report iter : %d\n", i);
-    lr->p.iterno += 1;
-    if (i % lr->p.savestep == 0){
-        fprintf(stderr, "should save model here\n");
+double lr_auc(double *x, void *_ds){
+    LRDS * ds = (LRDS*)_ds;
+    double  *y  = ds->y;
+    int     row = ds->r;
+    double *val = ds->val;
+    int    *id  = ds->ids;
+    int    *len = ds->l;
+
+    double * s = (double*)malloc(sizeof(double) * row);
+    memset(s, 0, sizeof(double) * row);
+
+    int offs =  0, i = 0, j = 0;
+
+    for (i = offs = 0; i < row; i++){
+        if (val){
+            for (j = 0; j < len[i]; j++){
+                s[i] += val[offs + j] * x[id[offs + j]]; 
+            }
+        }
+        else{
+            for (j = 0; j < len[i]; j++){
+                s[i] += x[id[offs + j]]; 
+            }
+        }
+        offs += len[i];
     }
+
+    //double auc_v = auc(ds->r, s, y);
+
+    free(s); s = NULL;
+
+    return 0.0;
+}
+
+int lr_repo(double *x0, double *x1, void *_ds) {
+    LR * lr = (LR *)_ds;
+    double val1 = lr_eval(x0, _ds);
+    double val2 = lr_eval(x1, _ds);
+    if (fabs(val2 - val1) < 1e-9){
+        fprintf(stderr, "conv done exit\n");
+        return 1;
+    }
+    int i = ++lr->p.iterno;
+    fprintf(stderr, "iter: %d, loss: %.10f", i, val2);
+    if (i % lr->p.savestep == 0){
+        double auc = lr_auc(x1, lr->train_ds);
+        fprintf(stderr, ",train_auc: %.10f", auc);
+        if (lr->test_ds){
+            auc = lr_auc(x1, lr->test_ds);
+            fprintf(stderr, ",test_auc: %.10f", auc);
+        }
+        memmove(lr->x, x1, sizeof(double) * lr->c);
+        save_lr(lr, i);
+    }
+    fprintf(stderr, "\n");
     return 0;
 }
  
@@ -380,10 +429,10 @@ int   init_lr(LR * lr){
 
 int  learn_lr(LR * lr){
     if (lr->p.method == 2){
-        lbfgs(lr, lr_eval, lr_grad, lr_repo, 1e-6, 5, lr->c, lr->p.niters, lr->x);
+        lbfgs(lr, lr_eval, lr_grad, lr_repo, 5, lr->c, lr->p.niters, lr->x);
     }
     else if (lr->p.method == 1){
-        owlqn(lr, lr_eval, lr_grad, lr_repo, 1e-6, 5, lr->c, lr->p.niters, lr->p.lambda, lr->x);
+        owlqn(lr, lr_eval, lr_grad, lr_repo, 5, lr->c, lr->p.niters, lr->p.lambda, lr->x);
     }
     return 0;
 }

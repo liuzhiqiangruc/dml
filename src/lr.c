@@ -25,7 +25,7 @@ void help() {
 }
 
 int parse_command_line(LRParam *p, int argc, char *argv[]){
-    double a = 0;
+    double a = 0, l = 1e-9;
     int b = 0, r = 1, n = 10, s = 10;
     char * f = NULL;
     char * t = NULL;
@@ -43,6 +43,9 @@ int parse_command_line(LRParam *p, int argc, char *argv[]){
         arg = argv[i];
         if (0 == strcmp(arg,"-a")){
             a = atof(argv[++i]);
+        }
+        else if (0 == strcmp(arg,"-l")){
+            l = atof(argv[++i]);
         }
         else if (0 == strcmp(arg,"-b")){
             b = atoi(argv[++i]);
@@ -80,6 +83,7 @@ int parse_command_line(LRParam *p, int argc, char *argv[]){
         return -1;
     }
     p->lambda   = a;
+    p->ftoler   = l;
     p->binary   = b;
     p->method   = r;
     p->niters   = n;

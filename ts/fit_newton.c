@@ -108,6 +108,24 @@ void l1grad(double *x, void *_data, double *g) {
     }
 }
 
+int l1_repo(double *x0, double *x1, void *_ds) {
+    double val1 = l1eval(x0, _ds);
+    double val2 = l1eval(x1, _ds);
+    if (val2 - val1 < 1e-15){
+        return 1;
+    }
+    return 0;
+}
+
+int l2_repo(double *x0, double *x1, void *_ds) {
+    double val1 = l2eval(x0, _ds);
+    double val2 = l2eval(x1, _ds);
+    if (val2 - val1 < 1e-15){
+        return 1;
+    }
+    return 0;
+}
+
 void fit_newton(int n, double *datax, double l, int method, int m, int it, double *retx) {
     int i;
     if (datax == NULL || retx == NULL) {
@@ -119,9 +137,9 @@ void fit_newton(int n, double *datax, double l, int method, int m, int it, doubl
     }
     data->lambda = l;
     if (method == 1) {
-        owlqn(data, l1eval, l1grad, NULL, 1e-15, m, n, it, l, retx);
+        owlqn(data, l1eval, l1grad, l1_repo, m, n, it, l, retx);
     } else if(method == 2) {
-        lbfgs(data, l2eval, l2grad, NULL, 1e-15, m, n, it, retx);
+        lbfgs(data, l2eval, l2grad, l2_repo, m, n, it, retx);
     }
     dataset_free(data);
 }

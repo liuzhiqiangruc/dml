@@ -197,8 +197,8 @@ free_str:
             }
         }
         if (rtlen > 0) {
-            lr->train_ds->l[row] = rtlen;
-            lr->train_ds->y[row] = atof(str_array[0]);
+            lr->test_ds->l[row] = rtlen;
+            lr->test_ds->y[row] = atof(str_array[0]);
             row += 1;
         }
 str_free:
@@ -357,12 +357,9 @@ double lr_auc(double *x, void *_ds){
     double *val = ds->val;
     int    *id  = ds->ids;
     int    *len = ds->l;
-
     double * s = (double*)malloc(sizeof(double) * row);
     memset(s, 0, sizeof(double) * row);
-
     int offs =  0, i = 0, j = 0;
-
     for (i = offs = 0; i < row; i++){
         if (val){
             for (j = 0; j < len[i]; j++){
@@ -376,24 +373,21 @@ double lr_auc(double *x, void *_ds){
         }
         offs += len[i];
     }
-
-    //double auc_v = auc(ds->r, s, y);
-
+    double auc_v = auc(ds->r, s, y);
     free(s); s = NULL;
-
-    return 0.0;
+    return auc_v;
 }
 
 int lr_repo(double *x0, double *x1, void *_ds) {
     LR * lr = (LR *)_ds;
     double val1 = lr_eval(x0, _ds);
     double val2 = lr_eval(x1, _ds);
-    if (fabs(val2 - val1) < 1e-9){
+    if (fabs(val2 - val1) < 1e-5){
         fprintf(stderr, "conv done exit\n");
         return 1;
     }
     int i = ++lr->p.iterno;
-    fprintf(stderr, "iter: %d, loss: %.10f", i, val2);
+    fprintf(stderr, "iter: %4d, loss: %.10f", i, val2);
     if (i % lr->p.savestep == 0){
         double auc = lr_auc(x1, lr->train_ds);
         fprintf(stderr, ",train_auc: %.10f", auc);

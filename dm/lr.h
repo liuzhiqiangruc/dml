@@ -43,7 +43,6 @@ typedef struct {
     double *y;                  /* target label of train    */
 } LRDS;
 
-
 /* -------------------------
  * LR Model struct 
  * ------------------------- */
@@ -64,21 +63,5 @@ int   init_lr(LR * lr);
 int  learn_lr(LR * lr);
 void  save_lr(LR * lr, int n);
 void  free_lr(LR * lr);
-
-
-/* -----------------------------------------
- * brief  : LR function 
- * r      : r instance
- * c      : c coefficient
- * tlen   : number of data
- * len    : length of each instance
- * id     : features ids
- * val    : features values NULL if binary 
- * y      : label of each instance
- * lambda : regulized parameter
- * method : 1: L1, 2: L2
- * x      : return coefficient
- * ----------------------------------------- */
-//int lr(int r, int c, int tlen, int *len, int *id, double *val, double *y, double lambda, int method, double *x);
 
 #endif //LR

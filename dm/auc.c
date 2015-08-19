@@ -1,16 +1,29 @@
-#include "auc.h"
-#include <stdlib.h>
+/* ========================================================
+ *   Copyright (C) 2015 All rights reserved.
+ *   
+ *   filename : auc.c
+ *   author   : ***
+ *   date     : 2015-08-19
+ *   info     : auc calculation
+ * ======================================================== */
+
 #include <stdio.h>
+#include <stdlib.h>
+
+#include "auc.h"
+
 typedef struct _aucP {
     double x;
     int id;
 }AucP;
+
 int cmp(const void *_a, const void *_b) {
     AucP *a = (AucP *) _a;
     AucP *b = (AucP *) _b;
     double l = a->x - b->x;
     return l > 0 ? 1 : (l < 0 ? -1 : 0);
 }
+
 void tiedrank(int n, AucP *aucp, double *rk) {
     double curval;
     int i, j, lastpos;
@@ -29,11 +42,10 @@ void tiedrank(int n, AucP *aucp, double *rk) {
         rk[aucp[j].id] = (double)(lastpos + i + 1) / 2.;
     }
 }
-/*
- * x : score
- * y : predict
- */
+
 double auc(int n, double *x, double *y) {
+    if (!y || !x) return 0.0;
+
     double *rk = (double*) malloc(sizeof(double) * n);
     AucP *aucp = (AucP *)malloc(sizeof(AucP) * n);
     int i, tsum;
@@ -62,29 +74,3 @@ double auc(int n, double *x, double *y) {
     return auc;
 }
 
-//int main(int argc, char * argv[]){
-//    char * filename = argv[1];
-//    FILE * f = NULL;
-//    char buffer[100];
-//    int pos, n = 0;
-//    double aucres;
-//    if (NULL == (f = fopen(filename,"r"))){
-//        fprintf(stderr,"file does not exist\n");
-//        return -1;
-//    }
-//    while(fgets(buffer, 100, f) != NULL){
-//        n++;
-//    }
-//    double *x = (double *)malloc(sizeof(double) * n);
-//    double *y = (double *)malloc(sizeof(double) * n);
-//    pos = 0;
-//    rewind(f);
-//    while(fscanf(f, "%lf %lf", &x[pos], &y[pos]) != EOF) {
-//        pos += 1;
-//    }
-//    aucres = auc(n, x, y);
-//    printf("%lf\n", aucres);
-//    free(x);
-//    free(y);
-//    return 0;
-//}

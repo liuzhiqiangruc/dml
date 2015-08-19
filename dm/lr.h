@@ -21,10 +21,10 @@
  * ----------------------- */
 typedef struct {
     double lambda;              /* penalty for regulization */
+    double ftoler;              /* tolerance for conv       */
     int    niters;              /* max iters                */
     int    savestep;            /* save step                */
     int    iterno;              /* current iter number      */
-    int    ftoler;              /* tolerance for conv       */
     int    binary;              /* binary feature or not    */
     int    method;              /* regualization mod 1 or 2 */
     char  *in_file;             /* input file for train     */

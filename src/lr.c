@@ -15,17 +15,20 @@
 
 void help() {
     fprintf(stderr, "\nLR [Logistic Regression] usage:        \n");
-    fprintf(stderr, "\n./lr -f <string> -a <double> -r <int>  \n");
-    fprintf(stderr, "     -f  data input file                 \n");
-    fprintf(stderr, "     -t  test input file                 \n");
-    fprintf(stderr, "     -o  otuput dir                      \n");
+    fprintf(stderr, "\n./lr -a <double> -l <double> -b <int> -r <int> -n <int> -s <int> -f <string> -t <string> -o <string\n");
     fprintf(stderr, "     -a  regularized paramenter          \n");
+    fprintf(stderr, "     -l  Convergence tolerance           \n");
     fprintf(stderr, "     -b  1:binary or else                \n");
-    fprintf(stderr, "     -r  1:L1 Norm; 2: L2 Norm           \n\n");
+    fprintf(stderr, "     -r  1:L1 Norm; 2: L2 Norm           \n");
+    fprintf(stderr, "     -n  max iteration count             \n");
+    fprintf(stderr, "     -s  savestep                        \n");
+    fprintf(stderr, "     -f  train input file                \n");
+    fprintf(stderr, "     -t  test  input file                \n");
+    fprintf(stderr, "     -o  otuput dir                      \n");
 }
 
 int parse_command_line(LRParam *p, int argc, char *argv[]){
-    double a = 0, l = 1e-9;
+    double a = 0, l = 1e-5;
     int b = 0, r = 1, n = 10, s = 10;
     char * f = NULL;
     char * t = NULL;
@@ -91,9 +94,6 @@ int parse_command_line(LRParam *p, int argc, char *argv[]){
     p->in_file  = f;
     p->te_file  = t;
     p->out_dir  = o;
-
-    fprintf(stderr, "lambda : %f\tniters : %d\tsavestep: %d\tinput : %s\toutput : %s\n", \
-            a, n, s, f, o);
 
     return 0;
 

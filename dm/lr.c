@@ -471,3 +471,84 @@ void free_lr(LR * lr){
 }
 
 
+double pr_eval(double *x, void *_ds) {
+    LR * lr = (LR *) _ds;
+    double loss = 1.0, yest = 0.0, add = 0.0, regloss = 0.0;
+    double *val = lr->train_ds->val;
+    int    *id  = lr->train_ds->ids;
+    int    *len = lr->train_ds->l;
+    double *y   = lr->train_ds->y;
+    int     row = lr->train_ds->r;
+    int offs =  0, i = 0, j = 0;
+
+    // poisson loss
+    for (offs = i = 0; i < row; ++i) {
+        yest = 0.;
+        if (val) {
+            for (j = 0; j < len[i]; ++j) {
+                yest += val[offs + j] * x[id[offs + j]];
+            }
+        } else {
+            for (j = 0; j < len[i]; ++j) {
+                yest += x[id[offs + j]];
+            }
+        }
+        loss += y[i] * log(yest) - yest;
+        offs += len[i];
+    }
+
+    // add loss from regularization
+    regloss = 0.0;
+    if (lr->p.method == 2){       // for L2 Norm
+        for (i = 0; i < lr->c; i++){
+            regloss += x[i] * x[i];
+        }
+        loss += regloss * lr->p.lambda;
+    }
+    else if (lr->p.method == 1){  // for L1 Norm
+        for (i = 0; i < lr->c; i++){
+            if (x[i] > 0.0){
+                regloss += x[i];
+            }
+            else if (x[i] < 0.0){
+                regloss -= x[i];
+            }
+        }
+        loss += regloss * lr->p.lambda;
+    }
+    return loss;
+}
+void pr_grad(double *x, void *_ds, double *g) {
+    LR * lr = (LR*) _ds;
+    double yest = 0.0, hx = 0.0;
+    double *val = lr->train_ds->val;
+    double *y   = lr->train_ds->y;
+    int    *id  = lr->train_ds->ids;
+    int    *len = lr->train_ds->l;
+    int     col = lr->c;
+    int     row = lr->train_ds->r;
+    int i = 0, j = 0, offs = 0;
+    memset(g, 0, sizeof(double) * col);
+    for (offs = i = 0; i < row; i++) {
+        yest = 0.0;
+        if (val) {
+            for (j = 0; j < len[i]; j++) {
+                yest += val[offs + j] * x[id[offs + j]];
+            }
+            // if yest == 0,
+            g[i] += y[i] * val[offs + j] / yest - val[offs + j];
+        } else {
+            for (j = 0; j < len[i]; j++) {
+                yest += x[id[offs + j]];
+            }
+            g[i] += y[i] / yest - 1.;
+        }
+        offs += len[i];
+    }
+    // Just for L2 Norm
+    if (lr->p.method == 2){
+        for (i = 0; i < col; i++){
+            g[i] += lr->p.lambda * (x[i] + x[i]);
+        }
+    }
+}

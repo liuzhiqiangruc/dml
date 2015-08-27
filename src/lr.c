@@ -10,7 +10,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "lr.h"
+#include "regression.h"
+
+typedef Regression LR;
 
 
 void help() {
@@ -27,7 +29,7 @@ void help() {
     fprintf(stderr, "     -o  otuput dir                      \n");
 }
 
-int parse_command_line(LRParam *p, int argc, char *argv[]){
+int parse_command_line(RP *p, int argc, char *argv[]){
     double a = 0, l = 1e-5;
     int b = 0, r = 1, n = 10, s = 10;
     char * f = NULL;
@@ -101,13 +103,13 @@ int parse_command_line(LRParam *p, int argc, char *argv[]){
 
 
 int main(int argc, char *argv[]) {
-    LR * lr = create_lr_model();
+    LR *lr = create_regression();
     if (-1 == parse_command_line(&(lr->p), argc, argv)){
         help();
         goto except;
     }
     fprintf(stderr, "command line parse done\n");
-    if (-1 == init_lr(lr)){
+    if (-1 == init_regression(lr)){
         goto except;
     }
     fprintf(stderr, "load data done\n");
@@ -115,14 +117,14 @@ int main(int argc, char *argv[]) {
     if (lr->test_ds){
         fprintf(stderr, " test: %d\n", lr->test_ds->r);
     }
-    learn_lr(lr);
-    save_lr(lr, lr->p.niters);
-    free_lr(lr);
+    learn_regression(lr);
+    save_regression(lr, lr->p.niters);
+    free_regression(lr);
     lr = NULL;
     return 0;
 
 except:
-    free_lr(lr);
+    free_regression(lr);
     lr = NULL;
     return -1;
 }

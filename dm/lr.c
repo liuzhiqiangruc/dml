@@ -2,7 +2,7 @@
  *   Copyright (C) 2015 All rights reserved.
  *   
  *   filename : lr.c
- *   author   : ***
+ *   author   : liuzhiqiang01@baidu.com
  *   date     : 2015-08-27
  *   info     : LR implementation
  * ======================================================== */

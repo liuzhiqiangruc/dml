@@ -14,7 +14,6 @@
 #include "str.h"
 #include "idmap.h"
 #include "fn_type.h"
-#include "newton_opt.h"
 #include "regression.h"
 
 int load_train_ds(Regression * regression, IdMap * idmap){

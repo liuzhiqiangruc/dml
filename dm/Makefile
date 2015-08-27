@@ -7,13 +7,14 @@ CFLAGS   = $(CFBASE) -DNDEBUG -DNPRINT -O3 -fpic
 LD       = gcc
 SOFLAGS  = -shared 
 
-OBJS     = kmeans.o     modl.o     lda.o     author_lda.o  bri_lda.o   joint_lda.o  tot.o       totg.o      mf.o  pmf.o   bmf.o   newton.o     regression.o lr.o
-SOS      = libkmeans.so libmodl.so liblda.so libalda.so    libblda.so  libjlda.so   libtot.so   libtotg.so  libpmf.so libbmf.so   libnewt.so   liblr.so
-STATICS  = libkmeanss.a libmodls.a libldas.a libaldas.a    libbldas.a  libjldas.a   libtots.a   libtotgs.a  libpmfs.a libbmfs.a   libnewts.a   liblrs.a
+OBJS     = kmeans.o     modl.o     lda.o     author_lda.o  bri_lda.o   joint_lda.o  tot.o       totg.o      mf.o  pmf.o   bmf.o   newton.o     regression.o lr.o pr.o
+SOS      = libkmeans.so libmodl.so liblda.so libalda.so    libblda.so  libjlda.so   libtot.so   libtotg.so  libpmf.so libbmf.so   libnewt.so   liblr.so libpr.so
+STATICS  = libkmeanss.a libmodls.a libldas.a libaldas.a    libbldas.a  libjldas.a   libtots.a   libtotgs.a  libpmfs.a libbmfs.a   libnewts.a   liblrs.a libprs.a
 
 util_lda_objs = $(UTIL)/rbtree.o $(UTIL)/set.o $(UTIL)/idmap.o $(UTIL)/str.o
 util_pmf_objs = $(util_lda_objs)
-util_lr_objs  = $(util_lda_objs) newton.o auc.o
+util_pr_objs  = $(util_lda_objs) newton.o
+util_lr_objs  = $(util_pr_objs)  auc.o
 
 
 all:	$(STATICS)
@@ -32,6 +33,9 @@ regression.o   :   regression.c regression.h
 	$(CC) $(CFLAGS) $(INCS) -c $< -o $@
 
 lr.o           :   lr.c
+	$(CC) $(CFLAGS) $(INCS) -c $< -o $@
+
+pr.o           :   pr.c
 	$(CC) $(CFLAGS) $(INCS) -c $< -o $@
 
 lda.o          :   lda.c lda.h
@@ -104,6 +108,8 @@ libbmf.so   : bmf.o mf.o        $(util_pmf_objs)
 liblr.so    : lr.o regression.o $(util_lr_objs)
 	$(LD) $(SOFLAGS) $^ -o $@
 
+libpr.so    : pr.o regression.o $(util_pr_objs)
+	$(LD) $(SOFLAGS) $^ -o $@
 
 ## --------- .a --------------
 
@@ -117,6 +123,9 @@ libnewts.a : newton.o
 	ar cr $@ $^
 
 liblrs.a   : lr.o regression.o $(util_lr_objs)
+	ar cr $@ $^
+
+libprs.a   : pr.o regression.o $(util_pr_objs)
 	ar cr $@ $^
 
 libldas.a  : lda.o             $(util_lda_objs)

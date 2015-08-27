@@ -5,6 +5,7 @@
  *   author   : liuzhiqiang01@baidu.com
  *   date     : 2015-08-27
  *   info     : LR implementation
+ *              Using regression framework
  * ======================================================== */
 
 #include <math.h>
@@ -14,7 +15,6 @@
 #include "auc.h"
 #include "newton_opt.h"
 #include "regression.h"
-
 
 // LR implementation
 typedef Regression LR;
@@ -140,6 +140,11 @@ double lr_eval(double *x, void *_ds) {
     return loss;
 }
 
+/* --------------------------------------
+ * brief : calculating auc value for LR
+ * x     : current theta result
+ * _ds   : dataset used for scores
+ * -------------------------------------- */
 double lr_auc(double *x, void *_ds){
     LRDS * ds = (LRDS*)_ds;
     double  *y  = ds->y;
@@ -168,6 +173,12 @@ double lr_auc(double *x, void *_ds){
     return auc_v;
 }
 
+/* ----------------------------------------
+ * brief : report function for lr
+ * x0    : the last theta result
+ * x1    : the current theta result
+ * _ds   : the lr model struct
+ * ---------------------------------------- */
 int lr_repo(double *x0, double *x1, void *_ds) {
     LR * lr = (LR *)_ds;
     double val1 = lr_eval(x0, _ds);
@@ -192,7 +203,6 @@ int lr_repo(double *x0, double *x1, void *_ds) {
     return 0;
 }
  
-
 int  learn_regression(Regression * regression){
     LR * lr = (LR*)regression;
     if (lr->p.method == 2){
@@ -204,4 +214,3 @@ int  learn_regression(Regression * regression){
     return 0;
 
 }
-

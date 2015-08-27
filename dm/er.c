@@ -1,10 +1,11 @@
 /* ========================================================
  *   Copyright (C) 2015 All rights reserved.
  *   
- *   filename : pr.c
+ *   filename : er.c
  *   author   : liuzhiqiang01@baidu.com
  *   date     : 2015-08-27
- *   info     : possion regression implementation
+ *   info     : exponential regression implementation
+ *              using regression framework
  * ======================================================== */
 
 #include <math.h>
@@ -15,25 +16,25 @@
 #include "newton_opt.h"
 #include "regression.h"
 
-// PR implementation
-typedef Regression PR;
+// guassian regression implementation
+typedef Regression ER;
 
 /* ----------------------------------------
- * brief : PR gradient function
+ * brief : ER gradient function
  * x     : current theta learned
- * _ds   : dataset for PR learn
+ * _ds   : dataset for ER learn
  * g     : gradient vector on current theta
- * return: current PR loss function value
+ * return: current ER loss function value
  * ---------------------------------------- */
-void pr_grad(double *x, void *_ds, double *g) {
-    PR * pr = (PR*) _ds;
+void er_grad(double *x, void *_ds, double *g) {
+    ER * er = (ER*) _ds;
     double yest = 0.0, hx = 0.0;
-    double *val = pr->train_ds->val;
-    double *y   = pr->train_ds->y;
-    int    *id  = pr->train_ds->ids;
-    int    *len = pr->train_ds->l;
-    int     col = pr->c;
-    int     row = pr->train_ds->r;
+    double *val = er->train_ds->val;
+    double *y   = er->train_ds->y;
+    int    *id  = er->train_ds->ids;
+    int    *len = er->train_ds->l;
+    int     col = er->c;
+    int     row = er->train_ds->r;
     int i = 0, j = 0, offs = 0;
     memset(g, 0, sizeof(double) * col);
     for (offs = i = 0; i < row; i++) {
@@ -42,41 +43,44 @@ void pr_grad(double *x, void *_ds, double *g) {
             for (j = 0; j < len[i]; j++) {
                 yest += val[offs + j] * x[id[offs + j]];
             }
-            for (j = 0; j < len[i]; j++){
-                g[id[offs + j]] += (exp(yest) - y[i]) * val[offs + j];
-            }
         } else {
             for (j = 0; j < len[i]; j++) {
                 yest += x[id[offs + j]];
             }
+        }
+        if (val) {
             for (j = 0; j < len[i]; j++) {
-                g[id[offs + j]] += (exp(yest) - y[i]);
+                g[id[offs + j]] += (1.0 - y[i] / exp(yest)) * val[offs + j];
+            }
+        } else {
+            for (j = 0; j < len[i]; j++) {
+                g[id[offs + j]] += (1.0 - y[i] / exp(yest));
             }
         }
         offs += len[i];
     }
     // Just for L2 Norm 
-    if (pr->p.method == 2){
+    if (er->p.method == 2){
         for (i = 0; i < col; i++){
-            g[i] += pr->p.lambda * (x[i] + x[i]);
+            g[i] += er->p.lambda * (x[i] + x[i]);
         }
     }
 }
 
 /* ----------------------------------------
- * brief : PR loss function value 
+ * brief : ER loss function value 
  * x     : current theta learned
- * _ds   : dataset for PR learn
- * return: current PR loss function value
+ * _ds   : dataset for ER learn
+ * return: current ER loss function value
  * ---------------------------------------- */
-double pr_eval(double *x, void *_ds) {
-    PR * pr = (PR *) _ds;
+double er_eval(double *x, void *_ds) {
+    ER * er = (ER *) _ds;
     double loss = 1.0, yest = 0.0, add = 0.0, regloss = 0.0;
-    double *val = pr->train_ds->val;
-    int    *id  = pr->train_ds->ids;
-    int    *len = pr->train_ds->l;
-    double *y   = pr->train_ds->y;
-    int     row = pr->train_ds->r;
+    double *val = er->train_ds->val;
+    int    *id  = er->train_ds->ids;
+    int    *len = er->train_ds->l;
+    double *y   = er->train_ds->y;
+    int     row = er->train_ds->r;
     int offs =  0, i = 0, j = 0;
 
     for (offs = i = 0; i < row; i++) {
@@ -90,20 +94,20 @@ double pr_eval(double *x, void *_ds) {
                 yest += x[id[offs + j]];
             }
         }
-        loss += exp(yest) - y[i] * yest;
+        loss += y[i] / exp(yest) + yest;
         offs += len[i];
     }
 
     // add loss from regularization
     regloss = 0.0;
-    if (pr->p.method == 2){       // for L2 Norm
-        for (i = 0; i < pr->c; i++){
+    if (er->p.method == 2){       // for L2 Norm
+        for (i = 0; i < er->c; i++){
             regloss += x[i] * x[i];
         }
-        loss += regloss * pr->p.lambda;
+        loss += regloss * er->p.lambda;
     }
-    else if (pr->p.method == 1){  // for L1 Norm
-        for (i = 0; i < pr->c; i++){
+    else if (er->p.method == 1){  // for L1 Norm
+        for (i = 0; i < er->c; i++){
             if (x[i] > 0.0){
                 regloss += x[i];
             }
@@ -111,25 +115,25 @@ double pr_eval(double *x, void *_ds) {
                 regloss -= x[i];
             }
         }
-        loss += regloss * pr->p.lambda;
+        loss += regloss * er->p.lambda;
     }
     return loss;
 }
 
 /* ----------------------------------------
- * brief : PR loss function value for test
+ * brief : ER loss function value for test
  * x     : current theta result
  * _ds   : test data set
  * return: test loss value
  * ---------------------------------------- */
-double pr_eval_test(double *x, void *_ds) {
-    PR * pr = (PR *) _ds;
+double er_eval_test(double *x, void *_ds) {
+    ER * er = (ER *) _ds;
     double loss = 1.0, yest = 0.0, add = 0.0, regloss = 0.0;
-    double *val = pr->test_ds->val;
-    int    *id  = pr->test_ds->ids;
-    int    *len = pr->test_ds->l;
-    double *y   = pr->test_ds->y;
-    int     row = pr->test_ds->r;
+    double *val = er->test_ds->val;
+    int    *id  = er->test_ds->ids;
+    int    *len = er->test_ds->l;
+    double *y   = er->test_ds->y;
+    int     row = er->test_ds->r;
     int offs =  0, i = 0, j = 0;
 
     for (offs = i = 0; i < row; i++) {
@@ -143,50 +147,48 @@ double pr_eval_test(double *x, void *_ds) {
                 yest += x[id[offs + j]];
             }
         }
-        loss += exp(yest) - y[i] * yest;
+        loss += y[i] / exp(yest) + yest;
         offs += len[i];
     }
-
     // no loss from regularization
     return loss;
 }
 
-/* ----------------------------------------------
- * brief : report function for possion regression
+/* ----------------------------------------
+ * brief : report function for er
  * x0    : the last theta result
  * x1    : the current theta result
- * _ds   : the possion regressoin model struct
- * ---------------------------------------------- */
-int pr_repo(double *x0, double *x1, void *_ds) {
-    PR * pr = (PR *)_ds;
-    double val1 = pr_eval(x0, _ds);
-    double val2 = pr_eval(x1, _ds);
-    if (fabs(val2 - val1) < pr->p.ftoler){
+ * _ds   : the er model struct
+ * ---------------------------------------- */
+int er_repo(double *x0, double *x1, void *_ds) {
+    ER * er = (ER *)_ds;
+    double val1 = er_eval(x0, _ds);
+    double val2 = er_eval(x1, _ds);
+    if (fabs(val2 - val1) < er->p.ftoler){
         fprintf(stderr, "conv done exit\n");
         return 1;
     }
-    int i = ++pr->p.iterno;
+    int i = ++er->p.iterno;
     fprintf(stderr, "iter: %4d, train loss: %.10f", i, val2);
-    if (pr->test_ds){
-        double test_loss = pr_eval_test(x1, _ds);
+    if (er->test_ds){
+        double test_loss = er_eval_test(x1, _ds);
         fprintf(stderr, ", test loss: %.10f", test_loss);
     }
-    if (i % pr->p.savestep == 0){
-        memmove(pr->x, x1, sizeof(double) * pr->c);
-        save_regression(pr, i);
+    if (i % er->p.savestep == 0){
+        memmove(er->x, x1, sizeof(double) * er->c);
+        save_regression(er, i);
     }
     fprintf(stderr, "\n");
     return 0;
 }
-
+ 
 int  learn_regression(Regression * regression){
-    PR * pr = (PR*)regression;
-    if (pr->p.method == 2){
-        lbfgs(pr, pr_eval, pr_grad, pr_repo, 5, pr->c, pr->p.niters, pr->x);
+    ER * er = (ER*)regression;
+    if (er->p.method == 2){
+        lbfgs(er, er_eval, er_grad, er_repo, 5, er->c, er->p.niters, er->x);
     }
-    else if (pr->p.method == 1){
-        owlqn(pr, pr_eval, pr_grad, pr_repo, 5, pr->c, pr->p.niters, pr->p.lambda, pr->x);
+    else if (er->p.method == 1){
+        owlqn(er, er_eval, er_grad, er_repo, 5, er->c, er->p.niters, er->p.lambda, er->x);
     }
     return 0;
-
 }

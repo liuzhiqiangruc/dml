@@ -148,6 +148,27 @@ INSTALL(TARGETS pr_static LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 INSTALL(FILES regression.h DESTINATION include)
 target_link_libraries(pr_static newton_opt_static)
 
+#lib gr
+SET(LIBgr_SRC gr.c)
+ADD_LIBRARY(gr_static STATIC ${LIBgr_SRC})
+SET_TARGET_PROPERTIES(gr_static PROPERTIES OUTPUT_NAME "gr")
+SET_TARGET_PROPERTIES(gr_static PROPERTIES CLEAN_DIRECT_OUTPUT 1)
+INSTALL(TARGETS gr_static LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+INSTALL(FILES regression.h DESTINATION include)
+target_link_libraries(gr_static newton_opt_static)
+
+#lib er
+SET(LIBer_SRC er.c)
+ADD_LIBRARY(er_static STATIC ${LIBer_SRC})
+SET_TARGET_PROPERTIES(er_static PROPERTIES OUTPUT_NAME "er")
+SET_TARGET_PROPERTIES(er_static PROPERTIES CLEAN_DIRECT_OUTPUT 1)
+INSTALL(TARGETS er_static LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+INSTALL(FILES regression.h DESTINATION include)
+target_link_libraries(er_static newton_opt_static)
+
+
+
+
 #lib auc
 SET(LIBauc_SRC auc.c)
 ADD_LIBRARY(auc_static STATIC ${LIBauc_SRC})

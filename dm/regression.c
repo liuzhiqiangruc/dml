@@ -16,7 +16,11 @@
 #include "fn_type.h"
 #include "regression.h"
 
-int load_train_ds(Regression * regression, IdMap * idmap){
+/* --------------------------------------------
+ * brief : load train dataset 
+ *         and fullfill the feature name id map
+ * -------------------------------------------- */
+static int load_train_ds(Regression * regression, IdMap * idmap){
     FILE * fp = NULL;
     if (NULL == (fp = fopen(regression->p.in_file, "r"))){
         fprintf(stderr, "can not open file \"%s\"\n", regression->p.in_file);
@@ -110,7 +114,11 @@ str_free:
     return 0;
 }
 
-void load_test_ds(Regression * regression, IdMap * idmap){
+/* ---------------------------------
+ * brief : load test data set 
+ *         using feature name id map
+ * --------------------------------- */
+static void load_test_ds(Regression * regression, IdMap * idmap){
     FILE * fp = NULL;
     if (NULL == (fp = fopen(regression->p.te_file, "r"))){
         return;
@@ -203,6 +211,9 @@ str_free:
     fclose(fp);
 }
 
+/* -------------------------------
+ * brief : free regression dataset
+ * ------------------------------- */
 void free_ds(RDS * ds){
     if (ds){
         if (ds->l){
@@ -282,4 +293,3 @@ void free_regression(Regression * regression){
     }
     free(regression);
 }
-

@@ -7,13 +7,15 @@ CFLAGS   = $(CFBASE) -DNDEBUG -DNPRINT -O3 -fpic
 LD       = gcc
 SOFLAGS  = -shared 
 
-OBJS     = kmeans.o     modl.o     lda.o     author_lda.o  bri_lda.o   joint_lda.o  tot.o       totg.o      mf.o  pmf.o   bmf.o   newton.o     regression.o lr.o pr.o
-SOS      = libkmeans.so libmodl.so liblda.so libalda.so    libblda.so  libjlda.so   libtot.so   libtotg.so  libpmf.so libbmf.so   libnewt.so   liblr.so libpr.so
-STATICS  = libkmeanss.a libmodls.a libldas.a libaldas.a    libbldas.a  libjldas.a   libtots.a   libtotgs.a  libpmfs.a libbmfs.a   libnewts.a   liblrs.a libprs.a
+OBJS     = kmeans.o     modl.o     lda.o     author_lda.o  bri_lda.o   joint_lda.o  tot.o       totg.o      mf.o  pmf.o   bmf.o   newton.o     regression.o lr.o pr.o gr.o er.o
+SOS      = libkmeans.so libmodl.so liblda.so libalda.so    libblda.so  libjlda.so   libtot.so   libtotg.so  libpmf.so libbmf.so   libnewt.so   liblr.so libpr.so libgr.so liber.so
+STATICS  = libkmeanss.a libmodls.a libldas.a libaldas.a    libbldas.a  libjldas.a   libtots.a   libtotgs.a  libpmfs.a libbmfs.a   libnewts.a   liblrs.a libprs.a libgrs.a libers.a
 
 util_lda_objs = $(UTIL)/rbtree.o $(UTIL)/set.o $(UTIL)/idmap.o $(UTIL)/str.o
 util_pmf_objs = $(util_lda_objs)
 util_pr_objs  = $(util_lda_objs) newton.o
+util_gr_objs  = $(util_lda_objs) newton.o
+util_er_objs  = $(util_lda_objs) newton.o
 util_lr_objs  = $(util_pr_objs)  auc.o
 
 
@@ -36,6 +38,12 @@ lr.o           :   lr.c
 	$(CC) $(CFLAGS) $(INCS) -c $< -o $@
 
 pr.o           :   pr.c
+	$(CC) $(CFLAGS) $(INCS) -c $< -o $@
+
+gr.o           :   gr.c
+	$(CC) $(CFLAGS) $(INCS) -c $< -o $@
+
+er.o           :   er.c
 	$(CC) $(CFLAGS) $(INCS) -c $< -o $@
 
 lda.o          :   lda.c lda.h
@@ -111,6 +119,12 @@ liblr.so    : lr.o regression.o $(util_lr_objs)
 libpr.so    : pr.o regression.o $(util_pr_objs)
 	$(LD) $(SOFLAGS) $^ -o $@
 
+libgr.so    : gr.o regression.o $(util_gr_objs)
+	$(LD) $(SOFLAGS) $^ -o $@
+
+liber.so    : er.o regression.o $(util_er_objs)
+	$(LD) $(SOFLAGS) $^ -o $@
+
 ## --------- .a --------------
 
 libkmeanss.a : kmeans.o
@@ -126,6 +140,12 @@ liblrs.a   : lr.o regression.o $(util_lr_objs)
 	ar cr $@ $^
 
 libprs.a   : pr.o regression.o $(util_pr_objs)
+	ar cr $@ $^
+
+libgrs.a   : gr.o regression.o $(util_gr_objs)
+	ar cr $@ $^
+
+libers.a   : er.o regression.o $(util_er_objs)
 	ar cr $@ $^
 
 libldas.a  : lda.o             $(util_lda_objs)

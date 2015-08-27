@@ -50,12 +50,12 @@ typedef struct {
  * Regression Model struct 
  * ------------------------- */
 typedef struct {
-    RDS   * train_ds;           /* train dataset pointer    */
-    RDS   *  test_ds;           /* test  dataset pointer    */
+    RDS   * train_ds;                     /* train dataset pointer    */
+    RDS   *  test_ds;                     /* test  dataset pointer    */
     char (*id_map)[REGRESSION_KEY_LEN];   /* feature id map           */
-    int     c;                  /* unique feature count     */
-    double *x;                  /* learned weight result    */
-    RP      p;                  /* Regression parameters    */
+    int     c;                            /* unique feature count     */
+    double *x;                            /* learned weight result    */
+    RP      p;                            /* Regression parameters    */
 } Regression;
 
 /* --------------------------

@@ -20,6 +20,8 @@ PRGS     = breakout          \
 		   fits              \
            lr                \
            pr                \
+           gr                \
+           er                \
 		   lda               \
 		   alda              \
 		   tot               \
@@ -76,6 +78,12 @@ lr.o          : lr.c
 pr.o          : pr.c
 	$(CC) $(CFLAGS) $(INC) -c $^ -o $@
 
+gr.o          : gr.c
+	$(CC) $(CFLAGS) $(INC) -c $^ -o $@
+
+er.o          : er.c
+	$(CC) $(CFLAGS) $(INC) -c $^ -o $@
+
 pmf.o        : mf.c
 	$(CC) $(CFLAGS) $(INC) -DPMF -c $^ -o $@
 
@@ -126,10 +134,16 @@ fits: ts_fit.o
 	$(CC) $(LIBS)  $^ -lfitnts -lm -o $@
 
 lr  :   lr.o
-	$(CC) $(LIBS)  $^ -llrs    -lm -o $@
+	$(CC) $(LIBS)  $^ -llrs -lm -o $@
 
 pr  :   pr.o
-	$(CC) $(LIBS)  $^ -lprs    -lm -o $@
+	$(CC) $(LIBS)  $^ -lprs -lm -o $@
+
+gr  :   gr.o
+	$(CC) $(LIBS)  $^ -lgrs -lm -o $@
+
+er  :   er.o
+	$(CC) $(LIBS)  $^ -lers -lm -o $@
 
 pmf     : pmf.o
 	$(CC) $(LIBS)  $^ -lpmfs -lm -o $@

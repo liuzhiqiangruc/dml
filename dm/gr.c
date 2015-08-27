@@ -1,10 +1,11 @@
 /* ========================================================
  *   Copyright (C) 2015 All rights reserved.
  *   
- *   filename : pr.c
+ *   filename : gr.c
  *   author   : liuzhiqiang01@baidu.com
  *   date     : 2015-08-27
- *   info     : possion regression implementation
+ *   info     : guassian regression implementation
+ *              using regression framework
  * ======================================================== */
 
 #include <math.h>
@@ -15,25 +16,25 @@
 #include "newton_opt.h"
 #include "regression.h"
 
-// PR implementation
-typedef Regression PR;
+// guassian regression implementation
+typedef Regression GR;
 
 /* ----------------------------------------
- * brief : PR gradient function
+ * brief : GR gradient function
  * x     : current theta learned
- * _ds   : dataset for PR learn
+ * _ds   : dataset for GR learn
  * g     : gradient vector on current theta
- * return: current PR loss function value
+ * return: current GR loss function value
  * ---------------------------------------- */
-void pr_grad(double *x, void *_ds, double *g) {
-    PR * pr = (PR*) _ds;
+void gr_grad(double *x, void *_ds, double *g) {
+    GR * gr = (GR*) _ds;
     double yest = 0.0, hx = 0.0;
-    double *val = pr->train_ds->val;
-    double *y   = pr->train_ds->y;
-    int    *id  = pr->train_ds->ids;
-    int    *len = pr->train_ds->l;
-    int     col = pr->c;
-    int     row = pr->train_ds->r;
+    double *val = gr->train_ds->val;
+    double *y   = gr->train_ds->y;
+    int    *id  = gr->train_ds->ids;
+    int    *len = gr->train_ds->l;
+    int     col = gr->c;
+    int     row = gr->train_ds->r;
     int i = 0, j = 0, offs = 0;
     memset(g, 0, sizeof(double) * col);
     for (offs = i = 0; i < row; i++) {
@@ -42,41 +43,44 @@ void pr_grad(double *x, void *_ds, double *g) {
             for (j = 0; j < len[i]; j++) {
                 yest += val[offs + j] * x[id[offs + j]];
             }
-            for (j = 0; j < len[i]; j++){
-                g[id[offs + j]] += (exp(yest) - y[i]) * val[offs + j];
-            }
         } else {
             for (j = 0; j < len[i]; j++) {
                 yest += x[id[offs + j]];
             }
+        }
+        if (val) {
             for (j = 0; j < len[i]; j++) {
-                g[id[offs + j]] += (exp(yest) - y[i]);
+                g[id[offs + j]] += (y[i] - yest) * val[offs + j];
+            }
+        } else {
+            for (j = 0; j < len[i]; j++) {
+                g[id[offs + j]] += (y[i] - yest);
             }
         }
         offs += len[i];
     }
     // Just for L2 Norm 
-    if (pr->p.method == 2){
+    if (gr->p.method == 2){
         for (i = 0; i < col; i++){
-            g[i] += pr->p.lambda * (x[i] + x[i]);
+            g[i] += gr->p.lambda * (x[i] + x[i]);
         }
     }
 }
 
 /* ----------------------------------------
- * brief : PR loss function value 
+ * brief : GR loss function value 
  * x     : current theta learned
- * _ds   : dataset for PR learn
- * return: current PR loss function value
+ * _ds   : dataset for GR learn
+ * return: current GR loss function value
  * ---------------------------------------- */
-double pr_eval(double *x, void *_ds) {
-    PR * pr = (PR *) _ds;
+double gr_eval(double *x, void *_ds) {
+    GR * gr = (GR *) _ds;
     double loss = 1.0, yest = 0.0, add = 0.0, regloss = 0.0;
-    double *val = pr->train_ds->val;
-    int    *id  = pr->train_ds->ids;
-    int    *len = pr->train_ds->l;
-    double *y   = pr->train_ds->y;
-    int     row = pr->train_ds->r;
+    double *val = gr->train_ds->val;
+    int    *id  = gr->train_ds->ids;
+    int    *len = gr->train_ds->l;
+    double *y   = gr->train_ds->y;
+    int     row = gr->train_ds->r;
     int offs =  0, i = 0, j = 0;
 
     for (offs = i = 0; i < row; i++) {
@@ -90,20 +94,20 @@ double pr_eval(double *x, void *_ds) {
                 yest += x[id[offs + j]];
             }
         }
-        loss += exp(yest) - y[i] * yest;
+        loss += (y[i] - yest) * (y[i] - yest);
         offs += len[i];
     }
 
     // add loss from regularization
     regloss = 0.0;
-    if (pr->p.method == 2){       // for L2 Norm
-        for (i = 0; i < pr->c; i++){
+    if (gr->p.method == 2){       // for L2 Norm
+        for (i = 0; i < gr->c; i++){
             regloss += x[i] * x[i];
         }
-        loss += regloss * pr->p.lambda;
+        loss += regloss * gr->p.lambda;
     }
-    else if (pr->p.method == 1){  // for L1 Norm
-        for (i = 0; i < pr->c; i++){
+    else if (gr->p.method == 1){  // for L1 Norm
+        for (i = 0; i < gr->c; i++){
             if (x[i] > 0.0){
                 regloss += x[i];
             }
@@ -111,25 +115,25 @@ double pr_eval(double *x, void *_ds) {
                 regloss -= x[i];
             }
         }
-        loss += regloss * pr->p.lambda;
+        loss += regloss * gr->p.lambda;
     }
     return loss;
 }
 
 /* ----------------------------------------
- * brief : PR loss function value for test
+ * brief : GR loss function value for test
  * x     : current theta result
  * _ds   : test data set
  * return: test loss value
  * ---------------------------------------- */
-double pr_eval_test(double *x, void *_ds) {
-    PR * pr = (PR *) _ds;
+double gr_eval_test(double *x, void *_ds) {
+    GR * gr = (GR *) _ds;
     double loss = 1.0, yest = 0.0, add = 0.0, regloss = 0.0;
-    double *val = pr->test_ds->val;
-    int    *id  = pr->test_ds->ids;
-    int    *len = pr->test_ds->l;
-    double *y   = pr->test_ds->y;
-    int     row = pr->test_ds->r;
+    double *val = gr->test_ds->val;
+    int    *id  = gr->test_ds->ids;
+    int    *len = gr->test_ds->l;
+    double *y   = gr->test_ds->y;
+    int     row = gr->test_ds->r;
     int offs =  0, i = 0, j = 0;
 
     for (offs = i = 0; i < row; i++) {
@@ -143,50 +147,48 @@ double pr_eval_test(double *x, void *_ds) {
                 yest += x[id[offs + j]];
             }
         }
-        loss += exp(yest) - y[i] * yest;
+        loss += (y[i] - yest) * (y[i] - yest);
         offs += len[i];
     }
-
     // no loss from regularization
     return loss;
 }
 
-/* ----------------------------------------------
- * brief : report function for possion regression
+/* ----------------------------------------
+ * brief : report function for gr
  * x0    : the last theta result
  * x1    : the current theta result
- * _ds   : the possion regressoin model struct
- * ---------------------------------------------- */
-int pr_repo(double *x0, double *x1, void *_ds) {
-    PR * pr = (PR *)_ds;
-    double val1 = pr_eval(x0, _ds);
-    double val2 = pr_eval(x1, _ds);
-    if (fabs(val2 - val1) < pr->p.ftoler){
+ * _ds   : the gr model struct
+ * ---------------------------------------- */
+int gr_repo(double *x0, double *x1, void *_ds) {
+    GR * gr = (GR *)_ds;
+    double val1 = gr_eval(x0, _ds);
+    double val2 = gr_eval(x1, _ds);
+    if (fabs(val2 - val1) < gr->p.ftoler){
         fprintf(stderr, "conv done exit\n");
         return 1;
     }
-    int i = ++pr->p.iterno;
+    int i = ++gr->p.iterno;
     fprintf(stderr, "iter: %4d, train loss: %.10f", i, val2);
-    if (pr->test_ds){
-        double test_loss = pr_eval_test(x1, _ds);
+    if (gr->test_ds){
+        double test_loss = gr_eval_test(x1, _ds);
         fprintf(stderr, ", test loss: %.10f", test_loss);
     }
-    if (i % pr->p.savestep == 0){
-        memmove(pr->x, x1, sizeof(double) * pr->c);
-        save_regression(pr, i);
+    if (i % gr->p.savestep == 0){
+        memmove(gr->x, x1, sizeof(double) * gr->c);
+        save_regression(gr, i);
     }
     fprintf(stderr, "\n");
     return 0;
 }
-
+ 
 int  learn_regression(Regression * regression){
-    PR * pr = (PR*)regression;
-    if (pr->p.method == 2){
-        lbfgs(pr, pr_eval, pr_grad, pr_repo, 5, pr->c, pr->p.niters, pr->x);
+    GR * gr = (GR*)regression;
+    if (gr->p.method == 2){
+        lbfgs(gr, gr_eval, gr_grad, gr_repo, 5, gr->c, gr->p.niters, gr->x);
     }
-    else if (pr->p.method == 1){
-        owlqn(pr, pr_eval, pr_grad, pr_repo, 5, pr->c, pr->p.niters, pr->p.lambda, pr->x);
+    else if (gr->p.method == 1){
+        owlqn(gr, gr_eval, gr_grad, gr_repo, 5, gr->c, gr->p.niters, gr->p.lambda, gr->x);
     }
     return 0;
-
 }

@@ -17,7 +17,7 @@
 #define _REGRESSION_H
 
 #define  REGRESSION_LINE_LEN  1048576 
-#define  REGRESSION_KEY_LEN   64
+#define  REGRESSION_KEY_LEN   256
 
 /* -----------------------
  * regression parameter

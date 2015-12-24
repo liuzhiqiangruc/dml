@@ -5,7 +5,7 @@ TS       = ../ts
 LIBS     = -L../util -L../ts -L../dm
 INC      = -I../util -I../ts -I../dm
 
-CC       = gcc -std=c99
+CC       = gcc -std=c99 -g
 CFBASE   = -Wall -pedantic -pipe
 CFLAGS   = $(CFBASE) -DNDEBUG -DNPRINT -O3
 

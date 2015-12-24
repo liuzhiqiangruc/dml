@@ -1,6 +1,6 @@
 UTIL     = ../util
 CC       = gcc -std=c99
-CFBASE   = -Wall -pedantic -pipe -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unused-function
+CFBASE   = -Wall -pedantic -pipe -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unused-function -g
 INCS     = -I../util
 CFLAGS   = $(CFBASE) -DNDEBUG -DNPRINT -O3 -fpic
 

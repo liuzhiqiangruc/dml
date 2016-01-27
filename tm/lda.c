@@ -2,7 +2,7 @@
  *   Copyright (C) 2015 All rights reserved.
  *   
  *   filename : lda.c
- *   author   : liuzhiqiang01@baidu.com
+ *   author   : zhanzhizheng08@qq.com
  *   date     : 2015-03-26
  *   info     :
  * ======================================================== */

@@ -82,8 +82,10 @@ static void fullfill_param(Lda *lda) {
 static int gibbs_sample(Lda * lda) {
     double ab = lda->p.a * lda->p.b;
     double vb = lda->v * lda->p.b;
+    double * pscore = (double*)malloc(sizeof(double) * (lda->p.k + 1));
     double e, f, g, tmp, u;
     int k, d, id, vid, tid, offs, voffs;
+    memset(pscore, 0, sizeof(double) * (lda->p.k + 1));
     // calculate smooth bucket value e
     // for all documents 
     // recalculate for each iteration
@@ -125,6 +127,7 @@ static int gibbs_sample(Lda * lda) {
             k = lda->nw[voffs].next;
             while (k != 0){
                 g += lda->nw[voffs + k].count * (lda->p.a + lda->nd[offs + k].count) / (vb + lda->nkw[k]);
+                pscore[k] = g;
                 k = lda->nw[voffs + k].next;
             }
             u = (e + f + g) * (0.1 + rand()) / (1.0 + RAND_MAX);
@@ -154,11 +157,9 @@ static int gibbs_sample(Lda * lda) {
             // sample k from topic word bucket
             else {
                 u -= (e + f);
-                double s = 0.0;
                 k = lda->nw[voffs].next;
                 while (k != 0){
-                    s += 1.0 * lda->nw[voffs + k].count * (lda->p.a + lda->nd[offs + k].count) / (vb + lda->nkw[k]);
-                    if (s > u){
+                    if (pscore[k] > u){
                         break;
                     }
                     k = lda->nw[voffs + k].next;
@@ -196,6 +197,8 @@ static int gibbs_sample(Lda * lda) {
             id = lda->tokens[id][3];
         }
     }
+    free(pscore);
+    pscore = NULL;
     return 0;
 }
 

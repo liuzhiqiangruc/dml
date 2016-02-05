@@ -97,7 +97,7 @@ int main(int argc, char * argv[]) {
     }
 
     fprintf(stderr,"load data done\n");
-    fprintf(stderr,"doc: %d V: %d\n", lda->d, lda->v);
+    fprintf(stderr,"D: %d V: %d T: %d\n", lda->d, lda->v, lda->t);
     est_lda(lda);
     free_lda(lda);
     lda = NULL;

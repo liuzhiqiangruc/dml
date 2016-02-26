@@ -2,9 +2,10 @@
  *   Copyright (C) 2014 All rights reserved.
  *   
  *   filename : dist.h
- *   author   : liuzhiqiang01@baidu.com
+ *   author   : liuzhiqiangruc@126.com
  *   date     : 2014-12-08
  *   info     : implementation dtw and lcss using dynamic 
+ *              2016-02-26 adding ed
  * ======================================================== */
 
 #ifndef _DIST_H
@@ -16,6 +17,11 @@
  *          for continous values
  * ------------------------ */
 double dtw(double * x, int nx, double * y, int ny); 
+
+/* -----------------------
+ * min edit distance
+ * ----------------------- */
+int ed(char * x, char * y);
 
 
 /* ------------------------

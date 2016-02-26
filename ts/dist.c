@@ -13,6 +13,7 @@
 #include "dist.h"
 
 #define max(a,b) (a)<(b)?(b):(a)
+#define min(a,b) (a)<(b)?(a):(b)
 
 double dtw(double * x, int nx, double * y, int ny){
     if (nx < 1 || ny < 1 || !x || !y)
@@ -44,6 +45,85 @@ double dtw(double * x, int nx, double * y, int ny){
         }
     }
     dist = sqrt(dm[ny * nx - 1]);
+    free(dm); dm = NULL;
+    return dist;
+}
+
+int ed_bak(char * x, char * y){
+    if (!x || !y)
+        return 0;
+    int dist = 0;
+    int lx = strlen(x);
+    int ly = strlen(y);
+    if (lx < 1 || ly < 1)
+        return 0;
+    lx += 1;
+    ly += 1;
+    int * dm = (int*)malloc(sizeof(int) * lx * ly);
+    memset(dm, 0, sizeof(int) * lx * ly);
+    for (int i = 0; i < lx; i++){
+        dm[i * ly] = i;
+    }
+    for (int i = 0; i < ly; i++){
+        dm[i] = i;
+    }
+    for (int i = 1, offs = ly; i < lx; i++, offs += ly){
+        for (int j = 1; j < ly; j++){
+            int d = 1;
+            if (x[i - 1] == y[j - 1]){
+                d = 0;
+            }
+            int tmp = min(dm[offs - ly + j] + 1, dm[offs + j - 1] + 1);
+            dm[offs + j] = min(tmp, dm[offs + j - 1 - ly] + d);
+        }
+    }
+    for (int i = 0; i < lx; i++){
+        for (int j = 0; j < ly; j++){
+            printf ("%3d", dm[i * ly + j]);
+        }
+        printf("\n");
+    }
+    dist = dm[lx * ly - 1];
+    free(dm);
+    dm = NULL;
+    return dist;
+}
+
+int ed(char * x, char * y){
+    if (!x || !y)
+        return 0;
+    int dist = 0, t_dist = 0, tmp = 0, d = 0;
+    int lx = strlen(x), ly = strlen(y);
+    int * dm = NULL;
+    char * t = NULL;
+    if (lx < 1 || ly < 1)
+        return 0;
+    lx += 1;
+    ly += 1;
+    if (lx < ly){
+        t = x; x = y; y = t;
+        dist = lx; lx = ly; ly = dist;
+    }
+    dm = (int*)malloc(sizeof(int) * ly);
+    memset(dm, 0, sizeof(int) * ly);
+    for (int i = 0; i < ly; i++){
+        dm[i] = i;
+    }
+    for (int i = 1; i < lx; i++){
+        dist = i;
+        t_dist = 0;
+        for (int j = 1; j < ly; j++){
+            d = 1;
+            if (x[i - 1] == y[j - 1]){
+                d = 0;
+            }
+            tmp = min(dm[j] + 1, dist + 1);
+            t_dist = min(tmp, dm[j - 1] + d);
+            dm[j - 1] = dist;
+            dist = t_dist;
+        }
+        dm[ly - 1] = dist;
+    }
     free(dm); dm = NULL;
     return dist;
 }

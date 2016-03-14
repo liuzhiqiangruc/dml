@@ -1,15 +1,17 @@
 
 
-          gblr
-           |
-           |
-           |
+          gblr        rflr
+           |           |
+           |           |
+           |           |
           gbdt     randomforest
-          /  \       /
-         /    \     /
-        /      \   /
- grandient     dtree
-  boosting
-
+             \       /
+              \     /
+               \   /
+               dtree
+                 |
+                 |
+                 |
+               tdata
 
 

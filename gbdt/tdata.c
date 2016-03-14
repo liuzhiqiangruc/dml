@@ -1,10 +1,10 @@
 /* ========================================================
  *   Copyright (C) 2016 All rights reserved.
  *   
- *   filename : gboosting.c
+ *   filename : tdata.c
  *   author   : liuzhiqiangruc@126.com
- *   date     : 2016-02-26
- *   info     : implementation for grandient boosting
+ *   date     : 2016-03-05
+ *   info     : 
  * ======================================================== */
 
-#include "gboosting.h"
+#include "tdata.h"

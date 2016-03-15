@@ -13,15 +13,27 @@
 
 #include "tdata.h"
 
-
-typedef struct _t_node DTree;
+typedef struct _d_tree DTree;
 
 /* -----------------------------------------
  * brief   : generate tree by data ds
  * ds      : input data
  * F       : current model 
+ * g       : 1-gradient
+ * h       : 2-gradient
  * n       : length of F ,g, h
  * ----------------------------------------- */
-DTree * generate_dtree(DTrain * ds, double *F, double * g, double * h, int n);
+DTree * generate_dtree(DTD * ds, double *F, double * g, double * h, int n);
+
+/* -------------------------
+ * brief   : free tree space
+ * ------------------------- */
+void free_dtree(DTree * t);
+
+/* ------------------------------------
+ * brief   : predict ts with tree t
+ * return  : predict value(score)
+ * ------------------------------------ */
+double * eval_tree(DTD * ts, DTree * t);
 
 #endif //DTREE_H

@@ -12,7 +12,8 @@
 #ifndef _GBLR_H
 #define _GBLR_H
 
+#include "gbdt.h"
 
-
+GBDT * gbdt_lr(GBMP p);
 
 #endif //GBLR_H

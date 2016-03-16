@@ -13,6 +13,7 @@
 #include "dtree.h"
 #include "tdata.h"
 
+typedef struct _gbdt GBDT;
 
 /* --------------------------------------
  * brief  : f' and f" function definition
@@ -24,7 +25,7 @@
  * -------------------------------------- */
 typedef void(*G)(double * f, double * y, double * g, int n);
 typedef void(*H)(double * f, double * y, double * h, int n);
-typedef void(*R)(void * m);
+typedef void(*R)(GBDT * m);
 
 typedef struct _gbdt_param {
     double rate;
@@ -35,7 +36,7 @@ typedef struct _gbdt_param {
     char * out_dir;
 } GBMP;
 
-typedef struct _gbdt {
+struct _gbdt {
     DTD * train_ds;
     DTD *  test_ds;
     double * f;
@@ -46,7 +47,7 @@ typedef struct _gbdt {
     G g_fn;
     H h_fn;
     R r_fn;
-} GBDT;
+};
 
 GBDT * gbdt_create(G g_fn, H h_fn, R f_fn, GBMP p);
 int    gbdt_train(GBDT * gbdt);

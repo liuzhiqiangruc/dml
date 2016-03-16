@@ -263,7 +263,7 @@ void free_dtree(DTree * t){
     }
 }
 
-double * eval_tree(DTD * ts, DTree * t, double F, int n){
+double * eval_tree(DTD * ts, DTree * t, double * F, int n){
     int i, offs, len;
 
     len = n >> 6;

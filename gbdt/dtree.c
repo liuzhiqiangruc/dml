@@ -263,11 +263,8 @@ void free_dtree(DTree * t){
     }
 }
 
-double * eval_tree(DTD * ts, DTree * t){
-    int n = ts->row;
+double * eval_tree(DTD * ts, DTree * t, double F, int n){
     int i, offs, len;
-    double * F = (double*)malloc(sizeof(double) * n);
-    memset(F, 0, sizeof(double) * n);
 
     len = n >> 6;
     if ((n & ((1UL << 6) - 1)) > 0){

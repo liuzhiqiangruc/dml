@@ -29,4 +29,8 @@ typedef struct {
     char (*id_map)[FKL];            /* feature id name mapping   */
 }DTD;
 
+DTD *(*load_data(char * train_input, char * test_input))[2];
+
+void free_data(DTD *ts);
+
 #endif //TDATA_H

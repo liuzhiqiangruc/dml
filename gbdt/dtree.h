@@ -34,6 +34,6 @@ void free_dtree(DTree * t);
  * brief   : predict ts with tree t
  * return  : predict value(score)
  * ------------------------------------ */
-double * eval_tree(DTD * ts, DTree * t);
+double * eval_tree(DTD * ts, DTree * t, double * F, int n);
 
 #endif //DTREE_H

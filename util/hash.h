@@ -36,6 +36,9 @@ int  hash_del (Hash * hs, ...);
 // number of elements
 int  hash_cnt (Hash * hs);
 
+// size of hash
+int  hash_size(Hash * hs);
+
 // free hash index struct
 void hash_free(Hash * hs);
 

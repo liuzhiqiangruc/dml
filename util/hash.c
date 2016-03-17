@@ -338,6 +338,10 @@ int hash_cnt(Hash * hs){
     return hs->count;
 }
 
+int  hash_size(Hash * hs){
+    return hs->size;
+}
+
 // free the hash index struct
 void hash_free(Hash * hs){
     if (hs){

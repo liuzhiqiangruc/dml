@@ -21,16 +21,15 @@
  * ------------------------------------ */
 static void heap_up(DPair * h, int l){
     int p;
-    DPair t;
+    DPair t = h[l];
     while (l > 0){
         p = (l - 1) >> 1;
         if (h[p].val > h[l].val){
-            t = h[p];
-            h[p] = h[l];
-            h[l] = t;
+            h[l] = h[p];
         }
         l = p;
     }
+    h[l] = t;
 }
 
 /* ----------------------
@@ -69,45 +68,75 @@ static void heap_sorted(DPair * h, int l){
     } while (l > 1);
 }
 
-static DTD * load_train(char * train_input, Hash * hs, int * fea_cnt){
+static DTD * load_ds(char * input, Hash * hs, int f){
     FILE * fp = NULL;
-    if (NULL == (fp = fopen(train_input, "r"))){
-        fprintf(stderr, "can not open file \"%s\"\n", train_input);
-        return NULL;
+    if (NULL == (fp = fopen(input, "r"))){
+        fprintf(stderr , "can not open file \"%s\"\n", input);
+        if (f == 1){
+            return NULL;
+        }
     }
+
     DTD * ds = (DTD*)malloc(sizeof(DTD));
     memset(ds, 0, sizeof(DTD));
+
     char buffer[DT_LINE_LEN] = {'\0'};
-    char *token = NULL, *string = buffer;
-    int row = 0, tok = 0, i = 0, l = 0, offs = 0;
+    char *token, *string = buffer;
+    int i, row, tok, offs, id, hsize;
+    int *tmp_cnt, *fea_cnt = (int*)malloc(sizeof(int) * hash_size(hs));
+    memset(fea_cnt, 0, sizeof(int) * hash_size(hs));
+    hsize = hash_size(hs);
+
     while (NULL != fgets(buffer, DT_LINE_LEN, fp)){
         string = trim(buffer, 3);
-        token = strsep(&string, "\t");
+        strsep(&string, "\t");
         while (NULL != (token = strsep(&string, "\t"))){
-            fea_cnt[hash_add(hs, token)] += 1;
+            if (f == 1){
+                id = hash_add(hs, token);
+                if (id >= hsize){
+                    tmp_cnt = (int*)malloc(sizeof(int) * hash_size(hs));
+                    memset(tmp_cnt, 0, sizeof(int) * hash_size(hs));
+                    memmove(tmp_cnt, fea_cnt, sizeof(int) * hsize);
+                    hsize = hash_size(hs);
+                    free(fea_cnt);
+                    fea_cnt = tmp_cnt;
+                }
+                fea_cnt[id] += 1;
+                tok += 1;
+            }
+            else{
+                id = hash_find(hs, token);
+                if (id != -1){
+                    fea_cnt[id] += 1;
+                    tok += 1;
+                }
+            }
             strsep(&string, "\t");
-            tok += 1;
         }
         row += 1;
     }
-    ds->col = hash_cnt(hs);
+
+    ds->col = hash_size(hs);
     ds->row = row;
-    ds->y = (double*)malloc(sizeof(double) * row);
+    ds->y   = (double*)malloc(sizeof(double) * row);
     memset(ds->y, 0, sizeof(double) * row);
-    ds->l = (int *)malloc(sizeof(int) * ds->col);
-    ds->cl = (int*)malloc(sizeof(int) * ds->col);
-    memset(ds->l, 0, sizeof(int) * ds->col);
+    ds->l   = (int*)malloc(sizeof(int) * ds->col);
+    ds->cl  = (int*)malloc(sizeof(int) * ds->col);
+    memset(ds->l,  0, sizeof(int) * ds->col);
     memset(ds->cl, 0, sizeof(int) * ds->col);
-    for (i = 1; i < ds->col; i++){
+    for(i = 1; i < ds->col; i++){
         ds->cl[i] = fea_cnt[i - 1];
         if (i > 1){
             ds->cl[i] += ds->cl[i - 1];
         }
     }
+    free(fea_cnt); fea_cnt = NULL;
     ds->vals = (DPair*)malloc(sizeof(DPair) * tok);
     memset(ds->vals, 0, sizeof(DPair) * tok);
-    ds->id_map = (char(*)[FKL])malloc(sizeof(char) * ds->col);
-    memset(ds->id_map, 0, sizeof(char(*)[FKL]) * ds->col);
+    if (f == 1){
+        ds->id_map = (char(*)[FKL])malloc(FKL * ds->col);
+        memset(ds->id_map, 0, FKL * ds->col);
+    }
 
     rewind(fp);
 
@@ -117,38 +146,51 @@ static DTD * load_train(char * train_input, Hash * hs, int * fea_cnt){
         token = strsep(&string, "\t");
         ds->y[row] = atof(token);
         while (NULL != (token = strsep(&string, "\t"))){
-            i = hash_find(hs, token);
-            if (!ds->id_map[i][0]){
-                strncpy(ds->id_map[i], token, FKL - 1);
+            id = hash_find(hs, token);
+            if (f == 1 && (!ds->id_map[id][0])){
+                strncpy(ds->id_map[id], token, FKL - 1);
             }
-            offs = ds->cl[i];
-            ds->vals[offs + ds->l[i]].id = row;
-            token = strsep(&string, "\t");
-            ds->vals[offs + ds->l[i]].val = atof(token);
-            heap_up(ds->vals + offs, ds->l[i]);
-            ds->l[i] += 1;
+            if (id != -1){
+                offs = ds->cl[id];
+                ds->vals[offs + ds->l[id]].id = row;
+                token = strsep(&string, "\t");
+                ds->vals[offs + ds->l[id]].val = atof(token);
+                heap_up(ds->vals + offs, ds->l[id]);
+                ds->l[id] += 1;
+            }
         }
+        row += 1;
     }
+    fclose(fp);
+
     for (i = 0; i < ds->col; i++){
         DPair * d = ds->vals + ds->cl[i];
-        l = ds->l[i];
-        heap_sorted(d, l);
+        heap_sorted(d, ds->l[i]);
     }
+
     return ds;
 }
+
 
 DTD *(*load_data(char * train_input, char * test_input))[2]{
     if (!train_input){
         return NULL;
     }
-
     Hash * hs = hash_create(0x100000, STRING);
-    int * fea_cnt = (int*)malloc(sizeof(int) * hash_size(hs));
-    memset(fea_cnt, 0, sizeof(int) * hash_size(hs));
+    DTD * train_ds = load_ds(train_input, hs, 1);
+    if (!train_ds){
+        fprintf(stderr, "load train data failed\n");
+        return NULL;
+    }
+    DTD * test_ds = load_ds(test_input, hs, 0);
+    if (!test_ds){
+        fprintf(stderr, "no test data or read failed\n");
+    }
+    DTD *(*ds)[2] = (DTD*(*)[2])malloc(sizeof(void *) * 2);
+    (*ds)[0] = train_ds;
+    (*ds)[1] = test_ds;
 
-    DTD * train_ds = load_train(train_input, hs, fea_cnt);
-
-    return NULL;
+    return ds;
 }
 
 void free_data(DTD *ts){
@@ -176,4 +218,3 @@ void free_data(DTD *ts){
         free(ts);
     }
 }
-

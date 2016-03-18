@@ -25,11 +25,12 @@ typedef struct {
     int col;                        /* feature count of data     */
     int * l;                        /* row cnt of per feautre    */
     int * cl;                       /* cumulative row cnt ..     */
-    DPair * vals;                   /* row id and feature value  */
+    int * ids;                      /* row ids of feature        */
+    double * vals;                  /* row feature value         */
     char (*id_map)[FKL];            /* feature id name mapping   */
 }DTD;
 
-DTD *(*load_data(char * train_input, char * test_input))[2];
+DTD *(*load_data(char * train_input, char * test_input, int binary))[2];
 
 void free_data(DTD *ts);
 

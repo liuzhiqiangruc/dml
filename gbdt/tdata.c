@@ -221,6 +221,10 @@ void free_data(DTD *ts){
             free(ts->cl);
             ts->cl = NULL;
         }
+        if (ts->ids){
+            free(ts->ids);
+            ts->ids = NULL;
+        }
         if (ts->vals){
             free(ts->vals);
             ts->vals = NULL;

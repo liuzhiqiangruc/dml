@@ -43,7 +43,7 @@ static void heap_down(int * ids, double * vals, int p, int l){
     vals[p] = val;
 }
 
-static void heap_sorted(int * ids, double * vals, int l){
+static void heap_sort(int * ids, double * vals, int l){
     int p, t;
     int id;
     double val;
@@ -51,22 +51,20 @@ static void heap_sorted(int * ids, double * vals, int l){
     p = (l - 2) >> 1;
     while (p > 0){
         heap_down(ids, vals, p, l);
-        p = (p - 1) >> 1;
+        p -= 1;
     }
     heap_down(ids, vals, 0, l);
     // make sorted
-    do {
+    while (l > 2){     // heap with 2 ele is sorted already
         id = ids[l - 1];
         ids[l - 1] = ids[0];
         ids[0] = id;
-
         val  = vals[l - 1];
         vals[l - 1] = vals[0];
         vals[0] = val;
-
         l -= 1;
         heap_down(ids, vals, 0, l);
-    } while (l > 1);
+    }
 }
 
 static DTD * load_ds(char * input, Hash * hs, int f, int bin){
@@ -155,6 +153,9 @@ static DTD * load_ds(char * input, Hash * hs, int f, int bin){
         ds->y[row] = atof(token);
         while (NULL != (token = strsep(&string, "\t"))){
             id = hash_find(hs, token);
+            if (f == 1 && (!ds->id_map[id][0])){
+                strncpy(ds->id_map[id], token, FKL - 1);
+            }
             if (id != -1){
                 offs = ds->cl[id];
                 ds->ids[offs + ds->l[id]] = row;
@@ -164,16 +165,13 @@ static DTD * load_ds(char * input, Hash * hs, int f, int bin){
                 }
                 ds->l[id] += 1;
             }
-            if (f == 1 && (!ds->id_map[id][0])){
-                strncpy(ds->id_map[id], token, FKL - 1);
-            }
         }
         row += 1;
     }
     fclose(fp);
     if (bin == 0){
         for (i = 0; i < ds->col; i++){
-            if (ds->l[i] > 1){
+            if (ds->l[i] > 1){  // at least two elements
                 for (int j = 0; j < ds->l[i]; j++){
                     if (ds->vals[ds->cl[i] + j] != 1.0){
                         goto sort;
@@ -182,19 +180,18 @@ static DTD * load_ds(char * input, Hash * hs, int f, int bin){
                 // all vals equal 1.0, do not sort !!!
                 continue;
 sort:
-                heap_sorted(ds->ids + ds->cl[i], ds->vals + ds->cl[i], ds->l[i]);
+                heap_sort(ds->ids + ds->cl[i], ds->vals + ds->cl[i], ds->l[i]);
             }
         }
     }
     return ds;
 }
 
-
 DTD *(*load_data(char * train_input, char * test_input, int binary))[2]{
     if (!train_input){
         return NULL;
     }
-    Hash * hs = hash_create(0x100000, STRING);
+    Hash * hs = hash_create(1 << 20, STRING);
     DTD * train_ds = load_ds(train_input, hs, 1, binary);
     if (!train_ds){
         fprintf(stderr, "load train data failed\n");

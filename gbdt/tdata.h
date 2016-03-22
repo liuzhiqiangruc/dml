@@ -18,6 +18,7 @@ typedef struct {
 } DPair;
 
 typedef struct {
+    int bin;                        /* binary data or not        */
     int row;                        /* num of instances          */
     double * y;                     /* labels of data            */
     int pos;                        /* +1 labels  cnt            */

@@ -26,7 +26,7 @@ GBDT * gbdt_create(G g_fn, H h_fn, R r_fn, GBMP p){
         goto dts_failed;
     }
     memset(gbdt->dts, 0, sizeof(void *) * p.max_trees);
-    DTD *(*tds)[2] = load_data(p.train_input, p.test_input);
+    DTD *(*tds)[2] = load_data(p.train_input, p.test_input, p.binary);
     if (!tds){
         goto ds_failed;
     }
@@ -79,7 +79,7 @@ int    gbdt_train(GBDT * gbdt){
         gbdt->g_fn(gbdt->f, gbdt->train_ds->y, g, n);
         gbdt->h_fn(gbdt->f, gbdt->train_ds->y, h, n);
 
-        DTree * tt = generate_dtree(gbdt->train_ds, f, g, h, n);
+        DTree * tt = generate_dtree(gbdt->train_ds, f, g, h, n, gbdt->p.max_leaf_nodes);
         if (tt){
             gbdt->dts[i] = tt;
             gbdt->tree_size += 1;

@@ -184,6 +184,7 @@ sort:
             }
         }
     }
+    ds->bin = bin;
     return ds;
 }
 

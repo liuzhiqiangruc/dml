@@ -29,8 +29,9 @@ typedef void(*R)(GBDT * m);
 
 typedef struct _gbdt_param {
     double rate;
-    int max_depth;
+    int max_leaf_nodes;
     int max_trees;
+    int binary;
     char * train_input;
     char * test_input;
     char * out_dir;

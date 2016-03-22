@@ -1,12 +1,11 @@
 /* ========================================================
  *   Copyright (C) 2016 All rights reserved.
- *   
+ *
  *   filename : dtree.c
  *   author   : liuzhiqiangruc@126.com
  *   date     : 2016-02-26
  *   info     : implementation for decision_tree model
  * ======================================================== */
-
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -22,23 +21,24 @@ struct _d_tree {
     double sg;                      /* sum of 1-gradient         */
     double sh;                      /* sum of 2-gradient         */
     double wei;                     /* additive model value      */
+    double loss;                    /* loss value of this node   */
 };
 
-static void update_model(double w, unsigned long * bit_map, int len, double * F, int n){
+static void update_model(double w, unsigned long * bit_map, int len, double * F, int n) {
     int i, j, offs, ind;
-    unsigned long v = 0UL;
-    unsigned char uc = 0;
+    unsigned long v   = 0UL;
+    unsigned char uc  = 0;
     unsigned char luc = 0;
     // Log Dict
     int LogD[129] = {0};
-    LogD[1]   = 0;
-    LogD[2]   = 1;
-    LogD[4]   = 2;
-    LogD[8]   = 3;
-    LogD[16]  = 4;
-    LogD[32]  = 5;
-    LogD[64]  = 6;
-    LogD[128] = 7;
+    LogD[1]       =  0;
+    LogD[2]       =  1;
+    LogD[4]       =  2;
+    LogD[8]       =  3;
+    LogD[16]      =  4;
+    LogD[32]      =  5;
+    LogD[64]      =  6;
+    LogD[128]     =  7;
     for (i = 0; i < len; i++){
         v = bit_map[i];
         offs = 0;
@@ -59,152 +59,39 @@ static void update_model(double w, unsigned long * bit_map, int len, double * F,
     }
 }
 
-static void tree_grow(DTree * t, DTD * ds, unsigned long * bit_map, int len, double * F, double * g, double * h, int n){
-    int offs = 0;                    
-    int row = -1;                   
-    int counter = 0;
-    int l_count = 0;
-    int b_attr  = -1;            
-    double val = 0.0;             
-    double attr_val = 0.0;        
-    double gain = 0.0;
-    double max_gain = 0.0;
-    double l_sg = 0.0;
-    double l_sh = 0.0;
-    double r_sg = 0.0;
-    double r_sh = 0.0;
-    double l_sg_b = 0.0;
-    double l_sh_b = 0.0;
-    double r_sg_b = 0.0;
-    double r_sh_b = 0.0;
-    double last_value = 0.123456789;
-    double l_weight = 0.0;
-    double r_weight = 0.0;
-    unsigned long * l_bit = (unsigned long *)malloc(len << 3);
-    unsigned long * r_bit = (unsigned long *)malloc(len << 3);
-
-    // scan all the attributes
-    for (int i = 0, offs = 0; i < ds->col; i++){
-        memset(l_bit, 0, len << 3);
-        memmove(r_bit, bit_map, len << 3);
-        l_sg = l_sh = 0.0;
-        r_sg = t->sg;
-        r_sh = t->sh;
-        last_value = 0.123456789;
-        counter = 0;
-
-        // scan the non missing instance and value in this feature
-        for (int j = 0; j < ds->l[i]; j++){
-            row = ds->vals[offs + j].id;
-            val = ds->vals[offs + j].val;
-
-            // feature value changes
-            if ((fabs(val - last_value) > 1e-6) && (fabs(last_value - 0.12345678) > 1e-6)){
-                gain = (l_sg * l_sg / l_sh + r_sg * r_sg / r_sh - t->sg * t->sg / t->sh) / 2.0;
-                if (gain > max_gain){
-                    max_gain = gain;
-                    b_attr = i;
-                    attr_val = (val + last_value) / 2.0;
-
-                    l_sg_b = l_sg;
-                    l_sh_b = l_sh;
-                    r_sg_b = r_sg;
-                    r_sh_b = r_sh;
-                    l_count = counter;
-                }
-            }
-            unsigned long f = bit_map[row >> 6];
-            if((f & (1UL << (row & 63))) > 0){
-                l_bit[row >> 6] |= (1UL << (row & 63));
-                r_bit[row >> 6] ^= (1UL << (row & 63));
-                l_sg += g[row]; l_sh += h[row];
-                r_sg -= g[row]; r_sh -= h[row];
-                counter += 1;
-            }
-            last_value = val;
-        }
-        // this feature has missing instance
-        if (counter < t->n){
-            gain = (l_sg * l_sg / l_sh + r_sg * r_sg / r_sh - t->sg * t->sg / t->sh) / 2.0;
-            if (gain > max_gain){
-                max_gain = gain;
-                b_attr = i;
-                attr_val = val;
-                l_sg_b = l_sg;
-                l_sh_b = l_sh;
-                r_sg_b = r_sg;
-                r_sh_b = r_sh;
-                l_count = counter;
-            }
-        }
-        offs += ds->l[i];
-    }
-
-    // grow or not 
-    if (max_gain > 0.0){
-        // t is not a leaf node
-        t->leaf = 0;
-        t->attr = b_attr;
-        t->attr_val = attr_val;
-
-        // children nodes init
-        DTree * ln = (DTree *)malloc(sizeof(DTree));
-        DTree * rn = (DTree *)malloc(sizeof(DTree));
-        memset(ln, 0, sizeof(DTree));
-        memset(rn, 0, sizeof(DTree));
-        ln->n = l_count;
-        rn->n = t->n - ln->n;
-        ln->leaf = rn->leaf = 0;
-        ln->sg = l_sg_b;
-        ln->sh = l_sh_b;
-        rn->sg = r_sg_b;
-        rn->sh = r_sh_b;
-        t->child[0] = ln;
-        t->child[1] = rn;
-
-        // grow tree from ln and rn
-        tree_grow(ln, ds, l_bit, len, F, g, h, n);
-        tree_grow(rn, ds, r_bit, len, F, g, h, n);
-    }
-    else{
-        // t is a leaf node
-        t->leaf = 1;
-        t->wei = -1.0 * t->sg / t->sh;
-        // update model F in leaf node 
-        // add leaf node's weight
-        update_model(t->wei, bit_map, len, F, n);
-    }
-    free(l_bit);  l_bit = NULL;
-    free(r_bit);  r_bit = NULL;
-}
-
-static void scan_tree(DTD * ts, DTree * t, unsigned long * bit_map, int len, double * F, int n){
+static void scan_tree(DTD * ts, DTree * t, unsigned long * bit_map, int len, double * F, int n, int m){
+    int id, rowid, l_c, r_c;
+    double val;
+    unsigned long v;
     unsigned long * l_bit = NULL;
     unsigned long * r_bit = NULL;
-    memset(l_bit, 0, len >> 3);
-    memmove(r_bit, bit_map, len >> 3);
-    int id, rowid, attr;
-    double val = 0.0, attr_val;
-    unsigned long v;
     if (t->leaf == 0){
-        // if not leaf , down tree 
-        l_bit = (unsigned long *)malloc(len >> 3);
-        r_bit = (unsigned long *)malloc(len >> 3);
-        for (int i = 0; i < ts->l[attr]; i++){
-            id = i + ts->cl[attr];
-            rowid = ts->vals[id].id;
-            val = ts->vals[id].val;
-            v = bit_map[v >> 6];
+        l_bit = (unsigned long *)malloc(len << 3);
+        r_bit = (unsigned long *)malloc(len << 3);
+        memset(l_bit, 0, len << 3);
+        memmove(r_bit, bit_map, len << 3);
+        l_c = 0;
+        r_c = m;
+        for (int i = 0; i < ts->l[t->attr]; i++){
+            id = i + ts->cl[t->attr];
+            rowid = ts->ids[id];
+            v = bit_map[rowid >> 6];
             if ((v  & (1UL << (rowid & 63))) > 0){
-                if (val >= attr_val){
+                if (ts->bin == 1 || (ts->bin == 0 && ts->vals[id] >= t->attr_val)){
                     l_bit[rowid >> 6] |= (1UL << (rowid & 63));
                     r_bit[rowid >> 6] ^= (1UL << (rowid & 63));
+                    l_c += 1;
+                    r_c -= 1;
                 }
             }
         }
-        scan_tree(ts, t->child[0], l_bit, len, F, n);
+        if (l_c > 0){
+            scan_tree(ts, t->child[0], l_bit, len, F, n, l_c);
+        }
         free(l_bit); l_bit = NULL;
-        scan_tree(ts, t->child[1], r_bit, len, F, n);
+        if (r_c > 0){
+            scan_tree(ts, t->child[1], r_bit, len, F, n, r_c);
+        }
         free(r_bit); r_bit = NULL;
     }
     else{
@@ -212,40 +99,198 @@ static void scan_tree(DTD * ts, DTree * t, unsigned long * bit_map, int len, dou
     }
 }
 
-DTree * generate_dtree(DTD * ds, double *F, double * g, double * h, int n){
-    int i ;
-    // root of tree
-    DTree * t = (DTree*)malloc(sizeof(DTree));
-    if (!t){
-        return NULL;
+static int split(DTD * ds
+               , DTree * t
+               , DTree * le
+               , DTree * ri
+               , unsigned long * bit_map
+               , unsigned long * l_bit
+               , unsigned long * r_bit
+               , int len
+               , double * g
+               , double * h
+               , int n) {
+    memset(le, 0, sizeof(DTree));
+    memset(ri, 0, sizeof(DTree));
+    int i, j, row, offs, cnt, attr, l_cnt;
+    double l_sg, l_sh, r_sg, r_sh, l_val, val, gain, max_gain, aval, l_sg_b, l_sh_b;
+    // split gain must be bigger than 0.0 !!!
+    max_gain = 0.0;
+    // this can be parallelization for scan attributes !!!
+    for (i = 0; i < ds->col; i++){
+        offs = ds->cl[i];
+        memset (l_bit, 0,       len << 3);
+        memmove(r_bit, bit_map, len << 3);
+        l_sg = l_sh = 0.0;
+        r_sg = t->sg;
+        r_sh = t->sh;
+        l_val = 0.123456789;
+        cnt = 0;
+        for (j = 0; j < ds->l[i]; j++){
+            row = ds->ids[offs + j];
+            if (ds->bin == 0){
+                val = ds->vals[offs + j];
+            }
+            if ((ds->bin == 0) && (fabs(val - l_val) > 1e-6) && (fabs(l_val - 0.123456789) > 1e-6)){
+                gain = 0.5 * (l_sg * l_sg / l_sh + r_sg * r_sg / r_sh - t->sg * t->sg / t->sh);
+                if (gain > max_gain){
+                    max_gain = gain;
+                    attr = i;
+                    aval = (val + l_val) / 2.0;
+                    l_sg_b = l_sg;
+                    l_sh_b = l_sh;
+                    l_cnt  = cnt;
+                }
+            }
+            unsigned long f = bit_map[row>>6];
+            if ((f & (1UL << (row & 63)))> 0){
+                l_bit[row >> 6] |= (1UL << (row & 63));
+                r_bit[row >> 6] ^= (1UL << (row & 63));
+                l_sg += g[row]; l_sh += h[row];
+                r_sg -= g[row]; r_sh -= h[row];
+                cnt += 1;
+            }
+            if (ds->bin == 0){
+                l_val = val;
+            }
+        }
+        if (cnt > 0 && cnt < t->n){
+            gain = 0.5 * (l_sg * l_sg / l_sh + r_sg * r_sg / r_sh - t->sg * t->sg / t->sh);
+            if (gain > max_gain){
+                max_gain = gain;
+                attr = i;
+                if (ds->bin == 0){
+                    aval = val;
+                }
+                l_sg_b = l_sg;
+                l_sh_b = l_sh;
+                l_cnt  = cnt;
+            }
+        }
     }
+    if (max_gain > 0.0){
+        t->attr      = attr;
+        if (ds->bin == 0){
+            t->attr_val  = aval;
+        }
+        t->child[0]  = le;
+        t->child[1]  = ri;
+        le->n        = l_cnt;
+        ri->n        = t->n - l_cnt;
+        le->sg       = l_sg_b;
+        le->sh       = l_sh_b;
+        le->wei      = -1.0 * le->sg / le->sh;
+        le->loss     = -0.5 * le->sg * le->sg / le->sh;
+        ri->sg       = t->sg - l_sg_b;
+        ri->sh       = t->sh - l_sh_b;
+        ri->wei      = -1.0 * ri->sg / ri->sh;
+        ri->loss     = -0.5 * ri->sg * ri->sg / ri->sh;
+        return 0;
+    }
+    else{
+        return -1;
+    }
+}
+
+static void insert(DTree ** leafs, unsigned long ** bmaps, int l, DTree * t, unsigned long * bmap){
+    int i;
+    for (i = l; i > 0; i-= 1){
+        if ((leafs[i - 1]->leaf == 1) || \
+            (leafs[i - 1]->loss <= t->loss)){
+            break;
+        }
+        leafs[i] = leafs[i - 1];
+        bmaps[i] = bmaps[i - 1];
+    }
+    leafs[i] = t;
+    bmaps[i] = bmap;
+}
+
+DTree * generate_dtree(DTD * ds, double * F, double * g, double * h, int n, int m){
+    int i, l;
+    if (m < 2)
+        return NULL;
+    // len of bit map
+    int len = n >> 6;
+    if ((n & 63) > 0){
+        len += 1;
+    }
+    // leaf nodes sequences
+    DTree ** leaf_nodes = (DTree**)malloc(sizeof(DTree*) * m);
+    unsigned long ** bit_maps = (unsigned long **)malloc(sizeof(unsigned long*) * m);
+    memset(leaf_nodes, 0, sizeof(DTree*) * m);
+    memset(bit_maps,   0, sizeof(unsigned long *) * m);
+    // first leaf node : root of the tree;
+    DTree * t = (DTree *)malloc(sizeof(DTree));
     memset(t, 0, sizeof(DTree));
-    // init the tree node
-    t->n = ds->row;
-    t->leaf = 0;
+    unsigned long * bit_map = (unsigned long *)malloc(len << 3);
+    memset(bit_map, -1, len << 3);
+    t->n = n;
     for (i = 0; i < n; i++){
         t->sg += g[i];
         t->sh += h[i];
     }
-    // node instance bit map : root contains all instances
-    unsigned long * bit_map = NULL;
-    int row = ds->row;
-    int len = row >> 6;
-    if ((row & ((1UL << 6) - 1)) > 0){
-        len += 1;
+    t->wei = -1.0 * t->sg / t->sh;
+    t->loss = -0.5 * t->sg * t->sg / t->sh;
+    // add first leaf node into leaf node sequence
+    l = 0;
+    leaf_nodes[l] = t;
+    bit_maps[l] = bit_map;
+    l += 1;
+    // node split until leaf nodes sequence full
+    // or all leaf node can not split;
+    do {
+        i = l - 1;
+        DTree * p = leaf_nodes[i];
+        if (p->leaf == 0){
+            bit_map = bit_maps[i];
+            bit_maps[i] = NULL;
+            unsigned long * l_bit = (unsigned long *)malloc(len << 3);
+            unsigned long * r_bit = (unsigned long *)malloc(len << 3);
+            DTree * le = (DTree *)malloc(sizeof(DTree));
+            DTree * ri = (DTree *)malloc(sizeof(DTree));
+            if (split(ds, p, le, ri, bit_map, l_bit, r_bit, len, g, h, n) == 0){
+                insert(leaf_nodes, bit_maps, i,     le, l_bit);
+                insert(leaf_nodes, bit_maps, i + 1, ri, r_bit);
+                free(bit_map); bit_map = NULL;
+                l += 1;
+            }
+            else{
+                free(le); le = NULL;
+                free(ri); ri = NULL;
+                free(l_bit); l_bit = NULL;
+                free(r_bit); r_bit = NULL;
+                p->leaf = 1;
+                while (i > 0){
+                    leaf_nodes[i] = leaf_nodes[i - 1];
+                    bit_maps[i] = bit_maps[i - 1];
+                    i -= 1;
+                }
+                leaf_nodes[0] = p;
+                bit_maps[0] = bit_map;
+            }
+        }
+        else{
+            break;
+        }
+    } while (l < m);
+    // set leaf nodes' leaf == 1
+    // update model F;
+    // free bit_maps
+    if (t->leaf == 0){
+        for (i = 0; i < l; i++){
+            leaf_nodes[i]->leaf = 1;
+            update_model(leaf_nodes[i]->wei, bit_maps[i], len, F, n);
+            free(bit_maps[i]);
+            bit_maps[i] = NULL;
+        }
     }
-    bit_map = (unsigned long *)malloc(len << 3);
-    memset(bit_map, -1, len << 3);
-
-    // tree grow from root t
-    tree_grow(t, ds, bit_map, len, F, g, h, n);
-    free(bit_map); bit_map = NULL;
-
-    if (t->leaf == 1){
-        free(t);
-        t = NULL;
+    else{
+        free(bit_maps[0]); bit_maps[0] = NULL;
+        free(t); t = NULL;
     }
-
+    free(leaf_nodes);    leaf_nodes = NULL;
+    free(bit_maps);        bit_maps = NULL;
     return t;
 }
 
@@ -265,16 +310,13 @@ void free_dtree(DTree * t){
 
 double * eval_tree(DTD * ts, DTree * t, double * F, int n){
     int i, offs, len;
-
     len = n >> 6;
-    if ((n & ((1UL << 6) - 1)) > 0){
+    if ((n & 63) > 0){
         len += 1;
     }
     unsigned long * bit_map = (unsigned long *)malloc(len << 3);
     memset(bit_map, -1, len << 3);
-
-    scan_tree(ts, t, bit_map, len, F, n);
-
+    scan_tree(ts, t, bit_map, len, F, n, n);
+    free(bit_map);   bit_map = NULL;
     return F;
 }
-

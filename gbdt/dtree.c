@@ -116,7 +116,7 @@ static int split(DTD * ds
     double l_sg, l_sh, r_sg, r_sh, l_val, val, gain, max_gain, aval, l_sg_b, l_sh_b;
     // split gain must be bigger than 0.0 !!!
     max_gain = 0.0;
-    // this can be parallelization for scan attributes !!!
+    // this can be parallelized for scanning attributes !!!
     for (i = 0; i < ds->col; i++){
         offs = ds->cl[i];
         memset (l_bit, 0,       len << 3);

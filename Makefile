@@ -1,5 +1,6 @@
 UTILDIR  = util
 REGRDIR  = regr
+GBDTDIR  = gbdt
 TMDIR    = tm
 TSDIR    = ts
 CLSDIR   = cls
@@ -13,6 +14,7 @@ all: libs app
 libs:
 	cd $(UTILDIR); $(MAKE) clean; $(MAKE); $(MAKE) install
 	cd $(REGRDIR); $(MAKE) clean; $(MAKE); $(MAKE) install
+	cd $(GBDTDIR); $(MAKE) clean; $(MAKE); $(MAKE) install
 	cd $(TMDIR);   $(MAKE) clean; $(MAKE); $(MAKE) install
 	cd $(TSDIR);   $(MAKE) clean; $(MAKE); $(MAKE) install
 	cd $(CLSDIR);  $(MAKE) clean; $(MAKE); $(MAKE) install
@@ -43,6 +45,7 @@ clean:
 	$(MAKE) localclean
 	cd $(UTILDIR);  $(MAKE) clean
 	cd $(REGRDIR);  $(MAKE) clean
+	cd $(GBDTDIR);  $(MAKE) clean
 	cd $(SRC);      $(MAKE) clean
 	cd $(TMDIR);    $(MAKE) clean
 	cd $(TSDIR);    $(MAKE) clean

@@ -44,8 +44,7 @@ static void heap_down(int * ids, double * vals, int p, int l){
 }
 
 static void heap_sort(int * ids, double * vals, int l){
-    int p, t;
-    int id;
+    int p, id;
     double val;
     // make heap 
     p = (l - 2) >> 1;
@@ -87,6 +86,7 @@ static DTD * load_ds(char * input, Hash * hs, int f, int bin){
     hsize = hash_size(hs);
     // 1th scan for counting :
     // rows , features, length of each feature, nonmissing value count
+    row = tok = 0;
     while (NULL != fgets(buffer, DT_LINE_LEN, fp)){
         string = trim(buffer, 3);
         strsep(&string, "\t");

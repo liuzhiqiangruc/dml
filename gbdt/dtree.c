@@ -25,7 +25,7 @@ struct _d_tree {
 };
 
 static void update_model(double w, unsigned long * bit_map, int len, double * F, int n) {
-    int i, j, offs, ind;
+    int i, offs, ind;
     unsigned long v   = 0UL;
     unsigned char uc  = 0;
     unsigned char luc = 0;
@@ -61,7 +61,6 @@ static void update_model(double w, unsigned long * bit_map, int len, double * F,
 
 static void scan_tree(DTD * ts, DTree * t, unsigned long * bit_map, int len, double * F, int n, int m){
     int id, rowid, l_c, r_c;
-    double val;
     unsigned long v;
     unsigned long * l_bit = NULL;
     unsigned long * r_bit = NULL;
@@ -317,7 +316,7 @@ void free_dtree(DTree * t){
 }
 
 double * eval_tree(DTD * ts, DTree * t, double * F, int n){
-    int i, offs, len;
+    int len;
     len = n >> 6;
     if ((n & 63) > 0){
         len += 1;

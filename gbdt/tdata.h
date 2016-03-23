@@ -13,16 +13,9 @@
 #define FKL 32
 
 typedef struct {
-    int id;
-    double val;
-} DPair;
-
-typedef struct {
     int bin;                        /* binary data or not        */
     int row;                        /* num of instances          */
     double * y;                     /* labels of data            */
-    int pos;                        /* +1 labels  cnt            */
-    int neg;                        /* -1|0 lables  cnt          */
     int col;                        /* feature count of data     */
     int * l;                        /* row cnt of per feautre    */
     int * cl;                       /* cumulative row cnt ..     */

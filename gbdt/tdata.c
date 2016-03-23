@@ -202,6 +202,7 @@ DTD *(*load_data(char * train_input, char * test_input, int binary))[2]{
     if (!test_ds){
         fprintf(stderr, "no test data or read failed\n");
     }
+    hash_free(hs); hs = NULL;
     DTD *(*ds)[2] = (DTD*(*)[2])malloc(sizeof(void *) * 2);
     (*ds)[0] = train_ds;
     (*ds)[1] = test_ds;

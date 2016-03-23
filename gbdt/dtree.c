@@ -114,13 +114,15 @@ static int split(DTD * ds
     memset(ri, 0, sizeof(DTree));
     int i, j, row, offs, cnt, attr, l_cnt;
     double l_sg, l_sh, r_sg, r_sh, l_val, val, gain, max_gain, aval, l_sg_b, l_sh_b;
+    unsigned long * ll_bit = (unsigned long *)malloc(len << 3);
+    unsigned long * rr_bit = (unsigned long *)malloc(len << 3);
     // split gain must be bigger than 0.0 !!!
     max_gain = 0.0;
     // this can be parallelized for scanning attributes !!!
     for (i = 0; i < ds->col; i++){
         offs = ds->cl[i];
-        memset (l_bit, 0,       len << 3);
-        memmove(r_bit, bit_map, len << 3);
+        memset (ll_bit, 0,       len << 3);
+        memmove(rr_bit, bit_map, len << 3);
         l_sg = l_sh = 0.0;
         r_sg = t->sg;
         r_sh = t->sh;
@@ -140,12 +142,14 @@ static int split(DTD * ds
                     l_sg_b = l_sg;
                     l_sh_b = l_sh;
                     l_cnt  = cnt;
+                    memmove(l_bit, ll_bit, len << 3);
+                    memmove(r_bit, rr_bit, len << 3);
                 }
             }
             unsigned long f = bit_map[row>>6];
             if ((f & (1UL << (row & 63)))> 0){
-                l_bit[row >> 6] |= (1UL << (row & 63));
-                r_bit[row >> 6] ^= (1UL << (row & 63));
+                ll_bit[row >> 6] |= (1UL << (row & 63));
+                rr_bit[row >> 6] ^= (1UL << (row & 63));
                 l_sg += g[row]; l_sh += h[row];
                 r_sg -= g[row]; r_sh -= h[row];
                 cnt += 1;
@@ -165,9 +169,13 @@ static int split(DTD * ds
                 l_sg_b = l_sg;
                 l_sh_b = l_sh;
                 l_cnt  = cnt;
+                memmove(l_bit, ll_bit, len << 3);
+                memmove(r_bit, rr_bit, len << 3);
             }
         }
     }
+    free(ll_bit); ll_bit = NULL;
+    free(rr_bit); rr_bit = NULL;
     if (max_gain > 0.0){
         t->attr      = attr;
         if (ds->bin == 0){

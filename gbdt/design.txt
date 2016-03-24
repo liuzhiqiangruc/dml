@@ -8,19 +8,19 @@
   |___________|     |___________|
   |________             ________|
            |           |
-         ((o))       ((o)) 
+         ((o))       ((o))       |------> application    : classification or regression
            |           | 
            |           | 
-          gblr        rflr
+          gblr        rflr       |------> loss function  : 0-1 log likilihood (LR)
            |           |
            |           |
-          gbdt    randomforest
+          gbdt    randomforest   |------> tree embedings : boosting  &  bagging
           /  \       /   \   
          /    \     /     \  
         /      \   /       \ 
-       |       dtree        |
+       |       dtree        |    |------> decision tree implementation using tdata
        |         |          |
-       |       tdata        |
+       |       tdata        |    |------> data struct with column based stored
        |         |          |
        |         |          |
        |                    |

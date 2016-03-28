@@ -329,7 +329,7 @@ double * eval_tree(DTD * ts, DTree * t, double * F, int n){
     return F;
 }
 
-void save_dtree(DTree * t, char * out_file){
+void save_dtree(DTree * t, char * out_file, char (*id_map)[FKL]){
     if (!t){
         return;
     }
@@ -338,8 +338,39 @@ void save_dtree(DTree * t, char * out_file){
         fprintf(stderr, "save out file \"%s\"\n", out_file);
         return;
     }
+    // max 1000 leaf_nodes and 999 non_leaf nodes in tree
+    DTree ** ts = (DTree **)malloc(sizeof(void *) * 1999);
+    memset(ts, 0, sizeof(void*) * 1999);
+    int i, l, c1, c2;
+    i = l = 0;
+    ts[l++] = t;
+    fprintf(fp, "n\tleaf\tAttr\tAttr_val\tNode_wei\tNode_loss\tleft\tright\n");
+    do {
+        DTree * ct = ts[i];
+        c1 = c2 = 0;
+        // if is not leaf, push two children into ts
+        if (ct->leaf == 0){
+            c1 = l; ts[l++] = ct->child[0];
+            c2 = l; ts[l++] = ct->child[1];
+            fprintf(fp, "%d\t%d\t%s\t%.3f\t%.3f\t%.3f\t%d\t%d\n"         \
+                                                      , ct->n            \
+                                                      , ct->leaf         \
+                                                      , id_map[ct->attr] \
+                                                      , ct->attr_val     \
+                                                      , ct->wei          \
+                                                      , ct->loss         \
+                                                      , c1, c2);
 
+        }
+        else{
+            fprintf(fp, "%d\t%d\tNone\tNone\t%.3f\t%.3f\t%d\t%d\n"    \
+                                                      , ct->n         \
+                                                      , ct->leaf      \
+                                                      , ct->wei       \
+                                                      , ct->loss      \
+                                                      , c1, c2);
+        }
+        i += 1;
+    } while (i < l);
     fclose(fp);
 }
-
-

@@ -6,7 +6,7 @@
  *   date     : 2016-02-26
  *   info     : implementation for gbdt
  * ======================================================== */
-
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "gbdt.h"
@@ -106,7 +106,14 @@ int    gbdt_train(GBDT * gbdt){
     return 0;
 }
 
-void   gbdt_save (GBDT * gbdt, int n);
+void   gbdt_save (GBDT * gbdt){
+    int i;
+    char outfile[200] = {'\0'};
+    for (i = 0; i < gbdt->tree_size; i++){
+        snprintf(outfile, 200, "%s/%d.dat", gbdt->p.out_dir, i);
+        save_dtree(gbdt->dts[i], outfile, gbdt->train_ds->id_map);
+    }
+}
 
 void   gbdt_free (GBDT * gbdt){
     int i;

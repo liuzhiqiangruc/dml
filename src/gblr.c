@@ -93,6 +93,7 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "command line parse done\n");
     GBDT * gblr = gbdt_lr(p);
     gbdt_train(gblr);
+    gbdt_save(gblr);
     gbdt_free(gblr);
     gblr = NULL;
     return 0;

@@ -52,7 +52,7 @@ struct _gbdt {
 
 GBDT * gbdt_create(G g_fn, H h_fn, R f_fn, GBMP p);
 int    gbdt_train(GBDT * gbdt);
-void   gbdt_save (GBDT * gbdt, int n);
+void   gbdt_save (GBDT * gbdt);
 void   gbdt_free (GBDT * gbdt);
 
 #endif //GBDT_H

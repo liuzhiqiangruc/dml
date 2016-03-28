@@ -6,6 +6,7 @@
  *   date     : 2016-02-26
  *   info     : implementation for decision_tree model
  * ======================================================== */
+#include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -327,3 +328,18 @@ double * eval_tree(DTD * ts, DTree * t, double * F, int n){
     free(bit_map);   bit_map = NULL;
     return F;
 }
+
+void save_dtree(DTree * t, char * out_file){
+    if (!t){
+        return;
+    }
+    FILE * fp = NULL;
+    if (NULL == (fp = fopen(out_file, "w"))){
+        fprintf(stderr, "save out file \"%s\"\n", out_file);
+        return;
+    }
+
+    fclose(fp);
+}
+
+

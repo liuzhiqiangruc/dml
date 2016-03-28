@@ -8,6 +8,7 @@
  * ======================================================== */
 #include <stdio.h>
 #include <math.h>
+#include "auc.h"
 #include "gblr.h"
 
 
@@ -46,7 +47,9 @@ void lr_hess(double *f, double *y, double *h, int n){
 }
 
 void lr_repo(GBDT * g){
-    printf("current tree size : %4d \n", g->tree_size);
+    double train_auc = auc(g->train_ds->row, g->f, g->train_ds->y);
+    double test_auc  = auc(g->test_ds->row, g->t, g->test_ds->y);
+    printf("current tree size : %4d, train_auc : %.3f, test_auc : %.3f \n", g->tree_size, train_auc, test_auc);
 }
 
 

@@ -118,7 +118,7 @@ static DTD * load_ds(char * input, Hash * hs, int f, int bin){
         row += 1;
     }
     // malloc space for store data
-    ds->col = hash_size(hs);
+    ds->col = hash_cnt(hs);
     ds->row = row;
     ds->y   = (double*)malloc(sizeof(double) * row);
     ds->l   = (int*)malloc(sizeof(int) * ds->col);

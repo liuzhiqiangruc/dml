@@ -37,4 +37,9 @@ void free_dtree(DTree * t);
  * ------------------------------------ */
 double * eval_tree(DTD * ts, DTree * t, double * F, int n);
 
+/* ------------------------------------
+ * brief   : save decision tree to file
+ * ------------------------------------ */
+void save_dtree(DTree * t, char * out_file);
+
 #endif //DTREE_H

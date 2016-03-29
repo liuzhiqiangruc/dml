@@ -13,6 +13,6 @@ DML
 * 时序比较(dp based methods)
 * 时序平滑及异常点检测(loess)
 * 时序断点检测(breakout)
-* 以及时序数据集字典发现(pattern)
+* 时序数据集字典发现(pattern)
 
 

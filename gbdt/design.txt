@@ -5,8 +5,8 @@
             |   ___   |
              \       /
               |     |
-  |___________|     |___________|
-  |________             ________|
+ |____________|     |____________|
+ |_________             _________|
            |           |
          ((o))       ((o))       |------> application    : classification or regression
            |           | 
@@ -21,11 +21,13 @@
        |       dtree        |    |------> decision tree implementation using tdata
        |         |          |
        |       tdata        |    |------> data struct with column based stored
-       |         |          |
-       |         |          |
-       |                    |
-       |                    |
-       |                    |
-       |                    |
-
-
+       |        / \         |
+       |       /   \        |
+       |     str   hash     |    |------> string and hashing utils
+       |      |     |       |
+       |      |     |       |
+       |      |     |       |
+       |      |     |       |
+       |      |     |       |
+       |______|     |_______|  
+      /_______|     |________\

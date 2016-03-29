@@ -11,6 +11,19 @@
 #include <string.h>
 #include "gbdt.h"
 
+struct _gbdt {
+    DTD * train_ds;
+    DTD *  test_ds;
+    double * f;
+    double * t;
+    int tree_size;
+    DTree ** dts;
+    GBMP p;
+    G g_fn;
+    H h_fn;
+    R r_fn;
+};
+
 GBDT * gbdt_create(G g_fn, H h_fn, R r_fn, GBMP p){
     GBDT * gbdt = (GBDT*)malloc(sizeof(GBDT));
     if (!gbdt){
@@ -148,3 +161,30 @@ void   gbdt_free (GBDT * gbdt){
     }
 }
 
+int y_rowns(GBDT * gbdt){
+    return gbdt->train_ds->row;
+}
+
+int t_rowns(GBDT * gbdt){
+    return gbdt->test_ds->row;
+}
+
+double * y_model(GBDT * gbdt){
+    return gbdt->f;
+}
+
+double * t_model(GBDT * gbdt){
+    return gbdt->t;
+}
+
+double * y_label(GBDT * gbdt){
+    return gbdt->train_ds->y;
+}
+
+double * t_label(GBDT * gbdt){
+    return gbdt->test_ds->y;
+}
+
+int t_size(GBDT * gbdt){
+    return gbdt->tree_size;
+}

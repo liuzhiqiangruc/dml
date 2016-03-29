@@ -1,18 +1,18 @@
 DML
 ==
 
-»úÆ÷Ñ§Ï°Ëã·¨¿â£¬Ö÷ÒªÉæ¼°£ºÖ÷ÌâÄ£ĞÍ¡¢·ÖÀà»Ø¹éÄ£ĞÍ¡¢¾ÛÀà¡¢ÓÅ»¯·½·¨¡¢Ê±¼äĞòÁĞ·ÖÎöµÈ·½Ãæ¡£
+æœºå™¨å­¦ä¹ ç®—æ³•åº“ï¼Œä¸»è¦æ¶‰åŠï¼šä¸»é¢˜æ¨¡å‹ã€åˆ†ç±»å›å½’æ¨¡å‹ã€èšç±»ã€ä¼˜åŒ–æ–¹æ³•ã€æ—¶é—´åºåˆ—åˆ†æç­‰æ–¹é¢ã€‚
 
-Ä¿Ç°Ìá¹©µÄbinary°üÀ¨£º
+ç›®å‰æä¾›çš„binaryåŒ…æ‹¬ï¼š
 
-*topic model (sparse-lda)  
-*logistic regression(lr) 
-*gradient boosting decision tree(gbdt)
+* topic model (sparse-lda)  
+* logistic regression(lr) 
+* gradient boosting decision tree(gbdt)
 
-Ê±¼äĞòÁĞ·ÖÎöÖĞÖ÷ÒªÉæ¼°ÁË:
-*Ê±Ğò±È½Ï(dp based methods)
-*Ê±ĞòÆ½»¬¼°Òì³£µã¼ì²â(loess)
-*Ê±Ğò¶Ïµã¼ì²â(breakout)
-*ÒÔ¼°Ê±ĞòÊı¾İ¼¯×Öµä·¢ÏÖ(pattern)
+æ—¶é—´åºåˆ—åˆ†æä¸­ä¸»è¦æ¶‰åŠäº†:
+* æ—¶åºæ¯”è¾ƒ(dp based methods)
+* æ—¶åºå¹³æ»‘åŠå¼‚å¸¸ç‚¹æ£€æµ‹(loess)
+* æ—¶åºæ–­ç‚¹æ£€æµ‹(breakout)
+* ä»¥åŠæ—¶åºæ•°æ®é›†å­—å…¸å‘ç°(pattern)
 
 

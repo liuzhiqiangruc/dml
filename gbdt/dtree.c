@@ -371,6 +371,8 @@ void save_dtree(DTree * t, char * out_file, char (*id_map)[FKL]){
                                                       , c1, c2);
         }
         i += 1;
-    } while (i < l);
+    } while (i < l && l <= 1997);
     fclose(fp);
+    free(ts);
+    ts = NULL;
 }

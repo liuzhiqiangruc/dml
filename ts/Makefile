@@ -1,91 +1,70 @@
-DM       = ../dm
-UTIL     = ../util
-INCS     = -I../util -I../dm
-LIBS     = -L../util -L../dm
-
 CC       = gcc -std=c99
 CFBASE   = -Wall -pedantic -pipe
-CFLAGS   = $(CFBASE) -DNDEBUG -DNPRINT -O3 -fpic 
+CFLAGS   = $(CFBASE) -DNDEBUG -DNPRINT -O0 -fpic -I../util
 
-LD       = gcc
-SOFLAGS  = -shared
-
-OBJS     = dp.o     viterbi.o  edm.o     hash_pattern.o loess.o      fit_newtom.o
-SOS      = libdp.so libvtb.so  libedm.so libhpat.so     libloess.so  libfitnt.so
-STATICS  = libdps.a libvtbs.a  libedms.a libhpats.a     libloesss.a  libfitnts.a
-
-util_mtrace_objs = $(UTIL)/mtrace.o $(UTIL)/rbtree.o
-fit_newton_objs  = $(DM)/newton.o 
+UTIL     = ../util
+INCS     = -I../util
+LIBS     = -L../util
 
 
-#-----------------------------------------------------------------------
-# targets
-#-----------------------------------------------------------------------
+LD       = gcc -shared
 
-all:	$(STATICS)
-so:     $(SOS)
-objs:   $(OBJS)
+objs =      breakout.o dist.o    loess.o     modl.o     pattern.o viterbi.o
+sos =       libbrk.so  libdst.so libloess.so libmodl.so libpat.so libvtb.so
+statics =   libbrks.a  libdsts.a libloesss.a libmodls.a libpats.a libvtbs.a
 
-#-----------------------------------------------------------------------
-# objs
-#-----------------------------------------------------------------------
+all : $(objs) $(statics) $(sos)
 
-dp.o           : dp.h
-viterbi.o      : viterbi.h
-hash_pattern.o : hash_pattern.h
+lib_install:
+	mkdir -p ../lib
+	cp *.a ../lib
+	cp *.so ../lib
 
-edm.o          : edm.c edm.h
-	$(CC) $(CFLAGS) $(INCS) -c $< -o $@
+inc_install:
+	mkdir -p ../inc
+	cp *.h ../inc
 
-loess.o        : loess.c loess.h
-	$(CC) $(CFLAGS) $(INCS) -c $< -o $@
+install:
+	make lib_install
+	make inc_install
 
-fit_newton.o   : fit_newton.c fit_newton.h
-	$(CC) $(CFLAGS) $(INCS) -c $< -o $@
+libbrk.so : breakout.o ../util/median.o ../util/rbtree.o
+	$(LD) $(SOFLAGS) $^ -o $@
 
-#-----------------------------------------------------------------------
-# shared libs
-#-----------------------------------------------------------------------
-
-libdp.so  : dp.o
+libloess.so : loess.o  ../util/median.o ../util/rbtree.o
 	$(LD) $(SOFLAGS) $^ -o $@
 
 libvtb.so : viterbi.o
 	$(LD) $(SOFLAGS) $^ -o $@
 
-libhpat.so : hash_pattern.o
+libpat.so : pattern.o
 	$(LD) $(SOFLAGS) $^ -o $@
 
-libedm.so : edm.o                  $(util_mtrace_objs)
+libdst.so : dist.o
 	$(LD) $(SOFLAGS) $^ -o $@
 
-libloess.so : loess.o              $(util_mtrace_objs)
+libmodl.so : modl.o
 	$(LD) $(SOFLAGS) $^ -o $@
 
-libfitnt.so : fit_newton.o         $(fit_newton_objs)
-	$(LD) $(SOFLAGS) $^ -o $@
-
-
-#-----------------------------------------------------------------------
-# statics
-#-----------------------------------------------------------------------
-libdps.a : dp.o
-	ar cr $@ $^
 
 libvtbs.a : viterbi.o
 	ar cr $@ $^
 
-libhpats.a : hash_pattern.o
+libpats.a : pattern.o
 	ar cr $@ $^
 
-libedms.a : edm.o                  $(util_mtrace_objs)
-	ar cr $@ $^                    
-                                   
-libloesss.a : loess.o              $(util_mtrace_objs)
-	ar cr $@ $^                    
-                                   
-libfitnts.a : fit_newton.o         $(fit_newton_objs)
+libmodls.a : modl.o
 	ar cr $@ $^
+
+libdsts.a : dist.o
+	ar cr $@ $^                    
+
+libbrks.a : breakout.o  ../util/median.o ../util/rbtree.o
+	ar cr $@ $^                    
+                                   
+libloesss.a : loess.o   ../util/median.o ../util/rbtree.o
+	ar cr $@ $^                    
+                                   
 
 #-----------------------------------------------------------------------
 # Clean up
@@ -93,5 +72,7 @@ libfitnts.a : fit_newton.o         $(fit_newton_objs)
 .PHONY : clean
 
 clean:
-	rm -f $(PRGS) *.o *.so *.a
+	rm -rf $(sos)
+	rm -rf $(objs)
+	rm -rf $(statics)
 

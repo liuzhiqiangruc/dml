@@ -10,10 +10,7 @@
 #ifndef _STR_H
 #define _STR_H
 
-
+char *strsep(char **stringp, const char *delim);
 char * trim(char *c, int mode);
-char** split(const char* string, char delim, int* count);
-char * dupstr(const char * string);
-
 
 #endif //STR_H

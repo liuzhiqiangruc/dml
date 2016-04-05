@@ -1,0 +1,33 @@
+              _______
+             / ||||| \ 
+            |  _   _  |
+            |    |    |
+            |   ___   |
+             \       /
+              |     |
+ |____________|     |____________|
+ |_________             _________|
+           |           |
+         ((o))       ((o))       |------> application    : classification or regression
+           |           | 
+           |           | 
+          gblr        rflr       |------> loss function  : 0-1 log likilihood (LR)
+           |           |
+           |           |
+          gbdt    randomforest   |------> tree embedings : boosting  &  bagging
+          /  \       /   \   
+         /    \     /     \  
+        /      \   /       \ 
+       |       dtree        |    |------> decision tree implementation using tdata
+       |         |          |
+       |       tdata        |    |------> data struct with column based stored
+       |        / \         |
+       |       /   \        |
+       |     str   hash     |    |------> string and hashing utils
+       |      |     |       |
+       |      |     |       |
+       |      |     |       |
+       |      |     |       |
+       |      |     |       |
+       |______|     |_______|  
+      /_______|     |________\

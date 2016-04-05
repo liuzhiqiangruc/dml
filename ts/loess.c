@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "mtrace.h"
+#include "median.h"
 #include "loess.h"
 
 int cmp_fn(double *m, double *n) {

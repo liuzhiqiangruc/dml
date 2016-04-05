@@ -10,9 +10,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "regression.h"
+#include "lr.h"
 
-typedef Regression LR;
 
 
 void help() {
@@ -103,13 +102,13 @@ int parse_command_line(RP *p, int argc, char *argv[]){
 
 
 int main(int argc, char *argv[]) {
-    LR *lr = create_regression();
+    REG *lr = create_lr_model();
     if (-1 == parse_command_line(&(lr->p), argc, argv)){
         help();
         goto except;
     }
     fprintf(stderr, "command line parse done\n");
-    if (-1 == init_regression(lr)){
+    if (-1 == init_model(lr)){
         goto except;
     }
     fprintf(stderr, "load data done\n");
@@ -117,14 +116,14 @@ int main(int argc, char *argv[]) {
     if (lr->test_ds){
         fprintf(stderr, " test: %d\n", lr->test_ds->r);
     }
-    learn_regression(lr);
-    save_regression(lr, lr->p.niters);
-    free_regression(lr);
+    learn_model(lr);
+    save_model(lr, lr->p.niters);
+    free_model(lr);
     lr = NULL;
     return 0;
 
 except:
-    free_regression(lr);
+    free_model(lr);
     lr = NULL;
     return -1;
 }

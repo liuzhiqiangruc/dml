@@ -78,43 +78,25 @@ char * trim(char *c, int mode){
     return c;
 }
 
-char** split(const char* string, char delim, int* count){
-    if (!string)
-        return 0;
-    int i, j, c;
-    i = 0; j = c = 1;
-    int length = strlen(string);
-    char * copy_str = (char*) malloc(length + 1);
-    memmove(copy_str, string, length);
-    copy_str[length] = '\0';
-    for (; i<length; i++){
-        if (copy_str[i] == delim){
-            c += 1;
-        }
+char *strsep(char **stringp, const char *delim) {
+    char *s;
+    const char *spanp;
+    int c, sc;
+    char *tok;
+    if ((s = *stringp)== NULL)
+        return (NULL);
+    for (tok = s;;) {
+        c = *s++;
+        spanp = delim;
+        do {
+            if ((sc =*spanp++) == c) {
+                if (c == 0)
+                    s = NULL;
+                else
+                    s[-1] = 0;
+                *stringp = s;
+                return (tok);
+            }
+        } while (sc != 0);
     }
-    (*count) = c;
-    char ** str_array = malloc(sizeof(char*) * c);
-    str_array[0] = copy_str;
-    for (i = 0; i < length; i++){
-        if (copy_str[i] == delim){
-            copy_str[i] = '\0';
-            str_array[j++] = copy_str + i + 1;
-        }
-    }
-    return str_array;
 }
-
-
-char * dupstr(const char * string){
-    if (!string){
-        return NULL;
-    }
-    int len = strlen(string);
-    char * dup = (char*)malloc(sizeof(char) * (len + 1));
-    memmove(dup, string, len);
-    dup[len] = 0;
-    return dup;
-}
-
-
-

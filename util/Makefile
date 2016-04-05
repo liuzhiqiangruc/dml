@@ -1,101 +1,56 @@
-CC       = gcc -std=c99
-CFBASE   = -Wall -pedantic -pipe -Wno-strict-aliasing -Wno-unused-but-set-variable
-CFLAGS   = $(CFBASE) -DNDEBUG -DNPRINT -O3 -fpic
-
-LD       = gcc
-SOFLAGS  = -shared 
-
-OBJS     = hashtable.o heap.o   fptree.o  str.o      md5.o     mtrace.o  queue.o    rbtree.o   set.o      idmap.o      
-SOS      = libht.so    libhp.so libfpt.so libstr.so  libmd5.so libque.so librbt.so  libmed.so  libset.so  libidmap.so  
-STATICS  = libhts.a    libhps.a libfpts.a libstrs.a  libmd5s.a libques.a librbts.a  libmeds.a  libsets.a  libidmaps.a  
-
-all:    $(STATICS)
-so :    $(SOS)
-
-## --------- objects --------------
-
-str.o:         str.h
-hashtable.o:   hashtable.h str.h
-heap.o:        heap.h 
-fptree.o:      fptree.h str.h hashtable.h
-md5.o:         md5.h 
-queue.o:       queue.h 
-rbtree.o:      rbtree.h fn_type.h
-mtrace.o:      mtrace.h fn_type.h rbtree.h
-set.o:         set.h rbtree.h fn_type.h
-idmap.o:       idmap.h set.h rbtree.h fn_type.h
+CC = gcc -std=c99 -g
+CFBASE = -pedantic -pipe -Wall
+CFLAGS = $(CFBASE) -O3 -fpic -DNDEBUG -DNPRINT
+LD = gcc -shared
 
 
-## --------- .so --------------
 
+objs    = hash.o     rbtree.o    str.o       median.o
+sos     = libhs.so   librbt.so   libstr.so   libmed.so
+statics = libhss.a   librbts.a   libstrs.a   libmeds.a
+
+all : $(objs) $(statics) $(sos)
+
+lib_install :
+	mkdir -p ../lib
+	cp *.a ../lib
+	cp *.so ../lib
+
+inc_install :
+	mkdir -p ../inc
+	cp *.h ../inc
+
+
+hash.o : hash.h
+rbtree.o  : rbtree.h
+str.o    : str.h
+
+libhs.so : hash.o
+	$(LD) $^ -o $@
+librbt.so : rbtree.o
+	$(LD) $^ -o $@
 libstr.so : str.o
-	$(LD) $(SOFLAGS) $^ -o $@
+	$(LD) $^ -o $@
+libmed.so : median.o rbtree.o
+	$(LD) $^ -o $@
 
-libht.so  : hashtable.o str.o
-	$(LD) $(SOFLAGS) $^ -o $@
-
-libque.so : queue.o
-	$(LD) $(SOFLAGS) $^ -o $@
-
-libhp.so  : heap.o 
-	$(LD) $(SOFLAGS) $^ -o $@
-
-libfpt.so : fptree.o hashtable.o str.o
-	$(LD) $(SOFLAGS) $^ -o $@
-
-libmd5.so : md5.o
-	$(LD) $(SOFLAGS) $^ -o $@
-
-librbt.so : rbtree.o 
-	$(LD) $(SOFLAGS) $^ -o $@
-
-libmed.so : mtrace.o rbtree.o
-	$(LD) $(SOFLAGS) $^ -o $@
-
-libset.so : set.o rbtree.o
-	$(LD) $(SOFLAGS) $^ -o $@
-
-libidmap.so : idmap.o set.o rbtree.o
-	$(LD) $(SOFLAGS) $^ -o $@
-
-
-## --------- .a --------------
-
-libstrs.a:str.o
+libhss.a : hash.o
 	ar cr $@ $^
-
-libhts.a: hashtable.o str.o
-	ar cr $@ $^
-
-libhps.a: heap.o
-	ar cr $@ $^
-
-libques.a : queue.o
-	ar cr $@ $^
-
-libfpts.a : fptree.o hashtable.o str.o
-	ar cr $@ $^
-
-libmd5s.a : md5.o
-	ar cr $@ $^
-
 librbts.a : rbtree.o
 	ar cr $@ $^
-
-libmeds.a : mtrace.o rbtree.o
+libstrs.a : str.o
+	ar cr $@ $^
+libmeds.a : median.o rbtree.o
 	ar cr $@ $^
 
-libsets.a : set.o rbtree.o
-	ar cr $@ $^
 
-libidmaps.a : set.o idmap.o rbtree.o
-	ar cr $@ $^
+install :
+	$(MAKE) lib_install
+	$(MAKE) inc_install
 
-#-----------------------------------------------------------------------
-# Clean up
-#-----------------------------------------------------------------------
 
 .PHONY: clean
-
-clean:
-	rm -f $(PRGS) *.o *.so *.a
+clean :
+	rm -rf $(sos)
+	rm -rf $(objs)
+	rm -rf $(statics)

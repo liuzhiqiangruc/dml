@@ -77,22 +77,22 @@ static int split(DTD   * ds
         cnt = 0;
         for (j = 0; j < ds->l[i]; j++){
             row = ds->ids[offs + j];
-            if (ds->bin == 0 && ds->vals){
-                val = ds->vals[offs + j];
-                if ((fabs(val - l_val) > 1e-6) && (fabs(l_val - 0.123456789) > 1e-6)){
-                    gain = 0.5 * (l_sg * l_sg / l_sh + r_sg * r_sg / r_sh - t->sg * t->sg / t->sh);
-                    if (gain > max_gain){
-                        max_gain = gain;
-                        attr = i;
-                        aval = (val + l_val) / 2.0;
-                        l_sg_b = l_sg;
-                        l_sh_b = l_sh;
-                        l_cnt  = cnt;
-                    }
-                }
-                l_val = val;
-            }
             if (t == inst_nodes[row]){
+                if (ds->bin == 0) {
+                    val = ds->vals[offs + j];
+                    if ((fabs(val - l_val) > 1e-6) && (fabs(l_val - 0.123456789) > 1e-6)) {
+                        gain = 0.5 * (l_sg * l_sg / l_sh + r_sg * r_sg / r_sh - t->sg * t->sg / t->sh);
+                        if (gain > max_gain) {
+                            max_gain = gain;
+                            attr = i;
+                            aval = (val + l_val) / 2.0;
+                            l_sg_b = l_sg;
+                            l_sh_b = l_sh;
+                            l_cnt = cnt;
+                        }
+                    }
+                    l_val = val;
+                }
                 l_sg += g[row]; l_sh += h[row];
                 r_sg -= g[row]; r_sh -= h[row];
                 cnt += 1;
@@ -133,7 +133,7 @@ static int split(DTD   * ds
         for (j = 0; j < ds->l[attr]; j++){
             row = ds->ids[offs + j];
             if (inst_nodes[row] == t){
-                if ((ds->bin == 0 && ds->vals[offs + j] >= aval) || ds->bin == 1){
+                if (ds->bin == 1 || (ds->bin == 0 && ds->vals[offs + j] >= aval)) {
                     inst_nodes[row] = le;
                 }
             }

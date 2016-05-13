@@ -15,54 +15,28 @@
 
 #define DT_LINE_LEN 0x100000
 
-/* -------------------------
- * brief : heap down
- * p     : index of ele down
- * l     : length of heap
- * ------------------------- */
-static void heap_down(int * ids, double * vals, int p, int l){
-    if (l < ((p + 1) << 1)) {
-        return;
-    }
-    int r = (p << 1) + 1;
-    int id = ids[p];
-    double val = vals[p];
-    do {
-        if ((r < l - 1) && (vals[r] > vals[r + 1])){
-            r += 1;
-        }
-        if (vals[p] <= vals[r]){
-            break;
-        }
-        ids[p] = ids[r];
-        vals[p] = vals[r];
-        p = r;
-        r += r + 1;
-    }while (r < l);
-    ids[p] = id;
-    vals[p] = val;
+typedef struct {
+    int id;
+    double val;
+} DTD_FEA_VAL;
+
+static int tdt_fea_cmp(const void * a1, const void * a2){
+    DTD_FEA_VAL * t1 = (DTD_FEA_VAL*)a1;
+    DTD_FEA_VAL * t2 = (DTD_FEA_VAL*)a2;
+    double t = t1->val - t2->val;
+    return t > 0.0 ? -1 : (t < 0.0 ? 1 : 0);
 }
 
-static void heap_sort(int * ids, double * vals, int l){
-    int p, id;
-    double val;
-    // make heap 
-    p = (l - 2) >> 1;
-    while (p > 0){
-        heap_down(ids, vals, p, l);
-        p -= 1;
+static void fea_rows_sort(int * ids, double * vals, DTD_FEA_VAL * f, int n){
+    int i;
+    for (i = 0; i < n; i++){
+        f[i].id = ids[i];
+        f[i].val = vals[i];
     }
-    heap_down(ids, vals, 0, l);
-    // make sorted
-    while (l > 2){     // heap with 2 ele is sorted already
-        id = ids[l - 1];
-        ids[l - 1] = ids[0];
-        ids[0] = id;
-        val  = vals[l - 1];
-        vals[l - 1] = vals[0];
-        vals[0] = val;
-        l -= 1;
-        heap_down(ids, vals, 0, l);
+    qsort(f, n, sizeof(DTD_FEA_VAL), tdt_fea_cmp);
+    for (i = 0; i < n; i++){
+        ids[i] = f[i].id;
+        vals[i] = f[i].val;
     }
 }
 
@@ -70,9 +44,7 @@ static DTD * load_ds(char * input, Hash * hs, int f, int bin){
     FILE * fp = NULL;
     if (NULL == (fp = fopen(input, "r"))){
         fprintf(stderr , "can not open file \"%s\"\n", input);
-        if (f == 1){
-            return NULL;
-        }
+        return NULL;
     }
     // Dataset Data Struct pointer
     DTD * ds = (DTD*)malloc(sizeof(DTD));
@@ -127,10 +99,7 @@ static DTD * load_ds(char * input, Hash * hs, int f, int bin){
     memset(ds->l,  0, sizeof(int) * ds->col);
     memset(ds->cl, 0, sizeof(int) * ds->col);
     for(i = 1; i < ds->col; i++){
-        ds->cl[i] = fea_cnt[i - 1];
-        if (i > 1){
-            ds->cl[i] += ds->cl[i - 1];
-        }
+        ds->cl[i] = fea_cnt[i - 1] + ds->cl[i - 1];
     }
     free(fea_cnt); fea_cnt = NULL;
     ds->ids  = (int*)malloc(sizeof(int) * tok);
@@ -170,19 +139,22 @@ static DTD * load_ds(char * input, Hash * hs, int f, int bin){
     }
     fclose(fp);
     if (bin == 0){
+        DTD_FEA_VAL * f = (DTD_FEA_VAL*)malloc(sizeof(DTD_FEA_VAL) * row);
         for (i = 0; i < ds->col; i++){
             if (ds->l[i] > 1){  // at least two elements
                 for (int j = 0; j < ds->l[i]; j++){
                     if (ds->vals[ds->cl[i] + j] != 1.0){
-                        goto sort;
+                        goto fea_sort;
                     }
                 }
                 // all vals equal 1.0, do not sort !!!
                 continue;
-sort:
-                heap_sort(ds->ids + ds->cl[i], ds->vals + ds->cl[i], ds->l[i]);
+fea_sort:
+                memset(f, 0, sizeof(DTD_FEA_VAL) * row);
+                fea_rows_sort(ds->ids + ds->cl[i], ds->vals + ds->cl[i], f, ds->l[i]);
             }
         }
+        free(f); f = NULL;
     }
     ds->bin = bin;
     return ds;

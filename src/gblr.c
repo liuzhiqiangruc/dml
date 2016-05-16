@@ -6,7 +6,7 @@
  *   date     : 2016-03-28
  *   info     : 
  * ======================================================== */
-
+#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -92,7 +92,13 @@ int main(int argc, char *argv[]) {
     }
     fprintf(stderr, "command line parse done\n");
     GBDT * gblr = gbdt_lr(p);
+    if (!gblr){
+        return -1;
+    }
+    long t1 = time(NULL);
     gbdt_train(gblr);
+    long t2 = time(NULL);
+    printf("time : %ld\n", t2 - t1);
     gbdt_save(gblr);
     gbdt_free(gblr);
     gblr = NULL;

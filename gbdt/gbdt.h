@@ -52,6 +52,9 @@ double * t_model(GBDT * gbdt);
 //-   tree size currently
 int      t_size(GBDT * gbdt);
 
+//-   has test data or not
+int      has_test(GBDT * gbdt);
+
 //-   create, train, save, free gbdt model
 GBDT * gbdt_create(G g_fn, H h_fn, R f_fn, GBMP p);
 int    gbdt_train(GBDT * gbdt);

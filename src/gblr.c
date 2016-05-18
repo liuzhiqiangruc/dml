@@ -6,7 +6,7 @@
  *   date     : 2016-03-28
  *   info     : 
  * ======================================================== */
-
+#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,9 +14,11 @@
 
 void help() {
     fprintf(stderr, "\ngblr usage:        \n");
-    fprintf(stderr, "\n./gblr -n <int> -m <int> -b <int> -r <double> -d <string> -t <string> -o <string>\n");
+    fprintf(stderr, "\n./gblr -n <int> -m <int> -a <double> -g <double> -b <int> -r <double> -d <string> -t <string> -o <string>\n");
     fprintf(stderr, "     -n  tree capicity                   \n");
     fprintf(stderr, "     -m  max leaf node in per tree       \n");
+    fprintf(stderr, "     -a  node regulization               \n");
+    fprintf(stderr, "     -g  weight regulization             \n");
     fprintf(stderr, "     -b  1:binary or else                \n");
     fprintf(stderr, "     -r  learning rate                   \n");
     fprintf(stderr, "     -d  train input file                \n");
@@ -26,6 +28,8 @@ void help() {
 
 int parse_command_line(GBMP *p, int argc, char *argv[]){
     double r = 0.0;
+    double w_reg = 0.0;
+    double n_reg = 0.0;
     int b = 0, n = 20, m = 10;
     char * f = NULL;
     char * t = NULL;
@@ -48,6 +52,12 @@ int parse_command_line(GBMP *p, int argc, char *argv[]){
         }
         else if (0 == strcmp(arg,"-b")){
             b = atoi(argv[++i]);
+        }
+        else if (0 == strcmp(arg,"-a")){
+            n_reg = atof(argv[++i]);
+        }
+        else if (0 == strcmp(arg,"-g")){
+            w_reg = atof(argv[++i]);
         }
         else if (0 == strcmp(arg,"-r")){
             r = atof(argv[++i]);
@@ -72,6 +82,8 @@ int parse_command_line(GBMP *p, int argc, char *argv[]){
         return -1;
     }
     p->rate           = r;
+    p->wei_reg        = w_reg;
+    p->nod_reg        = n_reg;
     p->binary         = b;
     p->max_trees      = n;
     p->max_leaf_nodes = m;
@@ -92,7 +104,13 @@ int main(int argc, char *argv[]) {
     }
     fprintf(stderr, "command line parse done\n");
     GBDT * gblr = gbdt_lr(p);
+    if (!gblr){
+        return -1;
+    }
+    long t1 = time(NULL);
     gbdt_train(gblr);
+    long t2 = time(NULL);
+    printf("time used for training: %ld seconds\n", t2 - t1);
     gbdt_save(gblr);
     gbdt_free(gblr);
     gblr = NULL;

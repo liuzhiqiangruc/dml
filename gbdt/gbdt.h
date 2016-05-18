@@ -18,6 +18,8 @@
  * -------------------------------------- */
 typedef struct _gbdt_param {
     double rate;
+    double nod_reg;
+    double wei_reg;
     int max_leaf_nodes;
     int max_trees;
     int binary;
@@ -51,6 +53,9 @@ double * t_model(GBDT * gbdt);
 
 //-   tree size currently
 int      t_size(GBDT * gbdt);
+
+//-   has test data or not
+int      has_test(GBDT * gbdt);
 
 //-   create, train, save, free gbdt model
 GBDT * gbdt_create(G g_fn, H h_fn, R f_fn, GBMP p);

@@ -60,6 +60,8 @@ static int split(DTD   * ds
                , DTree ** inst_nodes
                , double * g
                , double * h
+               , double n_reg
+               , double w_reg
                , int n)    {
     memset(le, 0, sizeof(DTree));
     memset(ri, 0, sizeof(DTree));
@@ -81,7 +83,9 @@ static int split(DTD   * ds
                 if (ds->bin == 0) {
                     val = ds->vals[offs + j];
                     if ((fabs(val - l_val) > 1e-6) && (fabs(l_val - 0.123456789) > 1e-6)) {
-                        gain = 0.5 * (l_sg * l_sg / l_sh + r_sg * r_sg / r_sh - t->sg * t->sg / t->sh);
+                        gain = 0.5 * (l_sg * l_sg / (l_sh + w_reg) \
+                                    + r_sg * r_sg / (r_sh + w_reg) \
+                                    - t->sg * t->sg / (t->sh + w_reg)) - n_reg;
                         if (gain > max_gain) {
                             max_gain = gain;
                             attr = i;
@@ -99,7 +103,9 @@ static int split(DTD   * ds
             }
         }
         if (cnt > 0 && cnt < t->n){
-            gain = 0.5 * (l_sg * l_sg / l_sh + r_sg * r_sg / r_sh - t->sg * t->sg / t->sh);
+            gain = 0.5 * (l_sg * l_sg / (l_sh + w_reg) \
+                        + r_sg * r_sg / (r_sh + w_reg) \
+                        - t->sg * t->sg / (t->sh + w_reg)) - n_reg;
             if (gain > max_gain){
                 max_gain = gain;
                 attr = i;
@@ -123,12 +129,12 @@ static int split(DTD   * ds
         ri->n        = t->n - l_cnt;
         le->sg       = l_sg_b;
         le->sh       = l_sh_b;
-        le->wei      = -1.0 * le->sg / le->sh;
-        le->loss     = -0.5 * le->sg * le->sg / le->sh;
+        le->wei      = -1.0 * le->sg / (le->sh + w_reg);
+        le->loss     = -0.5 * le->sg * le->sg / (le->sh + w_reg) + n_reg;
         ri->sg       = t->sg - l_sg_b;
         ri->sh       = t->sh - l_sh_b;
-        ri->wei      = -1.0 * ri->sg / ri->sh;
-        ri->loss     = -0.5 * ri->sg * ri->sg / ri->sh;
+        ri->wei      = -1.0 * ri->sg / (ri->sh + w_reg);
+        ri->loss     = -0.5 * ri->sg * ri->sg / (ri->sh + w_reg) + n_reg;
         offs = ds->cl[attr];
         for (j = 0; j < ds->l[attr]; j++){
             row = ds->ids[offs + j];
@@ -160,7 +166,7 @@ static void insert(DTree ** leafs, int l, DTree * t){
     leafs[i] = t;
 }
 
-DTree * generate_dtree(DTD * ds, double * F, double * g, double * h, int n, int m){
+DTree * generate_dtree(DTD * ds, double * F, double * g, double * h, double n_reg, double w_reg, int n, int m){
     int i, l;
     if (m < 2)
         return NULL;
@@ -178,8 +184,8 @@ DTree * generate_dtree(DTD * ds, double * F, double * g, double * h, int n, int 
         t->sh += h[i];
         inst_nodes[i] = t;
     }
-    t->wei  = -1.0 * t->sg / t->sh;
-    t->loss = -0.5 * t->sg * t->sg / t->sh;
+    t->wei  = -1.0 * t->sg / (t->sh + w_reg);
+    t->loss = -0.5 * t->sg * t->sg / (t->sh + w_reg) + n_reg;
     // add first leaf node into leaf node sequence
     l = 0;
     leaf_nodes[l] = t;
@@ -192,7 +198,7 @@ DTree * generate_dtree(DTD * ds, double * F, double * g, double * h, int n, int 
         if (p->leaf == 0){
             DTree * le = (DTree *)malloc(sizeof(DTree));
             DTree * ri = (DTree *)malloc(sizeof(DTree));
-            if (split(ds, p, le, ri, inst_nodes, g, h, n) == 0){
+            if (split(ds, p, le, ri, inst_nodes, g, h, n_reg, w_reg, n) == 0){
                 insert(leaf_nodes, i,     le);
                 insert(leaf_nodes, i + 1, ri);
                 l += 1;

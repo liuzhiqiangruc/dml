@@ -18,6 +18,8 @@
  * -------------------------------------- */
 typedef struct _gbdt_param {
     double rate;
+    double nod_reg;
+    double wei_reg;
     int max_leaf_nodes;
     int max_trees;
     int binary;

@@ -22,9 +22,10 @@ typedef struct _d_tree DTree;
  * g       : 1-gradient
  * h       : 2-gradient
  * n       : length of F ,g, h
+ * d       : max depth of trees
  * m       : max leaf node in the tree
  * ----------------------------------------- */
-DTree * generate_dtree(DTD * ds, double * F, double * g, double * h, double n_reg, double w_reg, int n, int m);
+DTree * generate_dtree(DTD * ds, double * F, double * g, double * h, double nr, double wr, int n, int d, int m);
 
 /* -------------------------
  * brief   : free tree space

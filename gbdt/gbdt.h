@@ -22,6 +22,7 @@ typedef struct _gbdt_param {
     double wei_reg;
     int max_leaf_nodes;
     int max_trees;
+    int max_depth;
     int binary;
     char * train_input;
     char * test_input;

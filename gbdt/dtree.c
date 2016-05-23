@@ -137,10 +137,12 @@ static int tree_grow(DTD * ds
     k = -1;
     for (i = 0; i < l; i++){
         t = leaf_nodes[i];
-        gain = t->loss - t->child[0]->loss - t->child[1]->loss;
-        if (gain > v){
-            v = gain;
-            k = i;
+        if (0 == t->leaf){
+            gain = t->loss - t->child[0]->loss - t->child[1]->loss;
+            if (gain > v){
+                v = gain;
+                k = i;
+            }
         }
     }
     return k;
@@ -274,23 +276,14 @@ void save_dtree(DTree * t, char * out_file, char (*id_map)[FKL]){
         if (ct->leaf == 0){
             c1 = l; ts[l++] = ct->child[0];
             c2 = l; ts[l++] = ct->child[1];
-            fprintf(fp, "%d\t%d\t%s\t%.3f\t%.3f\t%.3f\t%d\t%d\n"         \
-                                                      , ct->n            \
-                                                      , ct->leaf         \
-                                                      , id_map[ct->attr] \
-                                                      , ct->attr_val     \
-                                                      , ct->wei          \
-                                                      , ct->loss         \
-                                                      , c1, c2);
+            fprintf(fp, "%d\t%d\t%s\t%.3f\t%.3f\t%.3f\t%d\t%d\n"          \
+                      , ct->n,   ct->leaf, id_map[ct->attr], ct->attr_val \
+                      , ct->wei, ct->loss, c1, c2);
 
         }
         else{
             fprintf(fp, "%d\t%d\tNone\tNone\t%.3f\t%.3f\t%d\t%d\n"    \
-                                                      , ct->n         \
-                                                      , ct->leaf      \
-                                                      , ct->wei       \
-                                                      , ct->loss      \
-                                                      , c1, c2);
+                      , ct->n, ct->leaf, ct->wei, ct->loss, c1, c2);
         }
         i += 1;
     } while (i < l && l <= 1997);

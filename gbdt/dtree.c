@@ -193,8 +193,10 @@ DTree * generate_dtree(DTD * ds      /* dataset for build tree */
         DTree * tmp = leaf_nodes[k];
         o = ds->cl[tmp->attr];
         for (i = 0; i < ds->l[tmp->attr]; i++){
-            if ((1 == ds->bin) || (0 == ds->bin && ds->vals[o + i] >= tmp->attr_val)){
-                inst_nodes[ds->ids[o + i]] = l;
+            if (inst_nodes[ds->ids[o + i]] == k){
+                if ((1 == ds->bin) || (0 == ds->bin && ds->vals[o + i] >= tmp->attr_val)){
+                    inst_nodes[ds->ids[o + i]] = l;
+                }
             }
         }
         leaf_nodes[l++] = tmp->child[0];
@@ -279,7 +281,6 @@ void save_dtree(DTree * t, char * out_file, char (*id_map)[FKL]){
             fprintf(fp, "%d\t%d\t%s\t%.3f\t%.3f\t%.3f\t%d\t%d\n"          \
                       , ct->n,   ct->leaf, id_map[ct->attr], ct->attr_val \
                       , ct->wei, ct->loss, c1, c2);
-
         }
         else{
             fprintf(fp, "%d\t%d\tNone\tNone\t%.3f\t%.3f\t%d\t%d\n"    \

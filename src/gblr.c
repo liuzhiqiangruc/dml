@@ -14,14 +14,15 @@
 
 void help() {
     fprintf(stderr, "\ngblr usage:        \n");
-    fprintf(stderr, "\n./gblr -n <int> -m <int> -a <double> -g <double> -b <int> -r <double> -d <string> -t <string> -o <string>\n");
+    fprintf(stderr, "\n./gblr -n <int> -m <int> -d <int> -b <int> -a <double> -g <double> -r <double> -f <string> -t <string> -o <string>\n");
     fprintf(stderr, "     -n  tree capicity                   \n");
     fprintf(stderr, "     -m  max leaf node in per tree       \n");
+    fprintf(stderr, "     -d  max depth of trees              \n");
+    fprintf(stderr, "     -b  1:binary or else                \n");
     fprintf(stderr, "     -a  node regulization               \n");
     fprintf(stderr, "     -g  weight regulization             \n");
-    fprintf(stderr, "     -b  1:binary or else                \n");
     fprintf(stderr, "     -r  learning rate                   \n");
-    fprintf(stderr, "     -d  train input file                \n");
+    fprintf(stderr, "     -f  train input file                \n");
     fprintf(stderr, "     -t  test  input file                \n");
     fprintf(stderr, "     -o  otuput dir                      \n");
 }
@@ -30,18 +31,16 @@ int parse_command_line(GBMP *p, int argc, char *argv[]){
     double r = 0.0;
     double w_reg = 0.0;
     double n_reg = 0.0;
-    int b = 0, n = 20, m = 10;
+    int b = 0, n = 20, m = 10, d = 2;
     char * f = NULL;
     char * t = NULL;
     char * o = "./";
     int i = 0;
     char * arg = NULL;
-
     if ((argc & 1) == 0){
         fprintf(stderr, "command line not well formatted\n");
         return -1;
     }
-
     while (i < argc) {
         arg = argv[i];
         if (0 == strcmp(arg,"-n")){
@@ -53,6 +52,9 @@ int parse_command_line(GBMP *p, int argc, char *argv[]){
         else if (0 == strcmp(arg,"-b")){
             b = atoi(argv[++i]);
         }
+        else if (0 == strcmp(arg,"-d")){
+            d = atoi(argv[++i]);
+        }
         else if (0 == strcmp(arg,"-a")){
             n_reg = atof(argv[++i]);
         }
@@ -62,7 +64,7 @@ int parse_command_line(GBMP *p, int argc, char *argv[]){
         else if (0 == strcmp(arg,"-r")){
             r = atof(argv[++i]);
         }
-        else if (0 == strcmp(arg,"-d")){
+        else if (0 == strcmp(arg,"-f")){
             f = argv[++i];
         }
         else if (0 == strcmp(arg,"-t")){
@@ -81,20 +83,18 @@ int parse_command_line(GBMP *p, int argc, char *argv[]){
         fprintf(stderr, "binary must be 0, or 1\n");
         return -1;
     }
-    p->rate           = r;
-    p->wei_reg        = w_reg;
-    p->nod_reg        = n_reg;
-    p->binary         = b;
     p->max_trees      = n;
     p->max_leaf_nodes = m;
+    p->binary         = b;
+    p->max_depth      = d;
+    p->nod_reg        = n_reg;
+    p->wei_reg        = w_reg;
+    p->rate           = r;
     p->train_input    = f;
     p->test_input     = t;
     p->out_dir        = o;
-
     return 0;
-
 }
-
 
 int main(int argc, char *argv[]) {
     GBMP p;
@@ -116,5 +116,3 @@ int main(int argc, char *argv[]) {
     gblr = NULL;
     return 0;
 }
-
-

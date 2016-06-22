@@ -63,17 +63,16 @@ static void fullfill_param(Lda * lda){
         lda->nkw[tid] += 1;
         double x = lda->xy[i][0];
         double y = lda->xy[i][1];
-        lda->disp[tid][0] = x;
-        lda->disp[tid][1] = y;
-        lda->disp[tid][2] = x * x;
-        lda->disp[tid][3] = y * y;
-        lda->disp[tid][4] = x * y;
+        lda->disp[tid][0] += x;
+        lda->disp[tid][1] += y;
+        lda->disp[tid][2] += x * x;
+        lda->disp[tid][3] += y * y;
+        lda->disp[tid][4] += x * y;
     }
     save_lda(lda, 0);
 }
 
 static void gibbs_sample(Lda * lda){
-    fullfill_param(lda);
     int st = 0;
     double *prob = (double*)malloc(sizeof(double) * lda->p.k);
     double vb = lda->p.b * lda->v;
@@ -107,7 +106,7 @@ static void gibbs_sample(Lda * lda){
             double invxy = -xy / det;
             double dx = x - mx;
             double dy = y - my;
-            prob[k] *= 1.0 / (sqrt(det) * exp((dx * dx * invxx + dy * dy * invyy + dx * dy * invxy)));
+            prob[k] *= 1.0 / (sqrt(det) * exp(0.5 * (dx * dx * invxx + dy * dy * invyy + 2.0 * dx * dy * invxy)));
             if (k > 0){
                 prob[k] += prob[k - 1];
             }
@@ -123,11 +122,11 @@ static void gibbs_sample(Lda * lda){
         lda->nd[uid * lda->p.k + st] += 1;
         lda->nw[vid * lda->p.k + st] += 1;
         lda->nkw[st] += 1;
-        lda->disp[st][0] -= x;
-        lda->disp[st][1] -= y;
-        lda->disp[st][2] -= x * x;
-        lda->disp[st][3] -= y * y;
-        lda->disp[st][4] -= x * y;
+        lda->disp[st][0] += x;
+        lda->disp[st][1] += y;
+        lda->disp[st][2] += x * x;
+        lda->disp[st][3] += y * y;
+        lda->disp[st][4] += x * y;
         lda->tokens[i][2] = st;
     }
     free(prob); prob = NULL;
@@ -245,7 +244,7 @@ void save_lda(Lda * lda, int n){
         fprintf(stderr, "can not open file \"%s\"\n", nw_file);
         return;
     }
-    for (int v = 0; v < lda->d; v++){
+    for (int v = 0; v < lda->v; v++){
         fprintf(fp, "%s", lda->id_v_map[v]);
         int offs = v * lda->p.k;
         for (int k = 0; k < lda->p.k; k++){
@@ -259,9 +258,10 @@ void save_lda(Lda * lda, int n){
         return;
     }
     for (int t = 0; t < lda->t; t++) {
-        fprintf(fp, "%s\t%s\t%d\n",   lda->id_doc_map[lda->tokens[t][0]],  \
-                                      lda->id_v_map[lda->tokens[t][1]],    \
-                                      lda->tokens[t][2]);
+        fprintf(fp, "%s\t%s\t%.4f\t%.4f\t%d\n",   lda->id_doc_map[lda->tokens[t][0]],  \
+                                                  lda->id_v_map[lda->tokens[t][1]],    \
+                                                  lda->xy[t][0], lda->xy[t][1],        \
+                                                  lda->tokens[t][2]);
     }
     fclose(fp);
     if (NULL == (fp = fopen(ps_file, "w"))) {
@@ -269,7 +269,8 @@ void save_lda(Lda * lda, int n){
         return;
     }
     for (int k = 0; k < lda->p.k; k++){
-        fprintf(fp, "%.8f\t%.8f\t%.8f\t%.8f\t%.8f\n", lda->disp[k][0], lda->disp[k][1], lda->disp[k][2], lda->disp[k][3], lda->disp[k][4]);
+        fprintf(fp, "%.8f\t%.8f\t%.8f\t%.8f\t%.8f\n", lda->disp[k][0], lda->disp[k][1], \
+                                     lda->disp[k][2], lda->disp[k][3], lda->disp[k][4]);
     }
     fclose(fp);
 }

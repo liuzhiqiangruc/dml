@@ -5,9 +5,9 @@ LD = gcc -shared
 
 
 
-objs    = lda.o
-sos     = liblda.so
-statics = libldas.a
+objs    = lda.o        lda_xy.o
+sos     = liblda.so    liblda_xy.so
+statics = libldas.a    liblda_xys.a
 
 all : $(objs) $(statics) $(sos)
 
@@ -22,13 +22,21 @@ inc_install :
 
 
 lda.o     : lda.h
+lda_xy.o  : lda.h
 
 
 liblda.so : lda.o ../util/str.o ../util/hash.o
 	$(LD) $^ -o $@
 
+liblda_xy.so : lda_xy.o ../util/str.o ../util/hash.o
+	$(LD) $^ -o $@
+
 libldas.a : lda.o ../util/str.o ../util/hash.o
 	ar cr $@ $^
+
+liblda_xys.a : lda_xy.o ../util/str.o ../util/hash.o
+	ar cr $@ $^
+
 
 install :
 	$(MAKE) lib_install

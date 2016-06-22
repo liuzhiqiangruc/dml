@@ -16,6 +16,31 @@
 #include "lda.h"
 
 #define LDA_LINE_LEN 1024
+/* ---------------------------------------------------
+ * matrix element for theta and phi
+ * --------------------------------------------------- */
+typedef struct {
+    unsigned short prev;
+    unsigned short next;
+    unsigned int   count;
+} ModelEle;
+
+/* ----------------------------------------------------
+ * model struct for Lda
+ * ---------------------------------------------------- */
+struct _lda {
+    int d;                         /* doc size          */
+    int t;                         /* token size        */
+    int v;                         /* dict size         */
+    char (*id_doc_map)[KEY_SIZE];  /* doc id map        */
+    char (*id_v_map)[KEY_SIZE];    /* word id map       */
+    int  (*tokens)[4];             /* tokens            */
+    int  * doc_entry;              /* doc entry         */
+    ModelEle * nd;                 /* doc_topic matrix  */
+    ModelEle * nw;                 /* topic_word matrix */
+    int * nkw;                     /* token n of topic  */
+    ParamLda p;                    /* lda parameter     */
+};
 
 static void malloc_space(Lda *lda) {
     // id_doc_map
@@ -202,9 +227,10 @@ static int gibbs_sample(Lda * lda) {
     return 0;
 }
 
-Lda *create_lda() {
+Lda *create_lda(ParamLda p) {
     Lda *lda = (Lda *) malloc(sizeof(Lda));
     memset(lda, 0, sizeof(Lda));
+    lda->p = p;
     return lda;
 }
 
@@ -377,4 +403,16 @@ void free_lda(Lda *lda) {
         }
         free(lda);
     }
+}
+
+int lda_d(Lda * lda){
+    return lda->d;
+}
+
+int lda_v(Lda * lda){
+    return lda->v;
+}
+
+int lda_t(Lda * lda){
+    return lda->t;
 }

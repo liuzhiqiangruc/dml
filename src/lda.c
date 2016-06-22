@@ -15,7 +15,7 @@
 
 void help() {
     fprintf(stderr, "Lda Command Usage: \n\n");
-    fprintf(stderr, "./lda -a <float> -b <float> -k <int> -n <int> -s <int> -d <string> -o <string>: \n\n");
+    fprintf(stderr, "./lda[_xx] -a <float> -b <float> -k <int> -n <int> -s <int> -d <string> -o <string>: \n\n");
     fprintf(stderr, "       -a  alpha     doc-K   paramenter  \n");
     fprintf(stderr, "       -b  beta      K-V     paramenter  \n");
     fprintf(stderr, "       -k  topicx    tt-size             \n");
@@ -84,20 +84,19 @@ int parse_command_line(ParamLda *p, int argc, char *argv[]) {
 }
 
 int main(int argc, char * argv[]) {
-    Lda * lda = create_lda();
-    if (-1 == parse_command_line(&(lda->p), argc, argv)){
+    ParamLda p;
+    if (-1 == parse_command_line(&p, argc, argv)){
         help();
         return -1;
     }
     fprintf(stderr,"command line parse done\n");
+    Lda * lda = create_lda(p);
     srand(time(NULL));
-
     if (-1 == init_lda(lda)) {
         return -1;
     }
-
     fprintf(stderr,"load data done\n");
-    fprintf(stderr,"D: %d V: %d T: %d\n", lda->d, lda->v, lda->t);
+    fprintf(stderr,"D: %d V: %d T: %d\n", lda_d(lda), lda_v(lda), lda_t(lda));
     est_lda(lda);
     free_lda(lda);
     lda = NULL;

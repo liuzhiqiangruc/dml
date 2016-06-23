@@ -96,7 +96,7 @@ static void gibbs_sample(Lda * lda){
             if (prob[st] > rnd) break;
         }
         if (st == lda->p.k){
-            fprintf(stderr, "sample failed, instance : %d\n", i);
+            fprintf(stderr, "sample failed, instance : %d\n", tkid);
             st = tid;
         }
         lda->nd[uid * lda->p.k + st] += 1;
@@ -129,6 +129,7 @@ int init_lda(Lda * lda){
     char *string, *token;
     int token_size = 0;
     int uid = -1, vid = -1, tid = -1, tkid = 0;
+    double x, y;
     Hash * uhs = hash_create(1<<20, STRING);
     Hash * vhs = hash_create(1<<20, STRING);
     while(NULL != fgets(buffer, LDA_LINE_LEN, fp)) {

@@ -226,12 +226,12 @@ void est_lda(Lda * lda){
     for (int n = 1; n <= lda->p.niters; n++){
         long sec1 = time(NULL);
         gibbs_sample(lda);
-        update_g_param(lda);
-        long sec2 = time(NULL);
-        fprintf(stderr, "iter %d done, using %ld seconds\n", n, sec2 - sec1);
         if (n % lda->p.savestep == 0){
+            update_g_param(lda);
             save_lda(lda, n);
         }
+        long sec2 = time(NULL);
+        fprintf(stderr, "iter %d done, using %ld seconds\n", n, sec2 - sec1);
     }
 }
 
@@ -295,8 +295,10 @@ void save_lda(Lda * lda, int n){
         return;
     }
     for (int k = 0; k < lda->p.k; k++){
-        fprintf(fp, "%.8f\t%.8f\t%.8f\t%.8f\t%.8f\n", lda->disp[k][0], lda->disp[k][1], \
-                                     lda->disp[k][2], lda->disp[k][3], lda->disp[k][4]);
+        for (int i = 0; i < 11; i++){
+            fprintf(fp, "%.4f\t", lda->disp[k][i]);
+        }
+        fprintf(fp, "\n");
     }
     fclose(fp);
 }

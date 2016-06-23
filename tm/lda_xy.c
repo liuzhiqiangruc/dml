@@ -30,7 +30,7 @@ struct _lda {
     int * nd;                      /* theta             */
     int * nw;                      /* phi               */
     int * nkw;                     /* token n of topic  */
-    double (*disp)[5];             /* for pos info      */
+    double (*disp)[11];            /* for pos info      */
     ParamLda p;                    /* lda parameter     */
 };
 
@@ -49,8 +49,30 @@ static void malloc_space(Lda * lda){
     memset(lda->nw, 0, sizeof(int) * lda->v * (lda->p.k));
     lda->nkw = (int *) malloc(sizeof(int) * (lda->p.k));
     memset(lda->nkw, 0, sizeof(int) * (lda->p.k));
-    lda->disp = (double(*)[5])malloc(sizeof(double[5]) * lda->p.k);
-    memset(lda->disp, 0, sizeof(double[5]) * lda->p.k);
+    lda->disp = (double(*)[11])malloc(sizeof(double[11]) * lda->p.k);
+    memset(lda->disp, 0, sizeof(double[11]) * lda->p.k);
+}
+
+static void update_g_param(Lda * lda){
+    double mx, my, xx, yy, xy, det, invxx, invyy, invxy;
+    int k = 0;
+    for (k = 0; k < lda->p.k; k++){
+        mx = lda->disp[k][0] / lda->nkw[k];
+        my = lda->disp[k][1] / lda->nkw[k];
+        xx = lda->disp[k][2] / lda->nkw[k] - mx * mx;
+        yy = lda->disp[k][3] / lda->nkw[k] - my * my;
+        xy = lda->disp[k][4] / lda->nkw[k] - mx * my;
+        det = xx * yy - xy * xy;
+        invxx = yy / det;
+        invyy = xx / det;
+        invxy = -xy / det;
+        lda->disp[k][5] = mx;
+        lda->disp[k][6] = my;
+        lda->disp[k][7] = det;
+        lda->disp[k][8] = invxx;
+        lda->disp[k][9] = invyy;
+        lda->disp[k][10] = invxy;
+    }
 }
 
 static void gibbs_sample(Lda * lda){
@@ -75,6 +97,7 @@ static void gibbs_sample(Lda * lda){
             prob[k] = 1.0 * (lda->nd[uid * lda->p.k + k] + lda->p.a) * \
                             (lda->nw[vid * lda->p.k + k] + lda->p.b) / \
                             (lda->nkw[k] + vb);
+            /*
             double mx = lda->disp[k][0] / lda->nkw[k];
             double my = lda->disp[k][1] / lda->nkw[k];
             double xx = lda->disp[k][2] / lda->nkw[k] - mx * mx;
@@ -84,8 +107,13 @@ static void gibbs_sample(Lda * lda){
             double invxx = yy / det;
             double invyy = xx / det;
             double invxy = -xy / det;
-            double dx = x - mx;
-            double dy = y - my;
+            */
+            double dx    = x - lda->disp[k][5];
+            double dy    = y - lda->disp[k][6];
+            double det   = lda->disp[k][7];
+            double invxx = lda->disp[k][8];
+            double invyy = lda->disp[k][9];
+            double invxy = lda->disp[k][10];
             prob[k] *= 1.0 / (sqrt(det) * exp(0.5 * (dx * dx * invxx + dy * dy * invyy + 2.0 * dx * dy * invxy)));
             if (k > 0){
                 prob[k] += prob[k - 1];
@@ -189,6 +217,7 @@ int init_lda(Lda * lda){
         lda->disp[tid][3] += y * y;
         lda->disp[tid][4] += x * y;
     }
+    update_g_param(lda);
     return 0;
 }
 
@@ -197,6 +226,7 @@ void est_lda(Lda * lda){
     for (int n = 1; n <= lda->p.niters; n++){
         long sec1 = time(NULL);
         gibbs_sample(lda);
+        update_g_param(lda);
         long sec2 = time(NULL);
         fprintf(stderr, "iter %d done, using %ld seconds\n", n, sec2 - sec1);
         if (n % lda->p.savestep == 0){

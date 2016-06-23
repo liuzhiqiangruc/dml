@@ -53,45 +53,25 @@ static void malloc_space(Lda * lda){
     memset(lda->disp, 0, sizeof(double[5]) * lda->p.k);
 }
 
-static void fullfill_param(Lda * lda){
-    for (int i = 0; i < lda->t; i++){
-        int uid = lda->tokens[i][0];
-        int vid = lda->tokens[i][1];
-        int tid = lda->tokens[i][2];
-        lda->nd[uid * lda->p.k + tid] += 1;
-        lda->nw[vid * lda->p.k + tid] += 1;
-        lda->nkw[tid] += 1;
-        double x = lda->xy[i][0];
-        double y = lda->xy[i][1];
-        lda->disp[tid][0] += x;
-        lda->disp[tid][1] += y;
-        lda->disp[tid][2] += x * x;
-        lda->disp[tid][3] += y * y;
-        lda->disp[tid][4] += x * y;
-    }
-    save_lda(lda, 0);
-}
-
 static void gibbs_sample(Lda * lda){
-    int st = 0;
+    int st, tkid, uid, vid, tid, k;
     double *prob = (double*)malloc(sizeof(double) * lda->p.k);
-    double vb = lda->p.b * lda->v;
-    double rnd = 0.0;
-    for (int i = 0; i < lda->t; i++){
-        int uid = lda->tokens[i][0];
-        int vid = lda->tokens[i][1];
-        int tid = lda->tokens[i][2];
-        double x = lda->xy[i][0];
-        double y = lda->xy[i][1];
+    double vb = lda->p.b * lda->v, rnd, x, y;
+    for (tkid = 0; tkid < lda->t; tkid++){
+        uid = lda->tokens[tkid][0];
+        vid = lda->tokens[tkid][1];
+        tid = lda->tokens[tkid][2];
+        x   = lda->xy[tkid][0];
+        y   = lda->xy[tkid][1];
         lda->nd[uid * lda->p.k + tid] -= 1;
-        lda->nd[vid * lda->p.k + tid] -= 1;
+        lda->nw[vid * lda->p.k + tid] -= 1;
         lda->nkw[tid] -= 1;
         lda->disp[tid][0] -= x;
         lda->disp[tid][1] -= y;
         lda->disp[tid][2] -= x * x;
         lda->disp[tid][3] -= y * y;
         lda->disp[tid][4] -= x * y;
-        for (int k = 0; k < lda->p.k; k++){
+        for (k = 0; k < lda->p.k; k++){
             prob[k] = 1.0 * (lda->nd[uid * lda->p.k + k] + lda->p.a) * \
                             (lda->nw[vid * lda->p.k + k] + lda->p.b) / \
                             (lda->nkw[k] + vb);
@@ -127,7 +107,7 @@ static void gibbs_sample(Lda * lda){
         lda->disp[st][2] += x * x;
         lda->disp[st][3] += y * y;
         lda->disp[st][4] += x * y;
-        lda->tokens[i][2] = st;
+        lda->tokens[tkid][2] = st;
     }
     free(prob); prob = NULL;
 }
@@ -193,11 +173,26 @@ int init_lda(Lda * lda){
     fclose(fp);
     hash_free(uhs); uhs = NULL;
     hash_free(vhs); vhs = NULL;
+    for (tkid = 0; tkid < lda->t; tkid++){
+        uid = lda->tokens[tkid][0];
+        vid = lda->tokens[tkid][1];
+        tid = lda->tokens[tkid][2];
+        x   = lda->xy[tkid][0];
+        y   = lda->xy[tkid][1];
+        lda->nd[uid * lda->p.k + tid] += 1;
+        lda->nw[vid * lda->p.k + tid] += 1;
+        lda->nkw[tid] += 1;
+        lda->disp[tid][0] += x;
+        lda->disp[tid][1] += y;
+        lda->disp[tid][2] += x * x;
+        lda->disp[tid][3] += y * y;
+        lda->disp[tid][4] += x * y;
+    }
     return 0;
 }
 
 void est_lda(Lda * lda){
-    fullfill_param(lda);
+    save_lda(lda, 0);
     for (int n = 1; n <= lda->p.niters; n++){
         long sec1 = time(NULL);
         gibbs_sample(lda);

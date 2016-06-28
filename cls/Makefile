@@ -5,9 +5,9 @@ LD = gcc -shared
 
 
 
-objs    = kmeans.o
-sos     = libkmeans.so
-statics = libkmeanss.a
+objs    = kmeans.o       k2d.o
+sos     = libkmeans.so   libk2d.so
+statics = libkmeanss.a   libk2ds.a
 
 all : $(objs) $(statics) $(sos)
 
@@ -20,6 +20,11 @@ inc_install :
 	mkdir -p ../inc
 	cp *.h ../inc
 
+libk2d.so: k2d.o
+	$(LD) $^ -o $@
+
+libk2ds.a: k2d.o
+	ar cr $@ $^
 
 libkmeans.so : kmeans.o
 	$(LD) $^ -o $@

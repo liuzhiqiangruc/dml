@@ -65,7 +65,7 @@ static void init_centers(double (*x)[2], double (*c)[11], int *ks, int *assign, 
     double _dist, __dist, rnd;
     memset(c,  0, sizeof(double[11]) * k);
     memset(ks, 0, sizeof(int) * k);
-    memset(cents, 0, sizeof(int) * n);
+    memset(cents, 0, sizeof(int) * k);
     *cents = (int)((0.1 + rand()) / (RAND_MAX + 0.1) * n);
     for (i = 1; i < k; i++){
         for (d = 0; d < n; d++){

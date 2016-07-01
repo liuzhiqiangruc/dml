@@ -107,6 +107,7 @@ static void init_centers(double (*x)[2], double (*c)[11], int *ks, int *assign, 
         ks[d]   += 1;
     }
     free(cents);      cents    = NULL;
+    update_center(c, ks, k);
 }
 
 double (*k2d(double (*x)[2], int *assign, int n, int k))[6] {

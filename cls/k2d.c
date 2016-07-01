@@ -35,25 +35,6 @@ static void update_center(double (*c)[11], int * ks, int k){
     }
 }
 
-/*
-static void init_centers(double (*x)[2], double (*c)[11], int *ks, int *assign, int n, int k){
-    int i, d;
-    memset(c, 0, sizeof(double[11]) * k);
-    memset(ks, 0, sizeof(int) * k);
-    for (i = 0; i < n; i++){
-        d = (int)(rand() + 0.1) / (RAND_MAX + 0.1) * k;
-        c[d][0] += x[i][0];
-        c[d][1] += x[i][1];
-        c[d][2] += x[i][0] * x[i][0];
-        c[d][3] += x[i][1] * x[i][1];
-        c[d][4] += x[i][0] * x[i][1];
-        ks[d]   += 1;
-        assign[i] = d;
-    }
-    update_center(c, ks, k);
-}
-*/
-
 static double dist(double x1, double y1, double x2, double y2){
     return sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
 }
@@ -118,8 +99,10 @@ double (*k2d(double (*x)[2], int *assign, int n, int k))[6] {
     int *ks = (int*)malloc(sizeof(int) * k);
     int i, j, t, mi;
     long t1, t2;
+    t1 = time(NULL);
     init_centers(x, centers, ks, assign, n, k);
-    fprintf(stderr, "init centers done\n");
+    t2 = time(NULL);
+    fprintf(stderr, "init centers done, using %ld seconds\n", t2 - t1);
     do {
         t = 0;
         t1 = time(NULL);

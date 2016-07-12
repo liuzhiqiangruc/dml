@@ -77,12 +77,12 @@ int ed_bak(char * x, char * y){
             dm[offs + j] = min(tmp, dm[offs + j - 1 - ly] + d);
         }
     }
-    for (int i = 0; i < lx; i++){
-        for (int j = 0; j < ly; j++){
-            printf ("%3d", dm[i * ly + j]);
-        }
-        printf("\n");
-    }
+    //for (int i = 0; i < lx; i++){
+    //    for (int j = 0; j < ly; j++){
+    //        printf ("%3d", dm[i * ly + j]);
+    //    }
+    //    printf("\n");
+    //}
     dist = dm[lx * ly - 1];
     free(dm);
     dm = NULL;

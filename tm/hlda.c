@@ -51,8 +51,8 @@ static void malloc_space(Lda * lda){
     lda->ln       = (int *)            calloc(lda->l,       sizeof(int));
     lda->nkw      = (int *)            calloc(lda->p.k + 1, sizeof(int));
     lda->wl       = (int *)            calloc(lda->v * lda->l,         sizeof(int));
-    lda->nd       = (ModelEle*)        calloc(lda->d * (lda->p.k + 1), sizeof(int));
-    lda->nw       = (ModelEle*)        calloc(lda->v * (lda->p.k + 1), sizeof(int));
+    lda->nd       = (ModelEle*)        calloc(lda->d * (lda->p.k + 1), sizeof(ModelEle));
+    lda->nw       = (ModelEle*)        calloc(lda->v * (lda->p.k + 1), sizeof(ModelEle));
     memset(lda->doc_ent, -1, lda->d * sizeof(int));
 }
 

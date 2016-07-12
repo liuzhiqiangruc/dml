@@ -6,7 +6,6 @@
  *   date     : 2016-07-11
  *   info     : 
  * ======================================================== */
-
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -260,11 +259,12 @@ static int gibbs_sample(Lda * lda){
             }
             i = lda->tokens[i][5];
         }
-        d0 = d;
     }
+    free(pse); pse = NULL;
+    free(psd); psd = NULL;
+    free(psv); psv = NULL;
     return 0;
 }
-
 
 Lda * create_lda(ParamLda p){
     Lda * lda = (Lda*)calloc(1, sizeof(Lda));
@@ -368,6 +368,7 @@ void save_lda(Lda *lda, int n) {
     char nw_file[512];
     char tk_file[512];
     char wl_file[512];
+    int d, v, t, offs, k, l;
     if (n < lda->p.niters){
         sprintf(nd_file,  "%s/%d_doc_topic",  lda->p.out_dir, n);
         sprintf(nw_file,  "%s/%d_word_topic", lda->p.out_dir, n);
@@ -385,10 +386,10 @@ void save_lda(Lda *lda, int n) {
         fprintf(stderr, "can not open file \"%s\"", nd_file);
         return;
     }
-    for (int d = 0; d < lda->d; d++) {
+    for (d = 0; d < lda->d; d++) {
         fprintf(fp, "%s", lda->id_d_map[d]);
-        int offs = d * (lda->p.k + 1);
-        for (int k = 1; k <= lda->p.k; k++) {
+        offs = d * (lda->p.k + 1);
+        for (k = 1; k <= lda->p.k; k++) {
             fprintf(fp, "\t%d", lda->nd[offs + k].count);
         }
         fprintf(fp, "\n");
@@ -399,10 +400,10 @@ void save_lda(Lda *lda, int n) {
         fprintf(stderr, "can not open file \"%s\"", nw_file);
         return;
     }
-    for (int v = 0; v < lda->v; v++) {
+    for (v = 0; v < lda->v; v++) {
         fprintf(fp, "%s", lda->id_v_map[v]);
-        int offs = v * (lda->p.k + 1);
-        for (int k = 1; k <= lda->p.k; k++) {
+        offs = v * (lda->p.k + 1);
+        for (k = 1; k <= lda->p.k; k++) {
             fprintf(fp, "\t%d", lda->nw[offs + k].count);
         }
         fprintf(fp, "\n");
@@ -413,10 +414,12 @@ void save_lda(Lda *lda, int n) {
         fprintf(stderr, "can not open file \"%s\"", tk_file);
         return;
     }
-    for (int t = 0; t < lda->t; t++) {
-        fprintf(fp, "%s\t%s\t%d\n",   lda->id_d_map[lda->tokens[t][0]],  \
-                                      lda->id_v_map[lda->tokens[t][1]],    \
-                                      lda->tokens[t][2]);
+    for (t = 0; t < lda->t; t++) {
+        fprintf(fp, "%s\t%s\t%s\t%d\t%d\n",   lda->id_d_map[lda->tokens[t][0]],  \
+                                              lda->id_l_map[lda->tokens[t][1]],  \
+                                              lda->id_v_map[lda->tokens[t][2]],  \
+                                              lda->tokens[t][3],                 \
+                                              lda->tokens[t][4]);
     }
     fclose(fp);
     //output for wl
@@ -424,17 +427,19 @@ void save_lda(Lda *lda, int n) {
         fprintf(stderr, "can not open file \"%s\"", tk_file);
         return;
     }
-    for (int l = 0; l < lda->l; l++){
+    fprintf(fp, "word:local");
+    for (l = 0; l < lda->l; l++){
         fprintf(fp, "\t%s", lda->id_l_map[l]);
     }
     fprintf(fp, "\n");
-    for (int v = 0; v < lda->v; v++){
+    for (v = 0; v < lda->v; v++){
         fprintf(fp, "%s", lda->id_v_map[v]);
-        for (int l = 0; l < lda->l; l++){
+        for (l = 0; l < lda->l; l++){
             fprintf(fp, "\t%d", lda->wl[v * lda->l + l]);
         }
         fprintf(fp, "\n");
     }
+    fclose(fp);
 }
 
 void free_lda(Lda *lda) {

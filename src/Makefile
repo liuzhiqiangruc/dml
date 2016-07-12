@@ -8,7 +8,7 @@ CC = gcc -std=c99 -g
 CFBASE = -Wall -pedantic -pipe
 CFLAGS = $(CFBASE) -DNDEBUG -DNPRINT -O0 -I$(INC)
 
-PRGS   = lr lda gblr lda_xy k2d
+PRGS   = lr lda gblr lda_xy k2d hlda
 
 all : $(PRGS)
 
@@ -33,6 +33,9 @@ lda: lda.o
 lda_xy: lda.o
 	$(CC) -L$(LIB) $^ -llda_xys -lm -o $@
 
+hlda: lda.o
+	$(CC) -L$(LIB) $^ -lhldas -lm -o $@
+
 gblr: gblr.o
 	$(CC) -L$(LIB) $^ -lgblrs -lm -o $@
 
@@ -42,6 +45,7 @@ k2d : k2d.o
 bin_install:
 	cp lr $(INS)/bin
 	cp lda $(INS)/bin
+	cp hlda $(INS)/bin
 	cp lda_xy $(INS)/bin
 	cp gblr $(INS)/bin
 	cp k2d $(INS)/bin

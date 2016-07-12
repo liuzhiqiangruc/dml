@@ -18,6 +18,8 @@
 typedef struct {           
     double a;              /* alpha   */     
     double b;              /* beta    */     
+    double g0;             /* gamma0  */
+    double g1;             /* gamma1  */
     int    niters;         /* iter n  */     
     int    savestep;       /* save s  */     
     int    k;              /* topic n */     

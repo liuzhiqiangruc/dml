@@ -108,6 +108,7 @@ static void fullfill_param(Lda * lda){
 static int gibbs_sample(Lda * lda){
     double ab = lda->p.a * lda->p.b;
     double vb = lda->p.b * lda->v;
+    double ta = lda->p.a * lda->p.k;
     double e, f, g, s, s1, s2, tmp, r;
     double *pse = (double*)malloc(sizeof(double) * (lda->p.k + 1));
     double *psd = (double*)malloc(sizeof(double) * (lda->p.k + 1));
@@ -172,12 +173,13 @@ static int gibbs_sample(Lda * lda){
                 g     += psv[k];
                 k = lda->nw[voffs + k].next;
             }
+            s1 = (e + f + g) * (lda->p.g0 + lda->doc_cnt[d][0]) \
+               / (lda->p.g0 + lda->p.g1 + lda->doc_cnt[d][0] + lda->doc_cnt[d][1]) \
+               / (ta + lda->doc_cnt[d][0]);
             s2 = (lda->p.g1 + lda->doc_cnt[d][1])      \
                / (lda->p.g0 + lda->p.g1 + lda->doc_cnt[d][0] + lda->doc_cnt[d][1]) \
                * (lda->p.b + lda->wl[v * lda->l + l])  \
                / (vb + lda->ln[l]);
-            s1 = (e + f + g) * (lda->p.g0 + lda->doc_cnt[d][0]) \
-               / (lda->p.g0 + lda->p.g1 + lda->doc_cnt[d][0] + lda->doc_cnt[d][1]);
             s = s1 + s2;
             r = s * (0.1 + rand()) / (0.1 + RAND_MAX);
             if (s1 <= r){ // special topic
@@ -190,7 +192,7 @@ static int gibbs_sample(Lda * lda){
             else{         // global topic  sample once or twice?
                 //r = (e + f + g) * (0.1 + rand()) / (0.9 + RAND_MAX);
                 r = r * (lda->p.g0 + lda->p.g1 + lda->doc_cnt[d][0] + lda->doc_cnt[d][1]) \
-                      / (lda->p.g0 + lda->doc_cnt[d][0]);
+                      * (ta + lda->doc_cnt[d][0]) / (lda->p.g0 + lda->doc_cnt[d][0]);
                 tmp = 0.0;
                 if (r < e){
                     for (k = 1; k <= lda->p.k; k++){

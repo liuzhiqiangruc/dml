@@ -108,11 +108,11 @@ static void fullfill_param(Lda * lda){
 static int gibbs_sample(Lda * lda){
     double ab = lda->p.a * lda->p.b;
     double vb = lda->p.b * lda->v;
-    double e, f, g, s, s1, s2, tmp, tmp1, r;
+    double e, f, g, s, s1, s2, tmp, r;
     double *pse = (double*)malloc(sizeof(double) * (lda->p.k + 1));
     double *psd = (double*)malloc(sizeof(double) * (lda->p.k + 1));
     double *psv = (double*)malloc(sizeof(double) * (lda->p.k + 1));
-    int i, k, d0, d, l, v, x, t, doffs, voffs;
+    int i, k, d, l, v, x, t, doffs, voffs;
     e = 0.0;
     memset(pse, 0, sizeof(double) * (lda->p.k + 1));
     for (k = 1; k <= lda->p.k; k++){
@@ -131,25 +131,12 @@ static int gibbs_sample(Lda * lda){
             k = lda->nd[doffs + k].next;
         }
         i = lda->doc_ent[d];
-        d0 = 0;
         while (i != -1){
             l = lda->tokens[i][1];
             v = lda->tokens[i][2];
             x = lda->tokens[i][3];
             t = lda->tokens[i][4];
             voffs = v * (lda->p.k + 1);
-            if (d0 == 0){
-                g = 0.0;
-                k = lda->nw[voffs].next;
-                while (k != 0){
-                    psv[k] = 1.0 * lda->nw[voffs + k].count \
-                                 * (lda->p.a + lda->nd[doffs + k].count) \
-                                 / (vb + lda->nkw[k]);
-                    g     += psv[k];
-                    k = lda->nw[voffs + k].next;
-                }
-                d0 = 1;
-            }
             if (x == 0){
                 lda->nd[doffs + t].count -= 1;
                 lda->nw[voffs + t].count -= 1;
@@ -158,27 +145,32 @@ static int gibbs_sample(Lda * lda){
                 if (lda->nd[doffs + t].count == 0){
                     lda->nd[doffs + lda->nd[doffs + t].prev].next = lda->nd[doffs + t].next;
                     lda->nd[doffs + lda->nd[doffs + t].next].prev = lda->nd[doffs + t].prev;
+                    lda->nd[doffs + t].next = lda->nd[doffs + t].prev = 0;
                 }
                 if (lda->nw[voffs + t].count == 0){
                     lda->nw[voffs + lda->nw[voffs + t].prev].next = lda->nw[voffs + t].next;
                     lda->nw[voffs + lda->nw[voffs + t].next].prev = lda->nw[voffs + t].prev;
+                    lda->nw[voffs + t].next = lda->nw[voffs + t].prev = 0;
                 }
                 tmp = (vb + lda->nkw[t]) * (vb + lda->nkw[t] + 1);
                 e      += ab / tmp;
                 pse[t] += ab / tmp;
                 f      += lda->p.b * (lda->nd[doffs + t].count - vb - lda->nkw[t]) / tmp;
                 psd[t] += lda->p.b * (lda->nd[doffs + t].count - vb - lda->nkw[t]) / tmp;
-                tmp1    = (lda->p.a + lda->nd[doffs + t].count)   \
-                        *  lda->nw[voffs + t].count               \
-                        - (lda->nkw[t] + vb)                      \
-                        * (lda->p.a + lda->nd[doffs + t].count + lda->nw[voffs + t].count + 1);
-                g      += tmp1 / tmp;
-                psv[t] += tmp1 / tmp;
             }
             else {
                 lda->wl[v * lda->l + l] -= 1;
                 lda->ln[l]              -= 1;
                 lda->doc_cnt[d][1]      -= 1;
+            }
+            g = 0.0;
+            k = lda->nw[voffs].next;
+            while (k != 0){
+                psv[k] = 1.0 * lda->nw[voffs + k].count \
+                             * (lda->p.a + lda->nd[doffs + k].count) \
+                             / (vb + lda->nkw[k]);
+                g     += psv[k];
+                k = lda->nw[voffs + k].next;
             }
             s2 = (lda->p.g1 + lda->doc_cnt[d][1])      \
                / (lda->p.g0 + lda->p.g1 + lda->doc_cnt[d][0] + lda->doc_cnt[d][1]) \
@@ -196,7 +188,9 @@ static int gibbs_sample(Lda * lda){
                 lda->tokens[i][4]        = -1;
             }
             else{         // global topic  sample once or twice?
-                r = (e + f + g) * (0.1 + rand()) / (0.1 + RAND_MAX);
+                //r = (e + f + g) * (0.1 + rand()) / (0.9 + RAND_MAX);
+                r = r * (lda->p.g0 + lda->p.g1 + lda->doc_cnt[d][0] + lda->doc_cnt[d][1]) \
+                      / (lda->p.g0 + lda->doc_cnt[d][0]);
                 tmp = 0.0;
                 if (r < e){
                     for (k = 1; k <= lda->p.k; k++){
@@ -228,6 +222,10 @@ static int gibbs_sample(Lda * lda){
                         k = lda->nw[voffs + k].next;
                     }
                 }
+                if (k == 0){
+                    fprintf(stderr, "\nsample failed\n");
+                    return -1;
+                }
                 if (lda->nd[doffs + k].count == 0){
                     lda->nd[doffs + lda->nd[doffs].prev].next = k;
                     lda->nd[doffs + k].prev = lda->nd[doffs].prev;
@@ -251,11 +249,6 @@ static int gibbs_sample(Lda * lda){
                 pse[k] -= ab / tmp;
                 f      += lda->p.b * (vb + lda->nkw[k] - lda->nd[doffs + k].count) / tmp;
                 psd[k] += lda->p.b * (vb + lda->nkw[k] - lda->nd[doffs + k].count) / tmp;
-                tmp1    = (vb + lda->nkw[k])                               \
-                        * (lda->nd[doffs + k].count + lda->p.a + lda->nw[voffs + k].count - 1) \
-                        - (lda->nd[doffs + k].count + lda->p.a) * lda->nw[voffs + k].count;
-                g      += tmp1 / tmp;
-                psv[k] += tmp1 / tmp;
             }
             i = lda->tokens[i][5];
         }

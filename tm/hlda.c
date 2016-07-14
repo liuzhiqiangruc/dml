@@ -105,152 +105,217 @@ static void fullfill_param(Lda * lda){
     save_lda(lda, 0);
 }
 
-static int gibbs_sample(Lda * lda){
+static double init_e(Lda * lda, double * pse){
+    int k;
+    double e = 0.0;
     double ab = lda->p.a * lda->p.b;
     double vb = lda->p.b * lda->v;
+    for (k = 1; k <= lda->p.k; k++){
+        pse[k] = ab / (vb + lda->nkw[k]);
+        e += pse[k];
+    }
+    return e;
+}
+
+static double init_f(Lda * lda, double * psd, int d){
+    double f = 0.0, vb = lda->p.b * lda->v;
+    int offs = d * (lda->p.k + 1), k;
+    k = lda->nd[offs].next;
+    while (k != 0){
+        psd[k] = lda->p.b * (lda->nd[offs + k].count) / (vb + lda->nkw[k]);
+        f += psd[k];
+        k = lda->nd[offs + k].next;
+    }
+    return f;
+}
+
+static double init_g(Lda * lda, double * psv, int d, int v){
+    double g = 0.0, vb = lda->p.b * lda->v;
+    int doffs = d * (lda->p.k + 1), voffs = v * (lda->p.k + 1);
+    int k = lda->nw[voffs].next;
+    while (k != 0){
+        psv[k] = 1.0 * lda->nw[voffs + k].count \
+                     * (lda->p.a + lda->nd[doffs + k].count) \
+                     / (vb + lda->nkw[k]);
+        g += psv[k];
+        k = lda->nw[voffs + k].next;
+    }
+    return g;
+}
+
+static double update_e(Lda * lda, double * pse, int t, int delta){
+    double ab = lda->p.a * lda->p.b;
+    double vb = lda->p.b * lda->v;
+    double tmp = 0.0;
+    tmp += ab / (vb + lda->nkw[t]);
+    tmp -= ab / (vb + lda->nkw[t] + delta);
+    pse[t] += tmp;
+    return tmp;
+}
+
+static double update_f(Lda * lda, double * psd, int d, int t, int delta){
+    double vb = lda->p.b * lda->v;
+    double tmp = 0.0;
+    int doffs = d * (lda->p.k + 1);
+    tmp += lda->p.b * lda->nd[doffs + t].count / (vb + lda->nkw[t]);
+    tmp -= lda->p.b * (lda->nd[doffs + t].count + delta) / (vb + lda->nkw[t] + delta);
+    psd[t] += tmp;
+    return tmp;
+}
+
+static void off_tp_k(Lda * lda, int d, int v, int t){
+    int voffs = v * (lda->p.k + 1);
+    int doffs = d * (lda->p.k + 1);
+    int p, n;
+    lda->nd[doffs + t].count -= 1;
+    lda->nw[voffs + t].count -= 1;
+    lda->nkw[t]              -= 1;
+    lda->doc_cnt[d][0]       -= 1;
+    if (lda->nd[doffs + t].count == 0){
+        p = lda->nd[doffs + t].prev;
+        n = lda->nd[doffs + t].next;
+        lda->nd[doffs + p].next = n;
+        lda->nd[doffs + n].prev = p;
+        lda->nd[doffs + t].next = 0;
+        lda->nd[doffs + t].prev = 0;
+    }
+    if (lda->nw[voffs + t].count == 0){
+        p = lda->nw[voffs + t].prev;
+        n = lda->nw[voffs + t].next;
+        lda->nw[voffs + p].next = n;
+        lda->nw[voffs + n].prev = p;
+        lda->nw[voffs + t].next = 0;
+        lda->nw[voffs + t].prev = 0;
+    }
+}
+
+static void addon_tp_k(Lda * lda, int d, int v, int k, int t){
+    int doffs = d * (lda->p.k + 1);
+    int voffs = v * (lda->p.k + 1);
+    if (lda->nd[doffs + k].count == 0){
+        lda->nd[doffs + lda->nd[doffs].prev].next = k;
+        lda->nd[doffs + k].prev = lda->nd[doffs].prev;
+        lda->nd[doffs + k].next = 0;
+        lda->nd[doffs].prev = k;
+    }
+    if (lda->nw[voffs + k].count == 0){
+        lda->nw[voffs + lda->nw[voffs].prev].next = k;
+        lda->nw[voffs + k].prev = lda->nw[voffs].prev;
+        lda->nw[voffs + k].next = 0;
+        lda->nw[voffs].prev = k;
+    }
+    lda->nd[doffs + k].count += 1;
+    lda->nw[voffs + k].count += 1;
+    lda->nkw[k]              += 1;
+    lda->doc_cnt[d][0]       += 1;
+    lda->tokens[t][3]         = 0;
+    lda->tokens[t][4]         = k;
+}
+
+static void off_lc_l(Lda * lda, int d, int v, int l){
+    lda->wl[v * lda->l + l] -= 1;
+    lda->ln[l]              -= 1;
+    lda->doc_cnt[d][1]      -= 1;
+}
+
+static void addon_lc_l(Lda * lda, int d, int v, int l, int t){
+    lda->wl[v * lda->l + l] += 1;
+    lda->ln[l]              += 1;
+    lda->doc_cnt[d][1]      += 1;
+    lda->tokens[t][3]        = 1;
+    lda->tokens[t][4]        =-1;
+}
+
+static int sample_k(Lda * lda, double * pse
+                             , double * psd
+                             , double * psv
+                             , double e
+                             , double f
+                             , double g
+                             , double r
+                             , int d
+                             , int v){
+    double tmp = 0.0;
+    int k, doffs = d * (lda->p.k + 1), voffs = v * (lda->p.k + 1);
+    if (r < e){
+        for (k = 1; k <= lda->p.k; k++){
+            tmp += pse[k];
+            if (tmp > r){
+                break;
+            }
+        }
+    }
+    else if (r < e + f){
+        r -= e;
+        k = lda->nd[doffs].next;
+        while (k != 0){
+            tmp += psd[k];
+            if (tmp > r ){
+                break;
+            }
+            k = lda->nd[doffs + k].next;
+        }
+    }
+    else{
+        r -= (e + f);
+        k = lda->nw[voffs].next;
+        while (k != 0){
+            tmp += psv[k];
+            if (tmp > r){
+                break;
+            }
+            k = lda->nw[voffs + k].next;
+        }
+    }
+    return k;
+}
+
+static int gibbs_sample(Lda * lda){
     double ta = lda->p.a * lda->p.k;
-    double e, f, g, s, s1, s2, tmp, r;
+    double e, f, g, s, s1, s2, r, tpr;
     double *pse = (double*)malloc(sizeof(double) * (lda->p.k + 1));
     double *psd = (double*)malloc(sizeof(double) * (lda->p.k + 1));
     double *psv = (double*)malloc(sizeof(double) * (lda->p.k + 1));
-    int i, k, d, l, v, x, t, doffs, voffs;
-    e = 0.0;
-    memset(pse, 0, sizeof(double) * (lda->p.k + 1));
-    for (k = 1; k <= lda->p.k; k++){
-        pse[k] = ab / (vb + lda->nkw[k]);
-        e     += pse[k];
-    }
+    int i, k, d, l, v, x, t;
+    e = init_e(lda, pse);
     for (d = 0; d < lda->d; d++){
-        memset(psd, 0, sizeof(double) * (lda->p.k + 1));
-        memset(psv, 0, sizeof(double) * (lda->p.k + 1));
-        doffs = d * (lda->p.k + 1);
-        f = 0.0;
-        k = lda->nd[doffs].next;
-        while (k != 0){
-            psd[k] = lda->p.b * lda->nd[doffs + k].count / (vb + lda->nkw[k]);
-            f     += psd[k];
-            k = lda->nd[doffs + k].next;
-        }
+        f = init_f(lda, psd, d);
         i = lda->doc_ent[d];
         while (i != -1){
             l = lda->tokens[i][1];
             v = lda->tokens[i][2];
             x = lda->tokens[i][3];
             t = lda->tokens[i][4];
-            voffs = v * (lda->p.k + 1);
             if (x == 0){
-                lda->nd[doffs + t].count -= 1;
-                lda->nw[voffs + t].count -= 1;
-                lda->nkw[t]              -= 1;
-                lda->doc_cnt[d][0]       -= 1;
-                if (lda->nd[doffs + t].count == 0){
-                    lda->nd[doffs + lda->nd[doffs + t].prev].next = lda->nd[doffs + t].next;
-                    lda->nd[doffs + lda->nd[doffs + t].next].prev = lda->nd[doffs + t].prev;
-                    lda->nd[doffs + t].next = lda->nd[doffs + t].prev = 0;
-                }
-                if (lda->nw[voffs + t].count == 0){
-                    lda->nw[voffs + lda->nw[voffs + t].prev].next = lda->nw[voffs + t].next;
-                    lda->nw[voffs + lda->nw[voffs + t].next].prev = lda->nw[voffs + t].prev;
-                    lda->nw[voffs + t].next = lda->nw[voffs + t].prev = 0;
-                }
-                tmp = (vb + lda->nkw[t]) * (vb + lda->nkw[t] + 1);
-                e      += ab / tmp;
-                pse[t] += ab / tmp;
-                f      += lda->p.b * (lda->nd[doffs + t].count - vb - lda->nkw[t]) / tmp;
-                psd[t] += lda->p.b * (lda->nd[doffs + t].count - vb - lda->nkw[t]) / tmp;
+                off_tp_k(lda, d, v, t);
+                e += update_e(lda, pse, t, 1);
+                f += update_f(lda, psd, d, t, 1);
             }
             else {
-                lda->wl[v * lda->l + l] -= 1;
-                lda->ln[l]              -= 1;
-                lda->doc_cnt[d][1]      -= 1;
+                off_lc_l(lda, d, v, l);
             }
-            g = 0.0;
-            k = lda->nw[voffs].next;
-            while (k != 0){
-                psv[k] = 1.0 * lda->nw[voffs + k].count \
-                             * (lda->p.a + lda->nd[doffs + k].count) \
-                             / (vb + lda->nkw[k]);
-                g     += psv[k];
-                k = lda->nw[voffs + k].next;
-            }
-            s1 = (e + f + g) * (lda->p.g0 + lda->doc_cnt[d][0]) \
-               / (lda->p.g0 + lda->p.g1 + lda->doc_cnt[d][0] + lda->doc_cnt[d][1]) \
-               / (ta + lda->doc_cnt[d][0]);
-            s2 = (lda->p.g1 + lda->doc_cnt[d][1])      \
-               / (lda->p.g0 + lda->p.g1 + lda->doc_cnt[d][0] + lda->doc_cnt[d][1]) \
-               * (lda->p.b + lda->wl[v * lda->l + l])  \
-               / (vb + lda->ln[l]);
+            g = init_g(lda, psv, d, v);
+            tpr = (lda->p.g0 + lda->doc_cnt[d][0]) \
+                / (lda->p.g0 + lda->doc_cnt[d][0]+ \
+                   lda->p.g1 + lda->doc_cnt[d][1]);
+            s1 = (e + f + g) * tpr / (ta + lda->doc_cnt[d][0]);
+            s2 = (1.0 - tpr) * (lda->p.b + lda->wl[v * lda->l + l]) \
+                             / (lda->p.b * lda->v + lda->ln[l]);
             s = s1 + s2;
             r = s * (0.1 + rand()) / (0.1 + RAND_MAX);
-            if (s1 <= r){ // special topic
-                lda->wl[v * lda->l + l] += 1;
-                lda->ln[l]              += 1;
-                lda->doc_cnt[d][1]      += 1;
-                lda->tokens[i][3]        = 1;
-                lda->tokens[i][4]        = -1;
+            if (s1 <= r){ 
+                addon_lc_l(lda, d, v, l, i);
             }
-            else{         // global topic  sample once or twice?
-                //r = (e + f + g) * (0.1 + rand()) / (0.9 + RAND_MAX);
-                r = r * (lda->p.g0 + lda->p.g1 + lda->doc_cnt[d][0] + lda->doc_cnt[d][1]) \
-                      * (ta + lda->doc_cnt[d][0]) / (lda->p.g0 + lda->doc_cnt[d][0]);
-                tmp = 0.0;
-                if (r < e){
-                    for (k = 1; k <= lda->p.k; k++){
-                        tmp += pse[k];
-                        if (tmp > r){
-                            break;
-                        }
-                    }
-                }
-                else if (r < e + f){
-                    r -= e;
-                    k = lda->nd[doffs].next;
-                    while (k != 0){
-                        tmp += psd[k];
-                        if (tmp > r ){
-                            break;
-                        }
-                        k = lda->nd[doffs + k].next;
-                    }
-                }
-                else{
-                    r -= (e + f);
-                    k = lda->nw[voffs].next;
-                    while (k != 0){
-                        tmp += psv[k];
-                        if (tmp > r){
-                            break;
-                        }
-                        k = lda->nw[voffs + k].next;
-                    }
-                }
+            else{
+                r = r / tpr * (ta + lda->doc_cnt[d][0]);
+                k = sample_k(lda, pse, psd, psv, e, f, g, r, d, v);
                 if (k == 0){
                     fprintf(stderr, "\nsample failed\n");
                     return -1;
                 }
-                if (lda->nd[doffs + k].count == 0){
-                    lda->nd[doffs + lda->nd[doffs].prev].next = k;
-                    lda->nd[doffs + k].prev = lda->nd[doffs].prev;
-                    lda->nd[doffs + k].next = 0;
-                    lda->nd[doffs].prev = k;
-                }
-                lda->nd[doffs + k].count += 1;
-                if (lda->nw[voffs + k].count == 0){
-                    lda->nw[voffs + lda->nw[voffs].prev].next = k;
-                    lda->nw[voffs + k].prev = lda->nw[voffs].prev;
-                    lda->nw[voffs + k].next = 0;
-                    lda->nw[voffs].prev = k;
-                }
-                lda->nw[voffs + k].count += 1;
-                lda->nkw[k]              += 1;
-                lda->doc_cnt[d][0]       += 1;
-                lda->tokens[i][3] = 0;
-                lda->tokens[i][4] = k;
-                tmp     = (vb + lda->nkw[k]) * (vb + lda->nkw[k] - 1);
-                e      -= ab / tmp;
-                pse[k] -= ab / tmp;
-                f      += lda->p.b * (vb + lda->nkw[k] - lda->nd[doffs + k].count) / tmp;
-                psd[k] += lda->p.b * (vb + lda->nkw[k] - lda->nd[doffs + k].count) / tmp;
+                addon_tp_k(lda, d, v, k, i);
+                e += update_e(lda, pse, k, -1);
+                f += update_f(lda, psd, d, k, -1);
             }
             i = lda->tokens[i][5];
         }

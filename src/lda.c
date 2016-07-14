@@ -4,7 +4,7 @@
  *   filename : lda.c
  *   author   : ***
  *   date     : 2015-03-26
- *   info     : 
+ *   info     : wtf
  * ======================================================== */
 
 #include <stdio.h>

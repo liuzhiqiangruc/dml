@@ -14,7 +14,7 @@
 #include "lda.h"
 
 void help(char * argv[]) {
-    fprintf(stderr, "Usage: \n\n");
+    fprintf(stderr, "Usage: \n");
     fprintf(stderr, "./%s -a <float> -b <float> -g0 <double> -g1 <double> -k <int> -n <int> -s <int> -d <string> -o <string>: \n\n", argv[0]);
     fprintf(stderr, "      -a  alpha     doc-K   paramenter  \n");
     fprintf(stderr, "      -b  beta      K-V     paramenter  \n");

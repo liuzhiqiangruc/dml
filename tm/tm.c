@@ -301,4 +301,131 @@ TM * tm_create(int argc, char * argv[]){
 }
 
 
+int tm_init(TM * tm) {
+    FILE *fp = NULL;
+    if (NULL == (fp = fopen(tm->tmc->get_d(tm->tmc), "r"))) {
+        fprintf(stderr, "can not open input file \n");
+        return -1;
+    }
+    char buffer[LDA_LINE_LEN] = {'\0'};
+    char *string = NULL, *token = NULL;
+    int tk, d, v, t, k;
+    k = tm->tmc->get_k(tm->tmc);
+    Hash * uhs = hash_create(1<<20, STRING);
+    Hash * vhs = hash_create(1<<20, STRING);
+    while (NULL != fgets(buffer, LDA_LINE_LEN, fp)) {
+        string = trim(buffer, 3);
+        token = strsep(&string, "\t");
+        hash_add(uhs, token);
+        token = strsep(&string, "\t");
+        hash_add(vhs, token);
+        tk += 1;
+    }
+    tm->d = hash_cnt(uhs);
+    tm->v = hash_cnt(vhs);
+    tm->t = tk;
+    malloc_space(tm);
+    rewind(fp);
+    tk = 0;
+    while (NULL != fgets(buffer, LDA_LINE_LEN, fp)) {
+        string = trim(buffer, 3);
+        token = strsep(&string, "\t");
+        d = hash_find(uhs, token);
+        if (tm->id_d_map[d][0] == '\0'){
+            strncpy(tm->id_d_map[d], token, KEY_SIZE - 1);
+        }
+        tm->tokens[tk][0] = d;
+        token = strsep(&string, "\t");
+        v = hash_find(vhs, token);
+        if (tm->id_v_map[v][0] == '\0'){
+            strncpy(tm->id_v_map[v], token, KEY_SIZE - 1);
+        }
+        tm->tokens[tk][1] = v;
+        t  = (int) ((0.1 + rand()) / (0.1 + RAND_MAX)) * k;
+        t += 1;
+        token = strsep(&string, "\t");
+        if (token){
+            t = atoi(token);
+        }
+        tm->tokens[tk][2] = t;
+        tm->tokens[tk][3] = tm->doc_entry[d];
+        tm->doc_entry[d] = tk;
+        tk += 1;
+    }
+    fclose(fp);
+    hash_free(uhs);    uhs = NULL;
+    hash_free(vhs);    vhs = NULL;
+    return 0;
+}
 
+void tm_est(TM * tm){
+    int n;
+    long sec1, sec2;
+    fullfill_param(tm);
+    for (n = 1; n < tm->tmc->get_n(tm->tmc) + 1; n++){
+        sec1 = time(NULL);
+        gibbs_sample(tm);
+        sec2 = time(NULL);
+        fprintf(stderr, "iter %d done, using %ld seconds\n", n, sec2 - sec1);
+        if (n % tm->tmc->get_s(tm->tmc) == 0){
+            tm_save(tm, n);
+        }
+    }
+}
+
+void tm_save(TM * tm, int n){
+    int d, v, t, k, o;
+    FILE *fp = NULL;
+    char nd_file[512];
+    char nw_file[512];
+    char tk_file[512];
+    char * out_dir = tm->tmc->get_o(tm->tmc);
+    k = tm->tmc->get_k(tm->tmc);
+    if (n < tm->tmc->get_n(tm->tmc)){
+        sprintf(nd_file,  "%s/%d_doc_topic",  out_dir, n);
+        sprintf(nw_file,  "%s/%d_word_topic", out_dir, n);
+        sprintf(tk_file,  "%s/%d_token_topic",out_dir, n);
+    }
+    else{
+        sprintf(nd_file,  "%s/%s_doc_topic",  out_dir, "f");
+        sprintf(nw_file,  "%s/%s_word_topic", out_dir, "f");
+        sprintf(tk_file,  "%s/%s_token_topic",out_dir, "f");
+    }
+    if (NULL == (fp = fopen(nd_file, "w"))) {
+        fprintf(stderr, "can not open file \"%s\"", nd_file);
+        return;
+    }
+    for (d = 0; d < tm->d; d++) {
+        fprintf(fp, "%s", tm->id_d_map[d]);
+        o = d * (k + 1);
+        for (t = 1; t < k + 1; t++){
+            fprintf(fp, "\t%d", tm->nd[o + t].count);
+        }
+        fprintf(fp, "\n");
+    }
+    fclose(fp);
+    if (NULL == (fp = fopen(nw_file, "w"))) {
+        fprintf(stderr, "can not open file \"%s\"", nw_file);
+        return;
+    }
+    for (v = 0; v < tm->v; v++) {
+        fprintf(fp, "%s", tm->id_v_map[v]);
+        o = v * (k + 1);
+        for (t = 1; t < k + 1; t++){
+            fprintf(fp, "\t%d", tm->nw[o + t].count);
+        }
+        fprintf(fp, "\n");
+    }
+    fclose(fp);
+    if (NULL == (fp = fopen(tk_file, "w"))) {
+        fprintf(stderr, "can not open file \"%s\"", tk_file);
+        return;
+    }
+    for (t = 0; t < tm->t; t++) {
+        fprintf(fp, "%s\t%s\t%d\n"                  \
+                  ,  tm->id_d_map[tm->tokens[t][0]] \
+                  ,  tm->id_v_map[tm->tokens[t][1]] \
+                  ,  tm->tokens[t][2]);
+    }
+    fclose(fp);
+}

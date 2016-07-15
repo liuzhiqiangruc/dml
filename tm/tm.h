@@ -19,7 +19,7 @@ typedef struct _tm TM;
 
 TM * tm_create(int argc, char *argv[]);
 int  tm_init(TM * tm);
-int  tm_est (TM * tm);
+void tm_est (TM * tm);
 void tm_save(TM * tm, int n);
 void tm_free(TM * tm);
 

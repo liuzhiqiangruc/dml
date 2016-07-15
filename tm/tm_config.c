@@ -13,6 +13,10 @@ static void set(void * tmc, int argc, char * argv[]){
     ((TMConfig*)tmc)->a = 0.1;
 }
 
+static void free_conf(void *tmc){
+    free(tmc);
+}
+
 static double get_alpha(void * tmc){
     return ((TMConfig*)tmc)->a;
 }
@@ -43,7 +47,8 @@ static char * get_o(void *tmc){
 
 TMConfig * init_config(){
     TMConfig * tmc = (TMConfig*)calloc(1, sizeof(TMConfig));
-    tmc->set = set;
+    tmc->set       = set;
+    tmc->free      = free_conf;
     tmc->get_alpha = get_alpha;
     tmc->get_beta  = get_beta;
     tmc->get_n     = get_n;
@@ -52,8 +57,4 @@ TMConfig * init_config(){
     tmc->get_d     = get_d;
     tmc->get_o     = get_o;
     return tmc;
-}
-
-void free_config(TMConfig * tmc){
-    free(tmc);
 }

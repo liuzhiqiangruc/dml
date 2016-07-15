@@ -31,10 +31,10 @@ struct _tmconfigh{
     GET_G0     get_g0;
     GET_G1     get_g1;
     SET_CONFIG set;
+    FREE_CONF  free;
 };
 
 
 TMHConfig * init_h_config();
-void free_h_config(TMHConfig * tmc);
 
 #endif //TM_CONFIG_H_H

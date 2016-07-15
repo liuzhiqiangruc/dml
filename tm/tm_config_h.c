@@ -14,6 +14,13 @@ static void set(void * tmc, int argc, char * argv[]){
     ((TMHConfig*)tmc)->tmc->set(((TMHConfig*)tmc)->tmc, argc, argv);
 }
 
+static void free_conf(void *tmc){
+    TMHConfig * t = ((TMHConfig*)tmc);
+    t->tmc->free(t->tmc);
+    t->tmc = NULL;
+    free(tmc);
+}
+
 static double get_alpha(void * tmc){
     TMHConfig * t = ((TMHConfig*)tmc);
     return t->tmc->get_alpha(t->tmc);
@@ -51,20 +58,15 @@ static char * get_o(void *tmc){
 
 TMHConfig * init_h_config(){
     TMHConfig * tmc = (TMHConfig*)calloc(1, sizeof(TMHConfig));
-    tmc->tmc = init_config();
-    tmc->set = set;
-    tmc->get_alpha = get_alpha;
-    tmc->get_beta  = get_beta;
-    tmc->get_n     = get_n;
-    tmc->get_s     = get_s;
-    tmc->get_k     = get_k;
-    tmc->get_d     = get_d;
-    tmc->get_o     = get_o;
+    tmc->tmc        = init_config();
+    tmc->set        = set;
+    tmc->free       = free_conf;
+    tmc->get_alpha  = get_alpha;
+    tmc->get_beta   = get_beta;
+    tmc->get_n      = get_n;
+    tmc->get_s      = get_s;
+    tmc->get_k      = get_k;
+    tmc->get_d      = get_d;
+    tmc->get_o      = get_o;
     return tmc;
-}
-
-void free_h_config(TMHConfig * tmc){
-    free_config(tmc->tmc);
-    tmc->tmc = NULL;
-    free(tmc);
 }

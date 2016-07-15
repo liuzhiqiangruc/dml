@@ -56,6 +56,14 @@ static char * get_o(void *tmc){
     return t->tmc->get_o(t->tmc);
 }
 
+static double get_g0(void *tmc){
+    return ((TMHConfig*)tmc)->g0;
+}
+
+static double get_g1(void *tmc){
+    return ((TMHConfig*)tmc)->g1;
+}
+
 TMHConfig * init_h_config(){
     TMHConfig * tmc = (TMHConfig*)calloc(1, sizeof(TMHConfig));
     tmc->tmc        = init_config();
@@ -68,5 +76,7 @@ TMHConfig * init_h_config(){
     tmc->get_k      = get_k;
     tmc->get_d      = get_d;
     tmc->get_o      = get_o;
+    tmc->get_g0     = get_g0;
+    tmc->get_g1     = get_g1;
     return tmc;
 }

@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "tm_config.h"
 #include "hash.h"
 #include "str.h"
 #include "tm.h"

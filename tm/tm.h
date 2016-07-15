@@ -10,8 +10,6 @@
 #ifndef _TM_H
 #define _TM_H
 
-#include "tm_config.h"
-
 #define KEY_SIZE 64
 #define LDA_LINE_LEN 1024
 

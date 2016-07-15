@@ -10,6 +10,7 @@
 #include "tm_config.h"
 
 static void set(void * tmc, int argc, char * argv[]){
+    ((TMConfig*)tmc)->a = 0.1;
 }
 
 static double get_alpha(void * tmc){

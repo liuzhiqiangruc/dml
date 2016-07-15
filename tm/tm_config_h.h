@@ -35,5 +35,6 @@ struct _tmconfigh{
 
 
 TMHConfig * init_h_config();
+void free_h_config(TMHConfig * tmc);
 
 #endif //TM_CONFIG_H_H

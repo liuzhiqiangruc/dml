@@ -429,3 +429,39 @@ void tm_save(TM * tm, int n){
     }
     fclose(fp);
 }
+
+void tm_free(TM * tm){
+    if (tm->id_d_map){
+        free(tm->id_d_map);
+        tm->id_d_map = NULL;
+    }
+    if (tm->id_v_map){
+        free(tm->id_v_map);
+        tm->id_v_map = NULL;
+    }
+    if (tm->tokens){
+        free(tm->tokens);
+        tm->tokens = NULL;
+    }
+    if (tm->doc_entry){
+        free(tm->doc_entry);
+        tm->doc_entry = NULL;
+    }
+    if (tm->nd){
+        free(tm->nd);
+        tm->nd = NULL;
+    }
+    if (tm->nw){
+        free(tm->nw);
+        tm->nw = NULL;
+    }
+    if (tm->nkw){
+        free(tm->nkw);
+        tm->nkw = NULL;
+    }
+    if (tm->tmc){
+        tm->tmc->free(tm->tmc);
+        tm->tmc = NULL;
+    }
+    free(tm);
+}

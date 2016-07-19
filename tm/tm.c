@@ -296,7 +296,10 @@ static int gibbs_sample(TM * tm){
 TM * tm_create(int argc, char * argv[]){
     TM * tm = (TM*)calloc(1, sizeof(TM));
     tm->tmc = init_config();
-    tm->tmc->set(tm->tmc, argc, argv);
+    if(0 != tm->tmc->set(tm->tmc, argc, argv)){
+        tm->tmc->help();
+        return NULL;
+    }
     return tm;
 }
 
@@ -380,7 +383,7 @@ void tm_save(TM * tm, int n){
     char tk_file[512];
     char * out_dir = tm->tmc->get_o(tm->tmc);
     k = tm->tmc->get_k(tm->tmc);
-    if (n < tm->tmc->get_n(tm->tmc)){
+    if (n < tm->tmc->get_n(tm->tmc) && n >= 0){
         sprintf(nd_file,  "%s/%d_doc_topic",  out_dir, n);
         sprintf(nw_file,  "%s/%d_word_topic", out_dir, n);
         sprintf(tk_file,  "%s/%d_token_topic",out_dir, n);

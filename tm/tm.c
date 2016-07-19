@@ -6,7 +6,6 @@
  *   date     : 2016-07-15
  *   info     : 
  * ======================================================== */
-
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -300,7 +299,6 @@ TM * tm_create(int argc, char * argv[]){
     tm->tmc->set(tm->tmc, argc, argv);
     return tm;
 }
-
 
 int tm_init(TM * tm) {
     FILE *fp = NULL;

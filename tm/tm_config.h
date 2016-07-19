@@ -41,7 +41,6 @@ typedef struct _tmconfig{
     FREE_CONF  free;
 } TMConfig;
 
-
 TMConfig * init_config();
 
 #endif //TM_CONFIG_H

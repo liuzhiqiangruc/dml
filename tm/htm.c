@@ -403,11 +403,13 @@ int tm_init(TM * tm){
             strncpy(tm->id_d_map[d], token, KEY_SIZE - 1);
         }
         tm->tokens[tk][0] = d;
+        token = strsep(&string, "\t");
         l = hash_find(lhs, token);
         if (tm->id_l_map[l][0] == '\0'){
             strncpy(tm->id_l_map[l], token, KEY_SIZE - 1);
         }
         tm->tokens[tk][1] = l;
+        token = strsep(&string, "\t");
         v = hash_find(vhs, token);
         if(tm->id_v_map[v][0] == '\0'){
             strncpy(tm->id_v_map[v], token, KEY_SIZE - 1);

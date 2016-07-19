@@ -344,7 +344,7 @@ int tm_init(TM * tm) {
             strncpy(tm->id_v_map[v], token, KEY_SIZE - 1);
         }
         tm->tokens[tk][1] = v;
-        t  = (int) ((0.1 + rand()) / (0.1 + RAND_MAX)) * k;
+        t  = (int) ((0.1 + rand()) / (0.1 + RAND_MAX) * k);
         t += 1;
         token = strsep(&string, "\t");
         if (token){

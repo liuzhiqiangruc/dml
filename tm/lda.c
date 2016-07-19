@@ -146,8 +146,12 @@ static int gibbs_sample(Lda * lda) {
                 lda->nw[voffs + lda->nw[voffs + tid].next].prev = lda->nw[voffs + tid].prev;
             }
             tmp = (vb + lda->nkw[tid]) * (vb + lda->nkw[tid] + 1);
-            e += ab / tmp;
-            f += lda->p.b * (lda->nd[offs + tid].count - vb - lda->nkw[tid]) / tmp;
+            e += ab / (vb + lda->nkw[tid]);
+            e -= ab / (vb + lda->nkw[tid] + 1);
+            //e += ab / tmp;
+            //f += lda->p.b * (lda->nd[offs + tid].count - vb - lda->nkw[tid]) / tmp;
+            f += lda->p.b * lda->nd[offs + tid].count / (vb + lda->nkw[tid]);
+            f -= lda->p.b *(lda->nd[offs + tid].count + 1) / (vb + lda->nkw[tid] + 1);
             g = 0.0;
             k = lda->nw[voffs].next;
             while (k != 0){
@@ -155,7 +159,7 @@ static int gibbs_sample(Lda * lda) {
                 pscore[k] = g;
                 k = lda->nw[voffs + k].next;
             }
-            u = (e + f + g) * (0.1 + rand()) / (1.0 + RAND_MAX);
+            u = (e + f + g) * (0.1 + rand()) / (0.1 + RAND_MAX);
             // sample k from smooth bucket
             if (u < e){
                 double s = 0.0;
@@ -216,8 +220,12 @@ static int gibbs_sample(Lda * lda) {
             // update the smooth bucket e value
             // and doc topic bucket f value
             tmp = (vb + lda->nkw[k]) * (vb + lda->nkw[k] - 1);
-            e -= ab / tmp;
-            f += lda->p.b * (vb + lda->nkw[k] - lda->nd[offs + k].count) / tmp;
+            //e -= ab / tmp;
+            e += ab / (vb + lda->nkw[k]);
+            e -= ab / (vb + lda->nkw[k] - 1);
+            //f += lda->p.b * (vb + lda->nkw[k] - lda->nd[offs + k].count) / tmp;
+            f += lda->p.b * lda->nd[offs + k].count / (vb + lda->nkw[k]);
+            f -= lda->p.b *(lda->nd[offs + k].count - 1) / (vb + lda->nkw[k] - 1);
             // next token id of document d
             id = lda->tokens[id][3];
         }

@@ -484,7 +484,7 @@ void save_lda(Lda *lda, int n) {
     fclose(fp);
     //output for wl
     if (NULL == (fp = fopen(wl_file, "w"))){
-        fprintf(stderr, "can not open file \"%s\"", tk_file);
+        fprintf(stderr, "can not open file \"%s\"", wl_file);
         return;
     }
     fprintf(fp, "word:local");

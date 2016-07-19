@@ -187,7 +187,7 @@ static void del_off_tp(TM * tm, int d, int v, int t){
 }
 
 static void add_on_tp(TM * tm, int d, int v, int t) {
-    int doffs, voffs, k, p, n;
+    int doffs, voffs, k;
     k = tm->tmc->get_k(tm->tmc);
     doffs = d * (k + 1);
     voffs = v * (k + 1);
@@ -315,6 +315,7 @@ int tm_init(TM * tm) {
     k = tm->tmc->get_k(tm->tmc);
     Hash * uhs = hash_create(1<<20, STRING);
     Hash * vhs = hash_create(1<<20, STRING);
+    tk = 0;
     while (NULL != fgets(buffer, LDA_LINE_LEN, fp)) {
         string = trim(buffer, 3);
         token = strsep(&string, "\t");
@@ -433,37 +434,39 @@ void tm_save(TM * tm, int n){
 }
 
 void tm_free(TM * tm){
-    if (tm->id_d_map){
-        free(tm->id_d_map);
-        tm->id_d_map = NULL;
-    }
-    if (tm->id_v_map){
-        free(tm->id_v_map);
-        tm->id_v_map = NULL;
-    }
-    if (tm->tokens){
-        free(tm->tokens);
-        tm->tokens = NULL;
-    }
-    if (tm->doc_entry){
-        free(tm->doc_entry);
-        tm->doc_entry = NULL;
-    }
-    if (tm->nd){
-        free(tm->nd);
-        tm->nd = NULL;
-    }
-    if (tm->nw){
-        free(tm->nw);
-        tm->nw = NULL;
-    }
-    if (tm->nkw){
-        free(tm->nkw);
-        tm->nkw = NULL;
-    }
-    if (tm->tmc){
-        tm->tmc->free(tm->tmc);
-        tm->tmc = NULL;
+    if (tm){
+        if (tm->id_d_map){
+            free(tm->id_d_map);
+            tm->id_d_map = NULL;
+        }
+        if (tm->id_v_map){
+            free(tm->id_v_map);
+            tm->id_v_map = NULL;
+        }
+        if (tm->tokens){
+            free(tm->tokens);
+            tm->tokens = NULL;
+        }
+        if (tm->doc_entry){
+            free(tm->doc_entry);
+            tm->doc_entry = NULL;
+        }
+        if (tm->nd){
+            free(tm->nd);
+            tm->nd = NULL;
+        }
+        if (tm->nw){
+            free(tm->nw);
+            tm->nw = NULL;
+        }
+        if (tm->nkw){
+            free(tm->nkw);
+            tm->nkw = NULL;
+        }
+        if (tm->tmc){
+            tm->tmc->free(tm->tmc);
+            tm->tmc = NULL;
+        }
     }
     free(tm);
 }

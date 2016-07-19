@@ -10,7 +10,8 @@
 #ifndef _TM_CONFIG_H
 #define _TM_CONFIG_H
 
-typedef void   (*SET_CONFIG)(void * tmc, int argc, char * argv[]);
+typedef void   (*HELP)      (void);
+typedef int    (*SET_CONFIG)(void * tmc, int argc, char * argv[]);
 typedef void   (*FREE_CONF) (void * tmc);
 typedef double (*GET_ALPHA) (void * tmc);
 typedef double (*GET_BETA)  (void * tmc);
@@ -36,6 +37,7 @@ typedef struct _tmconfig{
     GET_D      get_d;
     GET_O      get_o;
     SET_CONFIG set;
+    HELP       help;
     FREE_CONF  free;
 } TMConfig;
 

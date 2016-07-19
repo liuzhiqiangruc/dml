@@ -31,6 +31,7 @@ struct _tmconfigh{
     GET_G0     get_g0;
     GET_G1     get_g1;
     SET_CONFIG set;
+    HELP       help;
     FREE_CONF  free;
 };
 

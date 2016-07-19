@@ -52,12 +52,7 @@ k2d : k2d.o
 	$(CC) -L$(LIB) $^ -lk2ds -lm -o $@
 
 bin_install:
-	cp lr $(INS)/bin
-	cp lda $(INS)/bin
-	cp hlda $(INS)/bin
-	cp lda_xy $(INS)/bin
-	cp gblr $(INS)/bin
-	cp k2d $(INS)/bin
+	cp $(PRGS)  $(INS)/bin
 
 install:
 	-mkdir -p $(INS)/bin

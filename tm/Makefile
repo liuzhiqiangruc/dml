@@ -1,6 +1,6 @@
 CC = gcc -std=c99 -g
 CFBASE = -pedantic -pipe -Wall
-CFLAGS = $(CFBASE) -O3 -fpic -DNDEBUG -DNPRINT -I../util
+CFLAGS = $(CFBASE) -O0 -fpic -DNDEBUG -DNPRINT -I../util
 LD = gcc -shared
 
 

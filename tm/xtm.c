@@ -106,6 +106,7 @@ static void fullfill_param(TM * tm){
         }
     }
     update_g_param(tm);
+    tm_save(tm, 0);
 }
 
 static void gibbs_sample(TM * tm){
@@ -113,12 +114,12 @@ static void gibbs_sample(TM * tm){
     double dx, dy, det, invxx, invyy, invxy;
     double lx, ly, g0, g1, u, alpha, beta, vb, at, rnd;
     double *prb;
-    k = tm->tmc->get_k(tm->tmc);
-    l = tm->tmc->get_l(tm->tmc);
+    k     = tm->tmc->get_k(tm->tmc);
+    l     = tm->tmc->get_l(tm->tmc);
     alpha = tm->tmc->get_alpha(tm->tmc);
     beta  = tm->tmc->get_beta(tm->tmc);
     at    = alpha * k;
-    vb    = tm->v * beta;
+    vb    = beta * tm->v;
     g0    = tm->tmc->get_g0(tm->tmc);
     g1    = tm->tmc->get_g1(tm->tmc);
     u     = tm->tmc->get_u(tm->tmc);
@@ -133,13 +134,13 @@ static void gibbs_sample(TM * tm){
         if (x == 0){
             tm->nd[d * k + t] -= 1;
             tm->nw[v * k + t] -= 1;
-            tm->nkw[t] -= 1;
+            tm->nkw[t]        -= 1;
             tm->doc_cnt[d][0] -= 1;
         }
         else{
             tm->wl[v * l + t] -= 1;
-            tm->ln[t] -= 1;
-            tm->sln -= 1;
+            tm->ln[t]         -= 1;
+            tm->sln           -= 1;
             tm->doc_cnt[d][1] -= 1;
             tm->disp[t][0] -= lx;
             tm->disp[t][1] -= ly;
@@ -185,24 +186,24 @@ static void gibbs_sample(TM * tm){
         if (t < k){
             tm->nd[d * k + t] += 1;
             tm->nw[v * k + t] += 1;
-            tm->nkw[t] += 1;
+            tm->nkw[t]        += 1;
             tm->doc_cnt[d][0] += 1;
-            tm->tokens[i][2] = 0;
-            tm->tokens[i][3] = t;
+            tm->tokens[i][2]   = 0;
+            tm->tokens[i][3]   = t;
         }
         else if (t < k + l){
             t -= k;
             tm->wl[v * l + t] += 1;
-            tm->ln[t] += 1;
-            tm->sln += 1;
+            tm->ln[t]         += 1;
+            tm->sln           += 1;
             tm->doc_cnt[d][1] += 1;
-            tm->disp[t][0] += lx;
-            tm->disp[t][1] += ly;
-            tm->disp[t][2] += lx * lx;
-            tm->disp[t][3] += ly * ly;
-            tm->disp[t][4] += lx * ly;
-            tm->tokens[i][2] = 1;
-            tm->tokens[i][3] = t;
+            tm->disp[t][0]    += lx;
+            tm->disp[t][1]    += ly;
+            tm->disp[t][2]    += lx * lx;
+            tm->disp[t][3]    += ly * ly;
+            tm->disp[t][4]    += lx * ly;
+            tm->tokens[i][2]   = 1;
+            tm->tokens[i][3]   = t;
         }
         else{
             break;
@@ -222,8 +223,8 @@ TM * tm_create(int argc, char * argv[]){
 }
 
 int tm_init(TM * tm){
-    FILE * fp = NULL;
-    char buffer[LDA_LINE_LEN] = {'\0'};
+    FILE *fp = NULL;
+    char  buffer[LDA_LINE_LEN] = {'\0'};
     char *string, *token;
     int tk, d, v, x, t, k, l;
     double g0, g1, rnd;
@@ -310,7 +311,142 @@ void tm_est(TM * tm){
 }
 
 void tm_save(TM * tm, int n){
+    int d, v, t, k, l, o;
+    FILE *fp = NULL;
+    char nd_file[512];
+    char nw_file[512];
+    char wl_file[512];
+    char ld_file[512];
+    char tk_file[512];
+    char * out_dir = NULL;
+    k = tm->tmc->get_k(tm->tmc);
+    l = tm->tmc->get_l(tm->tmc);
+    out_dir = tm->tmc->get_o(tm->tmc);
+    if (n < tm->tmc->get_n(tm->tmc) && n >= 0){
+        sprintf(nd_file, "%s/%d_doc_topic",    out_dir, n);
+        sprintf(nw_file, "%s/%d_word_topic",   out_dir, n);
+        sprintf(wl_file, "%s/%d_word_local",   out_dir, n);
+        sprintf(ld_file, "%s/%d_local_disp",   out_dir, n);
+        sprintf(tk_file, "%s/%d_token_topic",  out_dir, n);
+    }
+    else{
+        sprintf(nd_file, "%s/%s_doc_topic",    out_dir, "f");
+        sprintf(nw_file, "%s/%s_word_topic",   out_dir, "f");
+        sprintf(wl_file, "%s/%s_word_local",   out_dir, "f");
+        sprintf(ld_file, "%s/%s_local_disp",   out_dir, "f");
+        sprintf(tk_file, "%s/%s_token_topic",  out_dir, "f");
+    }
+    if (NULL == (fp = fopen(nd_file, "w"))){
+        return;
+    }
+    for (d = 0; d < tm->d; d++){
+        fprintf(fp, "%s", tm->id_d_map[d]);
+        o = t * k;
+        for (t = 0; t < k; t++){
+            fprintf(fp, "\t%d", tm->nd[o + t]);
+        }
+        fprintf(fp, "\n");
+    }
+    fclose(fp);
+    if (NULL == (fp = fopen(nw_file, "w"))){
+        return;
+    }
+    for (v = 0; v < tm->v; v++){
+        o = v * k;
+        fprintf(fp, "%s", tm->id_v_map[v]);
+        for (t = 0; t < k; t++){
+            fprintf(fp, "\t%d", tm->nw[o + t]);
+        }
+        fprintf(fp, "\n");
+    }
+    fclose(fp);
+    if (NULL == (fp = fopen(wl_file, "w"))){
+        return;
+    }
+    for (v = 0; v < tm->v; v++){
+        o = v * l;
+        fprintf(fp, "%s", tm->id_v_map[v]);
+        for (t = 0; t < l; t++){
+            fprintf(fp, "\t%d", tm->wl[o + t]);
+        }
+        fprintf(fp, "\n");
+    }
+    fclose(fp);
+    if (NULL == (fp = fopen(ld_file, "w"))){
+        return;
+    }
+    for (t = 0; t < l; t++){
+        for (d = 0; d < 11; d++){
+            fprintf(fp, "%.6lf\t", tm->disp[t][d]);
+        }
+        fprintf(fp, "\n");
+    }
+    fclose(fp);
+    if (NULL == (fp = fopen(tk_file, "w"))){
+        return;
+    }
+    for (t = 0; t < tm->t; t++){
+        fprintf(fp, "%s\t%s\t%.6lf\t%.6lf\t%d\t%d\n" \
+                   , tm->id_d_map[tm->tokens[t][0]]  \
+                   , tm->id_v_map[tm->tokens[t][1]]  \
+                   , tm->xy[t][0]                    \
+                   , tm->xy[t][1]                    \
+                   , tm->tokens[t][2]                \
+                   , tm->tokens[t][3]);
+    }
+    fclose(fp);
 }
 
 void tm_free(TM * tm){
+    if (tm){
+        if (tm->id_d_map){
+            free(tm->id_d_map);
+            tm->id_d_map = NULL;
+        }
+        if (tm->id_v_map){
+            free(tm->id_v_map);
+            tm->id_v_map = NULL;
+        }
+        if (tm->disp){
+            free(tm->disp);
+            tm->disp = NULL;
+        }
+        if (tm->xy){
+            free(tm->xy);
+            tm->xy = NULL;
+        }
+        if (tm->tokens){
+            free(tm->tokens);
+            tm->tokens = NULL;
+        }
+        if (tm->doc_cnt){
+            free(tm->doc_cnt);
+            tm->doc_cnt = NULL;
+        }
+        if (tm->nd){
+            free(tm->nd);
+            tm->nd = NULL;
+        }
+        if (tm->nw){
+            free(tm->nw);
+            tm->nw = NULL;
+        }
+        if (tm->nkw){
+            free(tm->nkw);
+            tm->nkw = NULL;
+        }
+        if (tm->wl){
+            free(tm->wl);
+            tm->wl = NULL;
+        }
+        if (tm->ln){
+            free(tm->ln);
+            tm->ln = NULL;
+        }
+        if (tm->tmc){
+            tm->tmc->free(tm->tmc);
+            tm->tmc = NULL;
+        }
+        free(tm);
+    }
 }

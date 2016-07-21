@@ -8,7 +8,7 @@ CC = gcc -std=c99 -g
 CFBASE = -Wall -pedantic -pipe
 CFLAGS = $(CFBASE) -DNDEBUG -DNPRINT -O0 -I$(INC)
 
-PRGS   = lr lda gblr lda_xy k2d hlda xlda
+PRGS   = lr gblr k2d lda hlda xlda
 
 all : $(PRGS)
 

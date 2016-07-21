@@ -22,113 +22,227 @@ CFBASE	util/Makefile	/^CFBASE = -pedantic -pipe -Wall$/;"	m
 CFLAGS	cls/Makefile	/^CFLAGS = $(CFBASE) -O0 -fpic -DNDEBUG -DNPRINT -I..\/util$/;"	m
 CFLAGS	gbdt/Makefile	/^CFLAGS = $(CFBASE) -O0 -fpic -DNDEBUG -DNPRINT -I..\/util -I..\/regr$/;"	m
 CFLAGS	regr/Makefile	/^CFLAGS = $(CFBASE) -O0 -fpic -DNDEBUG -DNPRINT -I..\/util$/;"	m
-CFLAGS	src/Makefile	/^CFLAGS = $(CFBASE) -DNDEBUG -DNPRINT -O3 -I$(INC)$/;"	m
-CFLAGS	tm/Makefile	/^CFLAGS = $(CFBASE) -O3 -fpic -DNDEBUG -DNPRINT -I..\/util$/;"	m
+CFLAGS	src/Makefile	/^CFLAGS = $(CFBASE) -DNDEBUG -DNPRINT -O0 -I$(INC)$/;"	m
+CFLAGS	tm/Makefile	/^CFLAGS = $(CFBASE) -O0 -fpic -DNDEBUG -DNPRINT -I..\/util$/;"	m
 CFLAGS	ts/Makefile	/^CFLAGS   = $(CFBASE) -DNDEBUG -DNPRINT -O0 -fpic -I..\/util$/;"	m
 CFLAGS	util/Makefile	/^CFLAGS = $(CFBASE) -O3 -fpic -DNDEBUG -DNPRINT$/;"	m
 CLSDIR	Makefile	/^CLSDIR   = cls$/;"	m
+CMP_FN	output/inc/rbtree.h	/^typedef int    (*CMP_FN)(void *, void*);$/;"	t
 CMP_FN	util/rbtree.h	/^typedef int    (*CMP_FN)(void *, void*);$/;"	t
 ClsList	ts/pattern.c	/^} ClsList;$/;"	t	typeref:struct:_cls_list	file:
 ClsListS	ts/pattern.c	/^} ClsListS;$/;"	t	typeref:struct:_cls_list_s	file:
 Const	ts/breakout.c	/^static double Const(double x){$/;"	f	file:
 DBL_MAX	gbdt/dtree.c	/^#define  DBL_MAX /;"	d	file:
 DTD	gbdt/tdata.h	/^}DTD;$/;"	t	typeref:struct:__anon2
+DTD	output/inc/tdata.h	/^}DTD;$/;"	t	typeref:struct:__anon8
 DTD_FEA_VAL	gbdt/tdata.c	/^} DTD_FEA_VAL;$/;"	t	typeref:struct:__anon1	file:
 DT_LINE_LEN	gbdt/tdata.c	/^#define DT_LINE_LEN /;"	d	file:
 DTree	gbdt/dtree.h	/^typedef struct _d_tree DTree;$/;"	t	typeref:struct:_d_tree
+DTree	output/inc/dtree.h	/^typedef struct _d_tree DTree;$/;"	t	typeref:struct:_d_tree
 EPS	regr/newton.c	/^#define EPS /;"	d	file:
+EVAL_FN	output/inc/regr_fn.h	/^typedef double (*EVAL_FN)(double *x, void *data);$/;"	t
 EVAL_FN	regr/regr_fn.h	/^typedef double (*EVAL_FN)(double *x, void *data);$/;"	t
 FKL	gbdt/tdata.h	/^#define FKL /;"	d
+FKL	output/inc/tdata.h	/^#define FKL /;"	d
+FREE_CONF	output/inc/tm_config.h	/^typedef void   (*FREE_CONF) (void * tmc);$/;"	t
+FREE_CONF	tm/tm_config.h	/^typedef void   (*FREE_CONF) (void * tmc);$/;"	t
+FREE_FN	output/inc/rbtree.h	/^typedef void   (*FREE_FN)(void *);$/;"	t
 FREE_FN	util/rbtree.h	/^typedef void   (*FREE_FN)(void *);$/;"	t
 G	gbdt/gbdt.h	/^typedef void(*G)(double * f, double * y, double * g, int n);$/;"	t
+G	output/inc/gbdt.h	/^typedef void(*G)(double * f, double * y, double * g, int n);$/;"	t
 GBDT	gbdt/gbdt.h	/^typedef struct _gbdt GBDT;$/;"	t	typeref:struct:_gbdt
+GBDT	output/inc/gbdt.h	/^typedef struct _gbdt GBDT;$/;"	t	typeref:struct:_gbdt
 GBDTDIR	Makefile	/^GBDTDIR  = gbdt$/;"	m
 GBMP	gbdt/gbdt.h	/^} GBMP;$/;"	t	typeref:struct:_gbdt_param
+GBMP	output/inc/gbdt.h	/^} GBMP;$/;"	t	typeref:struct:_gbdt_param
+GET_ALPHA	output/inc/tm_config.h	/^typedef double (*GET_ALPHA) (void * tmc);$/;"	t
+GET_ALPHA	tm/tm_config.h	/^typedef double (*GET_ALPHA) (void * tmc);$/;"	t
+GET_BETA	output/inc/tm_config.h	/^typedef double (*GET_BETA)  (void * tmc);$/;"	t
+GET_BETA	tm/tm_config.h	/^typedef double (*GET_BETA)  (void * tmc);$/;"	t
+GET_D	output/inc/tm_config.h	/^typedef char * (*GET_D)     (void * tmc);$/;"	t
+GET_D	tm/tm_config.h	/^typedef char * (*GET_D)     (void * tmc);$/;"	t
+GET_G0	output/inc/tm_config_h.h	/^typedef double (*GET_G0)(void *);$/;"	t
+GET_G0	tm/tm_config_h.h	/^typedef double (*GET_G0)(void *);$/;"	t
+GET_G1	output/inc/tm_config_h.h	/^typedef double (*GET_G1)(void *);$/;"	t
+GET_G1	tm/tm_config_h.h	/^typedef double (*GET_G1)(void *);$/;"	t
+GET_K	output/inc/tm_config.h	/^typedef int    (*GET_K)     (void * tmc);$/;"	t
+GET_K	tm/tm_config.h	/^typedef int    (*GET_K)     (void * tmc);$/;"	t
+GET_L	output/inc/tm_config_d.h	/^typedef int (*GET_L)(void *);$/;"	t
+GET_L	output/inc/tm_config_x.h	/^typedef int    (*GET_L)(void *);$/;"	t
+GET_L	tm/tm_config_x.h	/^typedef int    (*GET_L)(void *);$/;"	t
+GET_N	output/inc/tm_config.h	/^typedef int    (*GET_N)     (void * tmc);$/;"	t
+GET_N	tm/tm_config.h	/^typedef int    (*GET_N)     (void * tmc);$/;"	t
+GET_O	output/inc/tm_config.h	/^typedef char * (*GET_O)     (void * tmc);$/;"	t
+GET_O	tm/tm_config.h	/^typedef char * (*GET_O)     (void * tmc);$/;"	t
+GET_S	output/inc/tm_config.h	/^typedef int    (*GET_S)     (void * tmc);$/;"	t
+GET_S	tm/tm_config.h	/^typedef int    (*GET_S)     (void * tmc);$/;"	t
+GET_U	output/inc/tm_config_x.h	/^typedef double (*GET_U)(void *);$/;"	t
+GET_U	tm/tm_config_x.h	/^typedef double (*GET_U)(void *);$/;"	t
+GRAD_FN	output/inc/regr_fn.h	/^typedef void   (*GRAD_FN)(double *x, void *data, double *g, double *sg);$/;"	t
 GRAD_FN	regr/regr_fn.h	/^typedef void   (*GRAD_FN)(double *x, void *data, double *g, double *sg);$/;"	t
 H	gbdt/gbdt.h	/^typedef void(*H)(double * f, double * y, double * h, int n);$/;"	t
+H	output/inc/gbdt.h	/^typedef void(*H)(double * f, double * y, double * h, int n);$/;"	t
 HASH_SPACE	util/hash.c	/^#define HASH_SPACE /;"	d	file:
 HEAP_ADJUST	util/heap.c	/^#define HEAP_ADJUST(/;"	d	file:
+HEAP_CMP_FN	output/inc/heap.h	/^typedef int  (*HEAP_CMP_FN) (void *, void*);$/;"	t
 HEAP_CMP_FN	util/heap.h	/^typedef int  (*HEAP_CMP_FN) (void *, void*);$/;"	t
+HEAP_H	output/inc/heap.h	/^#define HEAP_H$/;"	d
 HEAP_H	util/heap.h	/^#define HEAP_H$/;"	d
+HEAP_ITEM_FREE	output/inc/heap.h	/^typedef void (*HEAP_ITEM_FREE)(void *);$/;"	t
 HEAP_ITEM_FREE	util/heap.h	/^typedef void (*HEAP_ITEM_FREE)(void *);$/;"	t
+HELP	output/inc/tm_config.h	/^typedef void   (*HELP)      (void);$/;"	t
+HELP	tm/tm_config.h	/^typedef void   (*HELP)      (void);$/;"	t
+Hash	output/inc/hash.h	/^typedef struct _hash Hash;$/;"	t	typeref:struct:_hash
 Hash	util/hash.h	/^typedef struct _hash Hash;$/;"	t	typeref:struct:_hash
-HashType	util/hash.h	/^typedef enum { INT, LONG, STRING } HashType;$/;"	t	typeref:enum:__anon8
+HashType	output/inc/hash.h	/^typedef enum { INT, LONG, STRING } HashType;$/;"	t	typeref:enum:__anon3
+HashType	util/hash.h	/^typedef enum { INT, LONG, STRING } HashType;$/;"	t	typeref:enum:__anon17
 HashVal	util/hash.c	/^} HashVal;$/;"	t	typeref:union:_hash_val	file:
+Heap	output/inc/heap.h	/^} Heap;$/;"	t	typeref:struct:_heap
 Heap	util/heap.h	/^} Heap;$/;"	t	typeref:struct:_heap
 INC	src/Makefile	/^INC = ..\/inc$/;"	m
 INCS	ts/Makefile	/^INCS     = -I..\/util$/;"	m
 INS	src/Makefile	/^INS = ..\/output$/;"	m
 INSTDIR	Makefile	/^INSTDIR  = .$/;"	m
-INT	util/hash.h	/^typedef enum { INT, LONG, STRING } HashType;$/;"	e	enum:__anon8
+INT	output/inc/hash.h	/^typedef enum { INT, LONG, STRING } HashType;$/;"	e	enum:__anon3
+INT	util/hash.h	/^typedef enum { INT, LONG, STRING } HashType;$/;"	e	enum:__anon17
 Interval	ts/modl.c	/^typedef int Interval[6];$/;"	t	file:
+K	output/bin/top_words.py	/^K = int(sys.argv[1])$/;"	v
+KEY_SIZE	output/inc/lda.h	/^#define KEY_SIZE /;"	d
+KEY_SIZE	output/inc/tm.h	/^#define KEY_SIZE /;"	d
 KEY_SIZE	tm/lda.h	/^#define KEY_SIZE /;"	d
+KEY_SIZE	tm/tm.h	/^#define KEY_SIZE /;"	d
 LANode	util/hash.c	/^} LANode;$/;"	t	typeref:union:_la_node	file:
-LBFGS	regr/newton.h	/^typedef enum { OWLQN = 1, LBFGS } NT_METHOD;$/;"	e	enum:__anon3
+LBFGS	output/inc/newton.h	/^typedef enum { OWLQN = 1, LBFGS } NT_METHOD;$/;"	e	enum:__anon5
+LBFGS	regr/newton.h	/^typedef enum { OWLQN = 1, LBFGS } NT_METHOD;$/;"	e	enum:__anon9
 LD	cls/Makefile	/^LD = gcc -shared$/;"	m
 LD	gbdt/Makefile	/^LD = gcc -shared$/;"	m
 LD	regr/Makefile	/^LD = gcc -shared$/;"	m
 LD	tm/Makefile	/^LD = gcc -shared$/;"	m
 LD	ts/Makefile	/^LD       = gcc -shared$/;"	m
 LD	util/Makefile	/^LD = gcc -shared$/;"	m
+LDA_LINE_LEN	output/inc/tm.h	/^#define LDA_LINE_LEN /;"	d
+LDA_LINE_LEN	tm/hlda.c	/^#define LDA_LINE_LEN /;"	d	file:
 LDA_LINE_LEN	tm/lda.c	/^#define LDA_LINE_LEN /;"	d	file:
+LDA_LINE_LEN	tm/lda_xy.c	/^#define LDA_LINE_LEN /;"	d	file:
+LDA_LINE_LEN	tm/tm.h	/^#define LDA_LINE_LEN /;"	d
 LIB	src/Makefile	/^LIB = ..\/lib$/;"	m
 LIBS	ts/Makefile	/^LIBS     = -L..\/util$/;"	m
-LONG	util/hash.h	/^typedef enum { INT, LONG, STRING } HashType;$/;"	e	enum:__anon8
-Lda	tm/lda.h	/^} Lda;$/;"	t	typeref:struct:_lda
+LONG	output/inc/hash.h	/^typedef enum { INT, LONG, STRING } HashType;$/;"	e	enum:__anon3
+LONG	util/hash.h	/^typedef enum { INT, LONG, STRING } HashType;$/;"	e	enum:__anon17
+Lda	output/inc/lda.h	/^typedef struct _lda Lda;$/;"	t	typeref:struct:_lda
+Lda	tm/lda.h	/^typedef struct _lda Lda;$/;"	t	typeref:struct:_lda
 Linear	ts/breakout.c	/^static double Linear(double x){$/;"	f	file:
+MTrace	output/inc/median.h	/^} MTrace;$/;"	t	typeref:struct:_median
 MTrace	util/median.h	/^} MTrace;$/;"	t	typeref:struct:_median
-ModelEle	tm/lda.h	/^} ModelEle;$/;"	t	typeref:struct:__anon7
-NT_METHOD	regr/newton.h	/^typedef enum { OWLQN = 1, LBFGS } NT_METHOD;$/;"	t	typeref:enum:__anon3
+ModelEle	tm/hlda.c	/^} ModelEle;$/;"	t	typeref:struct:__anon12	file:
+ModelEle	tm/htm.c	/^}ModelEle;$/;"	t	typeref:struct:__anon13	file:
+ModelEle	tm/lda.c	/^} ModelEle;$/;"	t	typeref:struct:__anon14	file:
+ModelEle	tm/tm.c	/^}ModelEle;$/;"	t	typeref:struct:__anon16	file:
+NT_METHOD	output/inc/newton.h	/^typedef enum { OWLQN = 1, LBFGS } NT_METHOD;$/;"	t	typeref:enum:__anon5
+NT_METHOD	regr/newton.h	/^typedef enum { OWLQN = 1, LBFGS } NT_METHOD;$/;"	t	typeref:enum:__anon9
 Node	ts/pattern.c	/^} Node;$/;"	t	typeref:struct:_node	file:
-OWLQN	regr/newton.h	/^typedef enum { OWLQN = 1, LBFGS } NT_METHOD;$/;"	e	enum:__anon3
-PRGS	src/Makefile	/^PRGS   = lr lda gblr$/;"	m
-ParamLda	tm/lda.h	/^} ParamLda;$/;"	t	typeref:struct:__anon6
+OWLQN	output/inc/newton.h	/^typedef enum { OWLQN = 1, LBFGS } NT_METHOD;$/;"	e	enum:__anon5
+OWLQN	regr/newton.h	/^typedef enum { OWLQN = 1, LBFGS } NT_METHOD;$/;"	e	enum:__anon9
+PRGS	src/Makefile	/^PRGS   = lr gblr k2d lda hlda xlda$/;"	m
+ParamLda	output/inc/lda.h	/^} ParamLda;$/;"	t	typeref:struct:__anon4
+ParamLda	tm/lda.h	/^} ParamLda;$/;"	t	typeref:struct:__anon15
 Quadratic	ts/breakout.c	/^static double Quadratic(double x){$/;"	f	file:
 R	gbdt/gbdt.h	/^typedef void(*R)(GBDT * m);$/;"	t
+R	output/inc/gbdt.h	/^typedef void(*R)(GBDT * m);$/;"	t
 RBLANode	util/rbtree.c	/^} RBLANode;$/;"	t	typeref:union:_la_node	file:
 RBNode	util/rbtree.c	/^} RBNode;$/;"	t	typeref:struct:_RBNode	file:
+RBTree	output/inc/rbtree.h	/^typedef struct _RBTree RBTree;$/;"	t	typeref:struct:_RBTree
 RBTree	util/rbtree.h	/^typedef struct _RBTree RBTree;$/;"	t	typeref:struct:_RBTree
-RB_BLACK	util/rbtree.c	/^typedef enum {RB_RED, RB_BLACK} RB_NODE_COLOR;$/;"	e	enum:__anon9	file:
-RB_NODE_COLOR	util/rbtree.c	/^typedef enum {RB_RED, RB_BLACK} RB_NODE_COLOR;$/;"	t	typeref:enum:__anon9	file:
-RB_RED	util/rbtree.c	/^typedef enum {RB_RED, RB_BLACK} RB_NODE_COLOR;$/;"	e	enum:__anon9	file:
+RB_BLACK	util/rbtree.c	/^typedef enum {RB_RED, RB_BLACK} RB_NODE_COLOR;$/;"	e	enum:__anon18	file:
+RB_NODE_COLOR	util/rbtree.c	/^typedef enum {RB_RED, RB_BLACK} RB_NODE_COLOR;$/;"	t	typeref:enum:__anon18	file:
+RB_RED	util/rbtree.c	/^typedef enum {RB_RED, RB_BLACK} RB_NODE_COLOR;$/;"	e	enum:__anon18	file:
 RB_SPACE	util/rbtree.c	/^#define RB_SPACE /;"	d	file:
-RDS	regr/regress.h	/^} RDS;$/;"	t	typeref:struct:__anon5
+RDS	output/inc/regress.h	/^} RDS;$/;"	t	typeref:struct:__anon7
+RDS	regr/regress.h	/^} RDS;$/;"	t	typeref:struct:__anon11
+REG	output/inc/regress.h	/^} REG;$/;"	t	typeref:struct:_reg
 REG	regr/regress.h	/^} REG;$/;"	t	typeref:struct:_reg
 REGRDIR	Makefile	/^REGRDIR  = regr$/;"	m
 REG_LINE_LEN	regr/regress.c	/^#define REG_LINE_LEN /;"	d	file:
+REPO_FN	output/inc/regr_fn.h	/^typedef int    (*REPO_FN)(double *x0, double *x1, void *data);$/;"	t
 REPO_FN	regr/regr_fn.h	/^typedef int    (*REPO_FN)(double *x0, double *x1, void *data);$/;"	t
+RKL	output/inc/regress.h	/^#define RKL /;"	d
 RKL	regr/regress.h	/^#define RKL /;"	d
-RP	regr/regress.h	/^} RP;$/;"	t	typeref:struct:__anon4
+RP	output/inc/regress.h	/^} RP;$/;"	t	typeref:struct:__anon6
+RP	regr/regress.h	/^} RP;$/;"	t	typeref:struct:__anon10
+SET_CONFIG	output/inc/tm_config.h	/^typedef int    (*SET_CONFIG)(void * tmc, int argc, char * argv[]);$/;"	t
+SET_CONFIG	tm/tm_config.h	/^typedef int    (*SET_CONFIG)(void * tmc, int argc, char * argv[]);$/;"	t
 SRC	Makefile	/^SRC      = src$/;"	m
-STRING	util/hash.h	/^typedef enum { INT, LONG, STRING } HashType;$/;"	e	enum:__anon8
+STRING	output/inc/hash.h	/^typedef enum { INT, LONG, STRING } HashType;$/;"	e	enum:__anon3
+STRING	util/hash.h	/^typedef enum { INT, LONG, STRING } HashType;$/;"	e	enum:__anon17
 SimpleHashMap	ts/pattern.c	/^} SimpleHashMap;$/;"	t	typeref:struct:_simple_hash_map	file:
+TM	output/inc/tm.h	/^typedef struct _tm TM;$/;"	t	typeref:struct:_tm
+TM	tm/tm.h	/^typedef struct _tm TM;$/;"	t	typeref:struct:_tm
+TMConfig	output/inc/tm_config.h	/^} TMConfig;$/;"	t	typeref:struct:_tmconfig
+TMConfig	tm/tm_config.h	/^} TMConfig;$/;"	t	typeref:struct:_tmconfig
+TMDConfig	output/inc/tm_config_d.h	/^typedef struct _tmconfigd TMDConfig;$/;"	t	typeref:struct:_tmconfigd
 TMDIR	Makefile	/^TMDIR    = tm$/;"	m
+TMHConfig	output/inc/tm_config_h.h	/^typedef struct _tmconfigh TMHConfig;$/;"	t	typeref:struct:_tmconfigh
+TMHConfig	tm/tm_config_h.h	/^typedef struct _tmconfigh TMHConfig;$/;"	t	typeref:struct:_tmconfigh
+TMXConfig	output/inc/tm_config_x.h	/^typedef struct _tmconfigx TMXConfig;$/;"	t	typeref:struct:_tmconfigx
+TMXConfig	tm/tm_config_x.h	/^typedef struct _tmconfigx TMXConfig;$/;"	t	typeref:struct:_tmconfigx
 TSDIR	Makefile	/^TSDIR    = ts$/;"	m
 ULL	ts/pattern.c	/^typedef unsigned long long ULL;$/;"	t	file:
 UTIL	ts/Makefile	/^UTIL     = ..\/util$/;"	m
 UTILDIR	Makefile	/^UTILDIR  = util$/;"	m
+_AUC_H	output/inc/auc.h	/^#define _AUC_H$/;"	d
 _AUC_H	regr/auc.h	/^#define _AUC_H$/;"	d
+_BREAKOUT_H	output/inc/breakout.h	/^#define _BREAKOUT_H$/;"	d
 _BREAKOUT_H	ts/breakout.h	/^#define _BREAKOUT_H$/;"	d
+_DIST_H	output/inc/dist.h	/^#define _DIST_H$/;"	d
 _DIST_H	ts/dist.h	/^#define _DIST_H$/;"	d
 _DTREE_H	gbdt/dtree.h	/^#define _DTREE_H$/;"	d
+_DTREE_H	output/inc/dtree.h	/^#define _DTREE_H$/;"	d
 _GBDT_H	gbdt/gbdt.h	/^#define _GBDT_H$/;"	d
+_GBDT_H	output/inc/gbdt.h	/^#define _GBDT_H$/;"	d
 _GBLR_H	gbdt/gblr.h	/^#define _GBLR_H$/;"	d
+_GBLR_H	output/inc/gblr.h	/^#define _GBLR_H$/;"	d
+_HASH_H	output/inc/hash.h	/^#define _HASH_H$/;"	d
 _HASH_H	util/hash.h	/^#define _HASH_H$/;"	d
+_K2D_H	cls/k2d.h	/^#define _K2D_H$/;"	d
+_K2D_H	output/inc/k2d.h	/^#define _K2D_H$/;"	d
 _KMEANS_H	cls/kmeans.h	/^#define _KMEANS_H$/;"	d
+_KMEANS_H	output/inc/kmeans.h	/^#define _KMEANS_H$/;"	d
+_LDA_H	output/inc/lda.h	/^#define _LDA_H$/;"	d
 _LDA_H	tm/lda.h	/^#define _LDA_H$/;"	d
+_LOESS_H	output/inc/loess.h	/^#define _LOESS_H$/;"	d
 _LOESS_H	ts/loess.h	/^#define _LOESS_H$/;"	d
+_LR_H	output/inc/lr.h	/^#define _LR_H$/;"	d
 _LR_H	regr/lr.h	/^#define _LR_H$/;"	d
+_MEDIAN_H	output/inc/median.h	/^#define _MEDIAN_H$/;"	d
 _MEDIAN_H	util/median.h	/^#define _MEDIAN_H$/;"	d
+_MODL_H	output/inc/modl.h	/^#define _MODL_H$/;"	d
 _MODL_H	ts/modl.h	/^#define _MODL_H$/;"	d
+_NEWTON_H	output/inc/newton.h	/^#define _NEWTON_H$/;"	d
 _NEWTON_H	regr/newton.h	/^#define _NEWTON_H$/;"	d
+_PATTERN_H	output/inc/pattern.h	/^#define _PATTERN_H$/;"	d
 _PATTERN_H	ts/pattern.h	/^#define _PATTERN_H$/;"	d
 _RBNode	util/rbtree.c	/^typedef struct _RBNode{$/;"	s	file:
+_RBTREE_H	output/inc/rbtree.h	/^#define _RBTREE_H$/;"	d
 _RBTREE_H	util/rbtree.h	/^#define _RBTREE_H$/;"	d
 _RBTree	util/rbtree.c	/^struct _RBTree{$/;"	s	file:
+_REGRESS_H	output/inc/regress.h	/^#define _REGRESS_H$/;"	d
 _REGRESS_H	regr/regress.h	/^#define _REGRESS_H$/;"	d
+_REGR_FN_H	output/inc/regr_fn.h	/^#define _REGR_FN_H$/;"	d
 _REGR_FN_H	regr/regr_fn.h	/^#define _REGR_FN_H$/;"	d
+_STR_H	output/inc/str.h	/^#define _STR_H$/;"	d
 _STR_H	util/str.h	/^#define _STR_H$/;"	d
 _TDATA_H	gbdt/tdata.h	/^#define _TDATA_H$/;"	d
+_TDATA_H	output/inc/tdata.h	/^#define _TDATA_H$/;"	d
+_TM_CONFIG_D_H	output/inc/tm_config_d.h	/^#define _TM_CONFIG_D_H$/;"	d
+_TM_CONFIG_H	output/inc/tm_config.h	/^#define _TM_CONFIG_H$/;"	d
+_TM_CONFIG_H	tm/tm_config.h	/^#define _TM_CONFIG_H$/;"	d
+_TM_CONFIG_H_H	output/inc/tm_config_h.h	/^#define _TM_CONFIG_H_H$/;"	d
+_TM_CONFIG_H_H	tm/tm_config_h.h	/^#define _TM_CONFIG_H_H$/;"	d
+_TM_CONFIG_X_H	output/inc/tm_config_x.h	/^#define _TM_CONFIG_X_H$/;"	d
+_TM_CONFIG_X_H	tm/tm_config_x.h	/^#define _TM_CONFIG_X_H$/;"	d
+_TM_H	output/inc/tm.h	/^#define _TM_H$/;"	d
+_TM_H	tm/tm.h	/^#define _TM_H$/;"	d
+_VITERBI_H	output/inc/viterbi.h	/^#define _VITERBI_H$/;"	d
 _VITERBI_H	ts/viterbi.h	/^#define _VITERBI_H$/;"	d
 _aucP	regr/auc.c	/^typedef struct _aucP {$/;"	s	file:
 _cls_list	ts/pattern.c	/^typedef struct _cls_list {$/;"	s	file:
@@ -138,72 +252,138 @@ _del_node_t	util/rbtree.c	/^static void _del_node_t(RBTree * t, RBNode * z){$/;"
 _extend_node_space	util/rbtree.c	/^static int _extend_node_space(RBTree * t){$/;"	f	file:
 _gbdt	gbdt/gbdt.c	/^struct _gbdt {$/;"	s	file:
 _gbdt_param	gbdt/gbdt.h	/^typedef struct _gbdt_param {$/;"	s
+_gbdt_param	output/inc/gbdt.h	/^typedef struct _gbdt_param {$/;"	s
 _hash	util/hash.c	/^struct _hash {$/;"	s	file:
 _hash_val	util/hash.c	/^typedef union _hash_val {$/;"	u	file:
+_heap	output/inc/heap.h	/^typedef struct _heap {$/;"	s
 _heap	util/heap.h	/^typedef struct _heap {$/;"	s
 _la_node	util/hash.c	/^typedef union _la_node {$/;"	u	file:
 _la_node	util/rbtree.c	/^typedef union _la_node{$/;"	u	file:
-_lda	tm/lda.h	/^typedef struct _lda {$/;"	s
+_lda	tm/hlda.c	/^struct _lda{$/;"	s	file:
+_lda	tm/lda.c	/^struct _lda {$/;"	s	file:
+_lda	tm/lda_xy.c	/^struct _lda {$/;"	s	file:
+_median	output/inc/median.h	/^typedef struct _median {$/;"	s
 _median	util/median.h	/^typedef struct _median {$/;"	s
 _node	ts/pattern.c	/^typedef struct _node {$/;"	s	file:
+_reg	output/inc/regress.h	/^typedef struct _reg {$/;"	s
 _reg	regr/regress.h	/^typedef struct _reg {$/;"	s
 _relocal_node_free	util/rbtree.c	/^static void _relocal_node_free(RBTree * t, RBLANode * ns){$/;"	f	file:
 _relocal_node_t	util/rbtree.c	/^static void _relocal_node_t(RBTree * t, RBNode * z, RBLANode * ns){$/;"	f	file:
 _simple_hash_map	ts/pattern.c	/^typedef struct _simple_hash_map {$/;"	s	file:
-a	tm/lda.h	/^    double a;              \/* alpha   *\/     $/;"	m	struct:__anon6
+_tm	tm/htm.c	/^struct _tm{$/;"	s	file:
+_tm	tm/tm.c	/^struct _tm{$/;"	s	file:
+_tm	tm/xtm.c	/^struct _tm {$/;"	s	file:
+_tmconfig	output/inc/tm_config.h	/^typedef struct _tmconfig{$/;"	s
+_tmconfig	tm/tm_config.h	/^typedef struct _tmconfig{$/;"	s
+_tmconfigd	output/inc/tm_config_d.h	/^struct _tmconfigd{$/;"	s
+_tmconfigh	output/inc/tm_config_h.h	/^struct _tmconfigh{$/;"	s
+_tmconfigh	tm/tm_config_h.h	/^struct _tmconfigh{$/;"	s
+_tmconfigx	output/inc/tm_config_x.h	/^struct _tmconfigx{$/;"	s
+_tmconfigx	tm/tm_config_x.h	/^struct _tmconfigx{$/;"	s
+a	output/inc/lda.h	/^    double a;              \/* alpha   *\/     $/;"	m	struct:__anon4
+a	output/inc/tm_config.h	/^    double a;$/;"	m	struct:_tmconfig
+a	tm/lda.h	/^    double a;              \/* alpha   *\/     $/;"	m	struct:__anon15
+a	tm/tm_config.h	/^    double a;$/;"	m	struct:_tmconfig
+add_on_tp	tm/tm.c	/^static void add_on_tp(TM * tm, int d, int v, int t) {$/;"	f	file:
+addon_lc_l	tm/hlda.c	/^static void addon_lc_l(Lda * lda, int d, int v, int l, int t){$/;"	f	file:
+addon_lc_l	tm/htm.c	/^static void addon_lc_l(TM * tm, int d, int v, int l){$/;"	f	file:
+addon_tp_k	tm/hlda.c	/^static void addon_tp_k(Lda * lda, int d, int v, int k, int t){$/;"	f	file:
+addon_tp_k	tm/htm.c	/^static void addon_tp_k(TM * tm, int d, int v, int t){$/;"	f	file:
 attr	gbdt/dtree.c	/^    int attr;                       \/* if not leaf, split attr   *\/$/;"	m	struct:_d_tree	file:
 attr_val	gbdt/dtree.c	/^    double attr_val;                \/* split val of this attr    *\/$/;"	m	struct:_d_tree	file:
 auc	regr/auc.c	/^double auc(int n, double *x, double *y) {$/;"	f
-b	tm/lda.h	/^    double b;              \/* beta    *\/     $/;"	m	struct:__anon6
+b	output/inc/lda.h	/^    double b;              \/* beta    *\/     $/;"	m	struct:__anon4
+b	output/inc/tm_config.h	/^    double b;$/;"	m	struct:_tmconfig
+b	tm/lda.h	/^    double b;              \/* beta    *\/     $/;"	m	struct:__anon15
+b	tm/tm_config.h	/^    double b;$/;"	m	struct:_tmconfig
 backtrack	regr/newton.c	/^static double backtrack(void *data, EVAL_FN eval_fn, int n, double *x, double *g, double *dir, double *newx, NT_METHOD method){$/;"	f	file:
 balance	util/median.c	/^static void balance(MTrace * m){$/;"	f	file:
 bcp	ts/breakout.c	/^void bcp(double *X, int T,int *points) {$/;"	f
 bfgs	regr/newton.c	/^int bfgs(void *data, EVAL_FN eval_fn, GRAD_FN grad_fn, double ftol, int n, int it, double *retx) {$/;"	f
 bin	gbdt/tdata.h	/^    int bin;                        \/* binary data or not        *\/$/;"	m	struct:__anon2
+bin	output/inc/tdata.h	/^    int bin;                        \/* binary data or not        *\/$/;"	m	struct:__anon8
 binary	gbdt/gbdt.h	/^    int binary;$/;"	m	struct:_gbdt_param
-binary	regr/regress.h	/^    int    binary;              \/* binary feature or not    *\/$/;"	m	struct:__anon4
+binary	output/inc/gbdt.h	/^    int binary;$/;"	m	struct:_gbdt_param
+binary	output/inc/regress.h	/^    int    binary;              \/* binary feature or not    *\/$/;"	m	struct:__anon6
+binary	regr/regress.h	/^    int    binary;              \/* binary feature or not    *\/$/;"	m	struct:__anon10
+c	output/inc/regress.h	/^    int     c;                  \/* unique feature count     *\/$/;"	m	struct:_reg
 c	regr/regress.h	/^    int     c;                  \/* unique feature count     *\/$/;"	m	struct:_reg
+centers	output/bin/cal_pro.py	/^centers = []$/;"	v
 charmask	util/str.c	/^static inline int charmask(unsigned char *input, int len, char *mask)$/;"	f	file:
 child	gbdt/dtree.c	/^    struct _d_tree * child[2];      \/* splited children nodes    *\/$/;"	m	struct:_d_tree	typeref:struct:_d_tree::_d_tree	file:
 child	util/rbtree.c	/^    struct _RBNode * child[2];$/;"	m	struct:_RBNode	typeref:struct:_RBNode::_RBNode	file:
 cl	gbdt/tdata.h	/^    int * cl;                       \/* cumulative row cnt ..     *\/$/;"	m	struct:__anon2
+cl	output/inc/tdata.h	/^    int * cl;                       \/* cumulative row cnt ..     *\/$/;"	m	struct:__anon8
 cls_insert	ts/pattern.c	/^void cls_insert(ClsList *t, int row, int offset) {$/;"	f
 cls_s	ts/pattern.c	/^    ClsList *cls_s;$/;"	m	struct:_cls_list_s	file:
 cls_s_create	ts/pattern.c	/^ClsListS *cls_s_create(int n) {$/;"	f
 cls_s_free	ts/pattern.c	/^void cls_s_free(ClsListS *t) {$/;"	f
 cmp	regr/auc.c	/^int cmp(const void *_a, const void *_b) {$/;"	f
+cmp_fn	output/inc/median.h	/^    CMP_FN cmp_fn;$/;"	m	struct:_median
 cmp_fn	ts/breakout.c	/^static int cmp_fn(double *m, double *n){$/;"	f	file:
 cmp_fn	ts/loess.c	/^int cmp_fn(double *m, double *n) {$/;"	f
 cmp_fn	util/median.h	/^    CMP_FN cmp_fn;$/;"	m	struct:_median
 cmp_fn	util/rbtree.c	/^    CMP_FN  cmp_fn;$/;"	m	struct:_RBTree	file:
+cnt1	output/inc/median.h	/^    int cnt1;$/;"	m	struct:_median
 cnt1	util/median.h	/^    int cnt1;$/;"	m	struct:_median
+cnt2	output/inc/median.h	/^    int cnt2;$/;"	m	struct:_median
 cnt2	util/median.h	/^    int cnt2;$/;"	m	struct:_median
 col	gbdt/tdata.h	/^    int col;                        \/* feature count of data     *\/$/;"	m	struct:__anon2
+col	output/inc/tdata.h	/^    int col;                        \/* feature count of data     *\/$/;"	m	struct:__anon8
 color	util/rbtree.c	/^    RB_NODE_COLOR color;$/;"	m	struct:_RBNode	file:
 constant_hazard	ts/breakout.c	/^static void constant_hazard(double *nr, int n, double lambda) {$/;"	f	file:
 copy_val	util/hash.c	/^static HashVal copy_val(Hash * hs, HashVal s){$/;"	f	file:
-count	tm/lda.h	/^    unsigned int   count;$/;"	m	struct:__anon7
+count	tm/hlda.c	/^    unsigned int   count;$/;"	m	struct:__anon12	file:
+count	tm/htm.c	/^    unsigned int   count;$/;"	m	struct:__anon13	file:
+count	tm/lda.c	/^    unsigned int   count;$/;"	m	struct:__anon14	file:
+count	tm/tm.c	/^    unsigned int   count;$/;"	m	struct:__anon16	file:
 count	util/hash.c	/^    int count;          \/\/ number of elements inserted$/;"	m	struct:_hash	file:
-create_lda	tm/lda.c	/^Lda *create_lda() {$/;"	f
+create_lda	tm/hlda.c	/^Lda * create_lda(ParamLda p){$/;"	f
+create_lda	tm/lda.c	/^Lda *create_lda(ParamLda p) {$/;"	f
+create_lda	tm/lda_xy.c	/^Lda *create_lda(ParamLda p){$/;"	f
 create_lr_model	regr/lr.c	/^REG * create_lr_model(){$/;"	f
 create_model	regr/regress.c	/^REG * create_model(EVAL_FN eval_fn, GRAD_FN grad_fn, REPO_FN repo_fn){$/;"	f
-d	tm/lda.h	/^    int d;                         \/* doc size          *\/$/;"	m	struct:_lda
+d	output/inc/tm_config.h	/^    char * d;$/;"	m	struct:_tmconfig
+d	tm/hlda.c	/^    unsigned int d;                \/* doc_size  *\/$/;"	m	struct:_lda	file:
+d	tm/htm.c	/^    unsigned int d;$/;"	m	struct:_tm	file:
+d	tm/lda.c	/^    int d;                         \/* doc size          *\/$/;"	m	struct:_lda	file:
+d	tm/lda_xy.c	/^    int d;                         \/* doc size          *\/$/;"	m	struct:_lda	file:
+d	tm/tm.c	/^    unsigned int d;$/;"	m	struct:_tm	file:
+d	tm/tm_config.h	/^    char * d;$/;"	m	struct:_tmconfig
+d	tm/xtm.c	/^    unsigned int d;$/;"	m	struct:_tm	file:
+data	output/inc/heap.h	/^    void ** data;$/;"	m	struct:_heap
 data	util/heap.h	/^    void ** data;$/;"	m	struct:_heap
 default_cmp	util/rbtree.c	/^static int default_cmp(int *a, int *b) {$/;"	f	file:
 default_heap_cmp_fn	util/heap.c	/^int default_heap_cmp_fn(int* m, int* n){$/;"	f
+del_off_tp	tm/tm.c	/^static void del_off_tp(TM * tm, int d, int v, int t){$/;"	f	file:
 depth	gbdt/dtree.c	/^    int depth;                      \/* depth of this node        *\/$/;"	m	struct:_d_tree	file:
+disp	tm/lda_xy.c	/^    double (*disp)[11];            \/* for pos info      *\/$/;"	m	struct:_lda	file:
+disp	tm/xtm.c	/^    double (*disp)[11];$/;"	m	struct:_tm	file:
+dist	cls/k2d.c	/^static double dist(double x1, double y1, double x2, double y2){$/;"	f	file:
 dist	cls/kmeans.c	/^static float dist(float * feature1, float * feature2, int f){$/;"	f	file:
-doc_entry	tm/lda.h	/^    int  * doc_entry;              \/* doc entry         *\/$/;"	m	struct:_lda
+doc_cnt	tm/hlda.c	/^    int (*doc_cnt)[2];             \/* doc_cnt : {tpcnt, locnt}  *\/$/;"	m	struct:_lda	file:
+doc_cnt	tm/htm.c	/^    int  (*doc_cnt)[2];$/;"	m	struct:_tm	file:
+doc_cnt	tm/xtm.c	/^    int  (*doc_cnt)[2];$/;"	m	struct:_tm	file:
+doc_ent	tm/hlda.c	/^    int  *doc_ent;                 \/* doc ent   *\/$/;"	m	struct:_lda	file:
+doc_entry	tm/htm.c	/^    int   * doc_entry;$/;"	m	struct:_tm	file:
+doc_entry	tm/lda.c	/^    int  * doc_entry;              \/* doc entry         *\/$/;"	m	struct:_lda	file:
+doc_entry	tm/tm.c	/^    int   * doc_entry;$/;"	m	struct:_tm	file:
 dts	gbdt/gbdt.c	/^    DTree ** dts;$/;"	m	struct:_gbdt	file:
 dtw	ts/dist.c	/^double dtw(double * x, int nx, double * y, int ny){$/;"	f
+dx	output/bin/cal_pro.py	/^        dx = x - mx$/;"	v
+dy	output/bin/cal_pro.py	/^        dy = y - my$/;"	v
 ed	ts/dist.c	/^int ed(char * x, char * y){$/;"	f
 ed_bak	ts/dist.c	/^int ed_bak(char * x, char * y){$/;"	f
 edm	ts/breakout.c	/^int * edm(double * ts, int n, int min_size, double beta, int degree, int *ol){$/;"	f
+est_lda	tm/hlda.c	/^void est_lda(Lda *lda) {$/;"	f
 est_lda	tm/lda.c	/^void est_lda(Lda *lda) {$/;"	f
+est_lda	tm/lda_xy.c	/^void est_lda(Lda * lda){$/;"	f
+eval_fn	output/inc/regress.h	/^    EVAL_FN eval_fn;            \/* loss function            *\/$/;"	m	struct:_reg
 eval_fn	regr/regress.h	/^    EVAL_FN eval_fn;            \/* loss function            *\/$/;"	m	struct:_reg
 eval_test	gbdt/gbdt.c	/^static void eval_test(GBDT * gbdt){$/;"	f	file:
 eval_tree	gbdt/dtree.c	/^double * eval_tree(DTD * ts, DTree * t, double * F, int n){$/;"	f
 exMerge	ts/modl.c	/^static Interval * exMerge(Interval * I, int m, int n, int *l, double * LogD){$/;"	f	file:
+exp	output/bin/cal_pro.py	/^        exp = 0.5 * (dx * dx * invxx + dy * dy * invyy + 2.0 * dx * dy * invxy)$/;"	v
 ext_obj	gbdt/Makefile	/^ext_obj = ..\/util\/hash.o ..\/util\/str.o ..\/regr\/auc.o$/;"	m
 extend_hash	util/hash.c	/^static void extend_hash(Hash * hs){$/;"	f	file:
 f	gbdt/gbdt.c	/^    double * f;$/;"	m	struct:_gbdt	file:
@@ -211,31 +391,154 @@ fea_rows_sort	gbdt/tdata.c	/^static void fea_rows_sort(int * ids, double * vals,
 filter_cluster	ts/pattern.c	/^int (*filter_cluster(ClsListS *cls, int l, int *nlen))[3] {$/;"	f
 find_left_max	util/median.c	/^static void * find_left_max(MTrace * m){$/;"	f	file:
 find_right_min	util/median.c	/^static void * find_right_min(MTrace * m){$/;"	f	file:
+free	output/inc/tm_config.h	/^    FREE_CONF  free;$/;"	m	struct:_tmconfig
+free	output/inc/tm_config_d.h	/^    FREE_CONF  free;$/;"	m	struct:_tmconfigd
+free	output/inc/tm_config_h.h	/^    FREE_CONF  free;$/;"	m	struct:_tmconfigh
+free	output/inc/tm_config_x.h	/^    FREE_CONF  free;$/;"	m	struct:_tmconfigx
+free	tm/tm_config.h	/^    FREE_CONF  free;$/;"	m	struct:_tmconfig
+free	tm/tm_config_h.h	/^    FREE_CONF  free;$/;"	m	struct:_tmconfigh
+free	tm/tm_config_x.h	/^    FREE_CONF  free;$/;"	m	struct:_tmconfigx
+free_conf	tm/tm_config.c	/^static void free_conf(void *tmc){$/;"	f	file:
+free_conf	tm/tm_config_h.c	/^static void free_conf(void *tmc){$/;"	f	file:
+free_conf	tm/tm_config_x.c	/^static void free_conf(void *tmc){$/;"	f	file:
 free_data	gbdt/tdata.c	/^void free_data(DTD *ts){$/;"	f
 free_ds	regr/regress.c	/^static void free_ds(RDS * ds){$/;"	f	file:
 free_dtree	gbdt/dtree.c	/^void free_dtree(DTree * t){$/;"	f
+free_fn	output/inc/median.h	/^    FREE_FN free_fn;$/;"	m	struct:_median
 free_fn	util/median.h	/^    FREE_FN free_fn;$/;"	m	struct:_median
 free_fn	util/rbtree.c	/^    FREE_FN free_fn;$/;"	m	struct:_RBTree	file:
+free_lda	tm/hlda.c	/^void free_lda(Lda *lda) {$/;"	f
 free_lda	tm/lda.c	/^void free_lda(Lda *lda) {$/;"	f
+free_lda	tm/lda_xy.c	/^void free_lda(Lda *lda) {$/;"	f
 free_model	regr/regress.c	/^void free_model(REG * reg){$/;"	f
-ftoler	regr/regress.h	/^    double ftoler;              \/* tolerance for conv       *\/$/;"	m	struct:__anon4
+ftoler	output/inc/regress.h	/^    double ftoler;              \/* tolerance for conv       *\/$/;"	m	struct:__anon6
+ftoler	regr/regress.h	/^    double ftoler;              \/* tolerance for conv       *\/$/;"	m	struct:__anon10
+fullfill_param	tm/hlda.c	/^static void fullfill_param(Lda * lda){$/;"	f	file:
+fullfill_param	tm/htm.c	/^static void fullfill_param(TM * tm){$/;"	f	file:
 fullfill_param	tm/lda.c	/^static void fullfill_param(Lda *lda) {$/;"	f	file:
+fullfill_param	tm/tm.c	/^static void fullfill_param(TM * tm){$/;"	f	file:
+fullfill_param	tm/xtm.c	/^static void fullfill_param(TM * tm){$/;"	f	file:
+g0	output/inc/lda.h	/^    double g0;             \/* gamma0  *\/$/;"	m	struct:__anon4
+g0	output/inc/tm_config_h.h	/^    double g0;$/;"	m	struct:_tmconfigh
+g0	tm/lda.h	/^    double g0;             \/* gamma0  *\/$/;"	m	struct:__anon15
+g0	tm/tm_config_h.h	/^    double g0;$/;"	m	struct:_tmconfigh
+g1	output/inc/lda.h	/^    double g1;             \/* gamma1  *\/$/;"	m	struct:__anon4
+g1	output/inc/tm_config_h.h	/^    double g1;$/;"	m	struct:_tmconfigh
+g1	tm/lda.h	/^    double g1;             \/* gamma1  *\/$/;"	m	struct:__anon15
+g1	tm/tm_config_h.h	/^    double g1;$/;"	m	struct:_tmconfigh
 g_fn	gbdt/gbdt.c	/^    G g_fn;$/;"	m	struct:_gbdt	file:
 gbdt_create	gbdt/gbdt.c	/^GBDT * gbdt_create(G g_fn, H h_fn, R r_fn, GBMP p){$/;"	f
 gbdt_free	gbdt/gbdt.c	/^void   gbdt_free (GBDT * gbdt){$/;"	f
 gbdt_lr	gbdt/gblr.c	/^GBDT * gbdt_lr(GBMP p){$/;"	f
 gbdt_save	gbdt/gbdt.c	/^void   gbdt_save (GBDT * gbdt){$/;"	f
 gbdt_train	gbdt/gbdt.c	/^int    gbdt_train(GBDT * gbdt){$/;"	f
+gdisp	tm/xtm.c	/^    double  gdisp[11];$/;"	m	struct:_tm	file:
 gen_base	ts/pattern.c	/^ULL *gen_base(int l, int k) {$/;"	f
 gen_cluster	ts/pattern.c	/^ClsListS *gen_cluster(double *d, int n, int m, int l, int k) {$/;"	f
 generate_dtree	gbdt/dtree.c	/^DTree * generate_dtree(DTD * ds      \/* dataset for build tree *\/$/;"	f
 getDelta	ts/modl.c	/^static double getDelta(Interval a, Interval b, Interval c, int m, int n, double * LogD){$/;"	f	file:
 getValue	ts/modl.c	/^static double getValue(Interval * t,int m, int n, double * LogD){$/;"	f	file:
+get_alpha	output/inc/tm_config.h	/^    GET_ALPHA  get_alpha;$/;"	m	struct:_tmconfig
+get_alpha	output/inc/tm_config_d.h	/^    GET_ALPHA  get_alpha;$/;"	m	struct:_tmconfigd
+get_alpha	output/inc/tm_config_h.h	/^    GET_ALPHA  get_alpha;$/;"	m	struct:_tmconfigh
+get_alpha	output/inc/tm_config_x.h	/^    GET_ALPHA  get_alpha;$/;"	m	struct:_tmconfigx
+get_alpha	tm/tm_config.c	/^static double get_alpha(void * tmc){$/;"	f	file:
+get_alpha	tm/tm_config.h	/^    GET_ALPHA  get_alpha;$/;"	m	struct:_tmconfig
+get_alpha	tm/tm_config_h.c	/^static double get_alpha(void * tmc){$/;"	f	file:
+get_alpha	tm/tm_config_h.h	/^    GET_ALPHA  get_alpha;$/;"	m	struct:_tmconfigh
+get_alpha	tm/tm_config_x.c	/^static double get_alpha(void *tmc){$/;"	f	file:
+get_alpha	tm/tm_config_x.h	/^    GET_ALPHA  get_alpha;$/;"	m	struct:_tmconfigx
+get_beta	output/inc/tm_config.h	/^    GET_BETA   get_beta;$/;"	m	struct:_tmconfig
+get_beta	output/inc/tm_config_d.h	/^    GET_BETA   get_beta;$/;"	m	struct:_tmconfigd
+get_beta	output/inc/tm_config_h.h	/^    GET_BETA   get_beta;$/;"	m	struct:_tmconfigh
+get_beta	output/inc/tm_config_x.h	/^    GET_BETA   get_beta;$/;"	m	struct:_tmconfigx
+get_beta	tm/tm_config.c	/^static double get_beta(void * tmc){$/;"	f	file:
+get_beta	tm/tm_config.h	/^    GET_BETA   get_beta;$/;"	m	struct:_tmconfig
+get_beta	tm/tm_config_h.c	/^static double get_beta(void * tmc){$/;"	f	file:
+get_beta	tm/tm_config_h.h	/^    GET_BETA   get_beta;$/;"	m	struct:_tmconfigh
+get_beta	tm/tm_config_x.c	/^static double get_beta(void *tmc){$/;"	f	file:
+get_beta	tm/tm_config_x.h	/^    GET_BETA   get_beta;$/;"	m	struct:_tmconfigx
+get_d	output/inc/tm_config.h	/^    GET_D      get_d;$/;"	m	struct:_tmconfig
+get_d	output/inc/tm_config_d.h	/^    GET_D      get_d;$/;"	m	struct:_tmconfigd
+get_d	output/inc/tm_config_h.h	/^    GET_D      get_d;$/;"	m	struct:_tmconfigh
+get_d	output/inc/tm_config_x.h	/^    GET_D      get_d;$/;"	m	struct:_tmconfigx
+get_d	tm/tm_config.c	/^static char * get_d(void *tmc){$/;"	f	file:
+get_d	tm/tm_config.h	/^    GET_D      get_d;$/;"	m	struct:_tmconfig
+get_d	tm/tm_config_h.c	/^static char * get_d(void *tmc){$/;"	f	file:
+get_d	tm/tm_config_h.h	/^    GET_D      get_d;$/;"	m	struct:_tmconfigh
+get_d	tm/tm_config_x.c	/^static char * get_d(void *tmc){$/;"	f	file:
+get_d	tm/tm_config_x.h	/^    GET_D      get_d;$/;"	m	struct:_tmconfigx
+get_g0	output/inc/tm_config_h.h	/^    GET_G0     get_g0;$/;"	m	struct:_tmconfigh
+get_g0	output/inc/tm_config_x.h	/^    GET_G0     get_g0;$/;"	m	struct:_tmconfigx
+get_g0	tm/tm_config_h.c	/^static double get_g0(void *tmc){$/;"	f	file:
+get_g0	tm/tm_config_h.h	/^    GET_G0     get_g0;$/;"	m	struct:_tmconfigh
+get_g0	tm/tm_config_x.c	/^static double get_g0(void *tmc){$/;"	f	file:
+get_g0	tm/tm_config_x.h	/^    GET_G0     get_g0;$/;"	m	struct:_tmconfigx
+get_g1	output/inc/tm_config_h.h	/^    GET_G1     get_g1;$/;"	m	struct:_tmconfigh
+get_g1	output/inc/tm_config_x.h	/^    GET_G1     get_g1;$/;"	m	struct:_tmconfigx
+get_g1	tm/tm_config_h.c	/^static double get_g1(void *tmc){$/;"	f	file:
+get_g1	tm/tm_config_h.h	/^    GET_G1     get_g1;$/;"	m	struct:_tmconfigh
+get_g1	tm/tm_config_x.c	/^static double get_g1(void *tmc){$/;"	f	file:
+get_g1	tm/tm_config_x.h	/^    GET_G1     get_g1;$/;"	m	struct:_tmconfigx
 get_hg	regr/newton.c	/^static void get_hg(int n, double *g,  double *s, double *y, int m, int pos, int k, double hgini, double *hg, NT_METHOD method){$/;"	f	file:
 get_inv_h	regr/newton.c	/^static void get_inv_h(int n, double *s, double *y, double *b) {$/;"	f	file:
+get_k	output/inc/tm_config.h	/^    GET_K      get_k;$/;"	m	struct:_tmconfig
+get_k	output/inc/tm_config_d.h	/^    GET_K      get_k;$/;"	m	struct:_tmconfigd
+get_k	output/inc/tm_config_h.h	/^    GET_K      get_k;$/;"	m	struct:_tmconfigh
+get_k	output/inc/tm_config_x.h	/^    GET_K      get_k;$/;"	m	struct:_tmconfigx
+get_k	tm/tm_config.c	/^static int get_k(void *tmc){$/;"	f	file:
+get_k	tm/tm_config.h	/^    GET_K      get_k;$/;"	m	struct:_tmconfig
+get_k	tm/tm_config_h.c	/^static int get_k(void *tmc){$/;"	f	file:
+get_k	tm/tm_config_h.h	/^    GET_K      get_k;$/;"	m	struct:_tmconfigh
+get_k	tm/tm_config_x.c	/^static int get_k(void *tmc){$/;"	f	file:
+get_k	tm/tm_config_x.h	/^    GET_K      get_k;$/;"	m	struct:_tmconfigx
+get_l	output/inc/tm_config_d.h	/^    GET_L      get_l;$/;"	m	struct:_tmconfigd
+get_l	output/inc/tm_config_x.h	/^    GET_L      get_l;$/;"	m	struct:_tmconfigx
+get_l	tm/tm_config_x.c	/^static int    get_l(void *tmc){$/;"	f	file:
+get_l	tm/tm_config_x.h	/^    GET_L      get_l;$/;"	m	struct:_tmconfigx
 get_median	util/median.c	/^void * get_median(MTrace * m){$/;"	f
+get_n	output/inc/tm_config.h	/^    GET_N      get_n;$/;"	m	struct:_tmconfig
+get_n	output/inc/tm_config_d.h	/^    GET_N      get_n;$/;"	m	struct:_tmconfigd
+get_n	output/inc/tm_config_h.h	/^    GET_N      get_n;$/;"	m	struct:_tmconfigh
+get_n	output/inc/tm_config_x.h	/^    GET_N      get_n;$/;"	m	struct:_tmconfigx
+get_n	tm/tm_config.c	/^static int get_n(void *tmc){$/;"	f	file:
+get_n	tm/tm_config.h	/^    GET_N      get_n;$/;"	m	struct:_tmconfig
+get_n	tm/tm_config_h.c	/^static int get_n(void *tmc){$/;"	f	file:
+get_n	tm/tm_config_h.h	/^    GET_N      get_n;$/;"	m	struct:_tmconfigh
+get_n	tm/tm_config_x.c	/^static int get_n(void *tmc){$/;"	f	file:
+get_n	tm/tm_config_x.h	/^    GET_N      get_n;$/;"	m	struct:_tmconfigx
+get_o	output/inc/tm_config.h	/^    GET_O      get_o;$/;"	m	struct:_tmconfig
+get_o	output/inc/tm_config_d.h	/^    GET_O      get_o;$/;"	m	struct:_tmconfigd
+get_o	output/inc/tm_config_h.h	/^    GET_O      get_o;$/;"	m	struct:_tmconfigh
+get_o	output/inc/tm_config_x.h	/^    GET_O      get_o;$/;"	m	struct:_tmconfigx
+get_o	tm/tm_config.c	/^static char * get_o(void *tmc){$/;"	f	file:
+get_o	tm/tm_config.h	/^    GET_O      get_o;$/;"	m	struct:_tmconfig
+get_o	tm/tm_config_h.c	/^static char * get_o(void *tmc){$/;"	f	file:
+get_o	tm/tm_config_h.h	/^    GET_O      get_o;$/;"	m	struct:_tmconfigh
+get_o	tm/tm_config_x.c	/^static char * get_o(void *tmc){$/;"	f	file:
+get_o	tm/tm_config_x.h	/^    GET_O      get_o;$/;"	m	struct:_tmconfigx
 get_pattern	ts/pattern.c	/^int (*get_pattern(double *d, int n, int m, int l, int k, int *nlen))[3] {$/;"	f
+get_s	output/inc/tm_config.h	/^    GET_S      get_s;$/;"	m	struct:_tmconfig
+get_s	output/inc/tm_config_d.h	/^    GET_S      get_s;$/;"	m	struct:_tmconfigd
+get_s	output/inc/tm_config_h.h	/^    GET_S      get_s;$/;"	m	struct:_tmconfigh
+get_s	output/inc/tm_config_x.h	/^    GET_S      get_s;$/;"	m	struct:_tmconfigx
+get_s	tm/tm_config.c	/^static int get_s(void *tmc){$/;"	f	file:
+get_s	tm/tm_config.h	/^    GET_S      get_s;$/;"	m	struct:_tmconfig
+get_s	tm/tm_config_h.c	/^static int get_s(void *tmc){$/;"	f	file:
+get_s	tm/tm_config_h.h	/^    GET_S      get_s;$/;"	m	struct:_tmconfigh
+get_s	tm/tm_config_x.c	/^static int get_s(void *tmc){$/;"	f	file:
+get_s	tm/tm_config_x.h	/^    GET_S      get_s;$/;"	m	struct:_tmconfigx
+get_u	output/inc/tm_config_x.h	/^    GET_U      get_u;$/;"	m	struct:_tmconfigx
+get_u	tm/tm_config_x.c	/^static double get_u(void *tmc){$/;"	f	file:
+get_u	tm/tm_config_x.h	/^    GET_U      get_u;$/;"	m	struct:_tmconfigx
+gibbs_sample	tm/hlda.c	/^static int gibbs_sample(Lda * lda){$/;"	f	file:
+gibbs_sample	tm/htm.c	/^static int gibbs_sample(TM * tm){$/;"	f	file:
 gibbs_sample	tm/lda.c	/^static int gibbs_sample(Lda * lda) {$/;"	f	file:
+gibbs_sample	tm/lda_xy.c	/^static void gibbs_sample(Lda * lda){$/;"	f	file:
+gibbs_sample	tm/tm.c	/^static int gibbs_sample(TM * tm){$/;"	f	file:
+gibbs_sample	tm/xtm.c	/^static void gibbs_sample(TM * tm){$/;"	f	file:
+gln	tm/xtm.c	/^    int   gln;$/;"	m	struct:_tm	file:
+grad_fn	output/inc/regress.h	/^    GRAD_FN grad_fn;            \/* grandient function       *\/$/;"	m	struct:_reg
 grad_fn	regr/regress.h	/^    GRAD_FN grad_fn;            \/* grandient function       *\/$/;"	m	struct:_reg
 grad_fn	ts/loess.c	/^static void grad_fn (double *y, double *w, int k, double *grad) {$/;"	f	file:
 greedInit	ts/modl.c	/^static Interval * greedInit(double v[], int a[], int n, int* m){$/;"	f	file:
@@ -259,45 +562,123 @@ head	ts/pattern.c	/^    Node *head;$/;"	m	struct:_cls_list	file:
 head	ts/pattern.c	/^    int *head;$/;"	m	struct:_simple_hash_map	file:
 head	util/hash.c	/^    int * head;         \/\/ bucket head pointer$/;"	m	struct:_hash	file:
 heap_add	util/heap.c	/^void heap_add(Heap * hp, void * pdata){$/;"	f
+heap_cmp_fn	output/inc/heap.h	/^    HEAP_CMP_FN heap_cmp_fn;$/;"	m	struct:_heap
 heap_cmp_fn	util/heap.h	/^    HEAP_CMP_FN heap_cmp_fn;$/;"	m	struct:_heap
 heap_create	util/heap.c	/^Heap * heap_create(int size){$/;"	f
 heap_free	util/heap.c	/^void   heap_free(Heap * hp){$/;"	f
+heap_item_free_fn	output/inc/heap.h	/^    HEAP_ITEM_FREE heap_item_free_fn;$/;"	m	struct:_heap
 heap_item_free_fn	util/heap.h	/^    HEAP_ITEM_FREE heap_item_free_fn;$/;"	m	struct:_heap
 heap_pop	util/heap.c	/^void * heap_pop(Heap * hp){$/;"	f
 heap_remove	util/heap.c	/^void heap_remove(Heap * hp, void * pdata){$/;"	f
+heappop	output/bin/top_words.py	/^from heapq import heappop$/;"	i
+heappush	output/bin/top_words.py	/^from heapq import heappush$/;"	i
+help	output/inc/tm_config.h	/^    HELP       help;$/;"	m	struct:_tmconfig
+help	output/inc/tm_config_d.h	/^    HELP       help;$/;"	m	struct:_tmconfigd
+help	output/inc/tm_config_h.h	/^    HELP       help;$/;"	m	struct:_tmconfigh
+help	output/inc/tm_config_x.h	/^    HELP       help;$/;"	m	struct:_tmconfigx
 help	src/gblr.c	/^void help() {$/;"	f
-help	src/lda.c	/^void help() {$/;"	f
+help	src/k2d.c	/^void help(){$/;"	f
+help	src/lda.c	/^void help(char * argv[]) {$/;"	f
 help	src/lr.c	/^void help() {$/;"	f
+help	tm/tm_config.c	/^static void help(void){$/;"	f	file:
+help	tm/tm_config.h	/^    HELP       help;$/;"	m	struct:_tmconfig
+help	tm/tm_config_h.c	/^static void help(void){$/;"	f	file:
+help	tm/tm_config_h.h	/^    HELP       help;$/;"	m	struct:_tmconfigh
+help	tm/tm_config_x.c	/^static void help(void){$/;"	f	file:
+help	tm/tm_config_x.h	/^    HELP       help;$/;"	m	struct:_tmconfigx
 hessian_v	ts/loess.c	/^static void hessian_v(double *w, double (*hv)[3], int k) {$/;"	f	file:
 id	gbdt/tdata.c	/^    int id;$/;"	m	struct:__anon1	file:
 id	regr/auc.c	/^    int id;$/;"	m	struct:_aucP	file:
-id_doc_map	tm/lda.h	/^    char (*id_doc_map)[KEY_SIZE];  \/* doc id map        *\/$/;"	m	struct:_lda
+id_d_map	tm/hlda.c	/^    char (*id_d_map)[KEY_SIZE];    \/* doc_map   *\/$/;"	m	struct:_lda	file:
+id_d_map	tm/htm.c	/^    char (*id_d_map)[KEY_SIZE];$/;"	m	struct:_tm	file:
+id_d_map	tm/tm.c	/^    char (*id_d_map)[KEY_SIZE];$/;"	m	struct:_tm	file:
+id_d_map	tm/xtm.c	/^    char (*id_d_map)[KEY_SIZE];$/;"	m	struct:_tm	file:
+id_doc_map	tm/lda.c	/^    char (*id_doc_map)[KEY_SIZE];  \/* doc id map        *\/$/;"	m	struct:_lda	file:
+id_doc_map	tm/lda_xy.c	/^    char (*id_doc_map)[KEY_SIZE];  \/* doc id map        *\/$/;"	m	struct:_lda	file:
+id_l_map	tm/hlda.c	/^    char (*id_l_map)[KEY_SIZE];    \/* loc_map   *\/$/;"	m	struct:_lda	file:
+id_l_map	tm/htm.c	/^    char (*id_l_map)[KEY_SIZE];$/;"	m	struct:_tm	file:
 id_map	gbdt/tdata.h	/^    char (*id_map)[FKL];            \/* feature id name mapping   *\/$/;"	m	struct:__anon2
+id_map	output/inc/regress.h	/^    char  (*id_map)[RKL];       \/* feature id map           *\/$/;"	m	struct:_reg
+id_map	output/inc/tdata.h	/^    char (*id_map)[FKL];            \/* feature id name mapping   *\/$/;"	m	struct:__anon8
 id_map	regr/regress.h	/^    char  (*id_map)[RKL];       \/* feature id map           *\/$/;"	m	struct:_reg
-id_v_map	tm/lda.h	/^    char (*id_v_map)[KEY_SIZE];    \/* word id map       *\/$/;"	m	struct:_lda
+id_v_map	tm/hlda.c	/^    char (*id_v_map)[KEY_SIZE];    \/* word_map  *\/$/;"	m	struct:_lda	file:
+id_v_map	tm/htm.c	/^    char (*id_v_map)[KEY_SIZE];$/;"	m	struct:_tm	file:
+id_v_map	tm/lda.c	/^    char (*id_v_map)[KEY_SIZE];    \/* word id map       *\/$/;"	m	struct:_lda	file:
+id_v_map	tm/lda_xy.c	/^    char (*id_v_map)[KEY_SIZE];    \/* word id map       *\/$/;"	m	struct:_lda	file:
+id_v_map	tm/tm.c	/^    char (*id_v_map)[KEY_SIZE];$/;"	m	struct:_tm	file:
+id_v_map	tm/xtm.c	/^    char (*id_v_map)[KEY_SIZE];$/;"	m	struct:_tm	file:
 ids	gbdt/tdata.h	/^    int * ids;                      \/* row ids of feature        *\/$/;"	m	struct:__anon2
-ids	regr/regress.h	/^    int    *ids;                \/* all feature ids of train *\/$/;"	m	struct:__anon5
-in_file	regr/regress.h	/^    char  *in_file;             \/* input file for train     *\/$/;"	m	struct:__anon4
-in_file	tm/lda.h	/^    char * in_file;        \/* data in *\/     $/;"	m	struct:__anon6
+ids	output/inc/regress.h	/^    int    *ids;                \/* all feature ids of train *\/$/;"	m	struct:__anon7
+ids	output/inc/tdata.h	/^    int * ids;                      \/* row ids of feature        *\/$/;"	m	struct:__anon8
+ids	regr/regress.h	/^    int    *ids;                \/* all feature ids of train *\/$/;"	m	struct:__anon11
+in_file	output/inc/lda.h	/^    char * in_file;        \/* data in *\/     $/;"	m	struct:__anon4
+in_file	output/inc/regress.h	/^    char  *in_file;             \/* input file for train     *\/$/;"	m	struct:__anon6
+in_file	regr/regress.h	/^    char  *in_file;             \/* input file for train     *\/$/;"	m	struct:__anon10
+in_file	tm/lda.h	/^    char * in_file;        \/* data in *\/     $/;"	m	struct:__anon15
 initLogD	ts/modl.c	/^double * initLogD(int L){$/;"	f
+init_centers	cls/k2d.c	/^static void init_centers(double (*x)[2], double (*c)[11], int *ks, int *assign, int n, int k){$/;"	f	file:
 init_cents	cls/kmeans.c	/^static int init_cents(float * m, int n, int f, int k, float * cents, float * centsA, int * centsC, int * cids){$/;"	f	file:
 init_child	gbdt/dtree.c	/^static void init_child(DTree * t){$/;"	f	file:
+init_config	tm/tm_config.c	/^TMConfig * init_config(){$/;"	f
+init_e	tm/hlda.c	/^static double init_e(Lda * lda, double * pse){$/;"	f	file:
+init_e	tm/htm.c	/^static double init_e(TM * tm, double * pse){$/;"	f	file:
+init_e	tm/tm.c	/^static double init_e(TM * tm, double * pse){$/;"	f	file:
+init_f	tm/hlda.c	/^static double init_f(Lda * lda, double * psd, int d){$/;"	f	file:
+init_f	tm/htm.c	/^static double init_f(TM * tm, double * psd, int d){$/;"	f	file:
+init_f	tm/tm.c	/^static double init_f(TM * tm, double * psd, int d){$/;"	f	file:
+init_g	tm/hlda.c	/^static double init_g(Lda * lda, double * psv, int d, int v){$/;"	f	file:
+init_g	tm/htm.c	/^static double init_g(TM * tm, double * psv, int d, int v){$/;"	f	file:
+init_g	tm/tm.c	/^static double init_g(TM * tm, double * psv, int d, int v){$/;"	f	file:
+init_h_config	tm/tm_config_h.c	/^TMHConfig * init_h_config(){$/;"	f
+init_lda	tm/hlda.c	/^int init_lda(Lda * lda){$/;"	f
 init_lda	tm/lda.c	/^int init_lda(Lda *lda) {$/;"	f
+init_lda	tm/lda_xy.c	/^int init_lda(Lda * lda){$/;"	f
 init_model	regr/regress.c	/^int init_model(REG * reg){$/;"	f
 init_root	gbdt/dtree.c	/^static DTree * init_root(double * g, double * h, int n, double nr, double wr){$/;"	f	file:
-iterno	regr/regress.h	/^    int    iterno;              \/* current iter number      *\/$/;"	m	struct:__anon4
-k	tm/lda.h	/^    int    k;              \/* topic n *\/     $/;"	m	struct:__anon6
+init_x_config	tm/tm_config_x.c	/^TMXConfig * init_x_config(){$/;"	f
+invxx	output/bin/cal_pro.py	/^        invxx = xx \/ det$/;"	v
+invxy	output/bin/cal_pro.py	/^        invxy = -xy \/ det$/;"	v
+invyy	output/bin/cal_pro.py	/^        invyy = yy \/ det$/;"	v
+iterno	output/inc/regress.h	/^    int    iterno;              \/* current iter number      *\/$/;"	m	struct:__anon6
+iterno	regr/regress.h	/^    int    iterno;              \/* current iter number      *\/$/;"	m	struct:__anon10
+k	output/inc/lda.h	/^    int    k;              \/* topic n *\/     $/;"	m	struct:__anon4
+k	output/inc/tm_config.h	/^    int    k;$/;"	m	struct:_tmconfig
+k	tm/lda.h	/^    int    k;              \/* topic n *\/     $/;"	m	struct:__anon15
+k	tm/tm_config.h	/^    int    k;$/;"	m	struct:_tmconfig
+k2d	cls/k2d.c	/^double (*k2d(double (*x)[2], int *assign, int n, int k))[6] {$/;"	f
 key	ts/pattern.c	/^    ULL *key;$/;"	m	struct:_simple_hash_map	file:
 kmeans	cls/kmeans.c	/^int kmeans(float * m, int n, int f, int k, int * c){$/;"	f
 l	gbdt/tdata.h	/^    int * l;                        \/* row cnt of per feautre    *\/$/;"	m	struct:__anon2
-l	regr/regress.h	/^    int    *l;                  \/* feature cnt of instances *\/$/;"	m	struct:__anon5
-lambda	regr/regress.h	/^    double lambda;              \/* penalty for regulization *\/$/;"	m	struct:__anon4
+l	output/inc/regress.h	/^    int    *l;                  \/* feature cnt of instances *\/$/;"	m	struct:__anon7
+l	output/inc/tdata.h	/^    int * l;                        \/* row cnt of per feautre    *\/$/;"	m	struct:__anon8
+l	output/inc/tm_config_d.h	/^    int l;$/;"	m	struct:_tmconfigd
+l	output/inc/tm_config_x.h	/^    int l;$/;"	m	struct:_tmconfigx
+l	regr/regress.h	/^    int    *l;                  \/* feature cnt of instances *\/$/;"	m	struct:__anon11
+l	tm/hlda.c	/^    unsigned int l;                \/* loc_size  *\/$/;"	m	struct:_lda	file:
+l	tm/htm.c	/^    unsigned int l;$/;"	m	struct:_tm	file:
+l	tm/tm_config_x.h	/^    int l;$/;"	m	struct:_tmconfigx
+lambda	output/inc/regress.h	/^    double lambda;              \/* penalty for regulization *\/$/;"	m	struct:__anon6
+lambda	regr/regress.h	/^    double lambda;              \/* penalty for regulization *\/$/;"	m	struct:__anon10
 lcss	ts/dist.c	/^int lcss(int * x, int nx, int *y, int ny){$/;"	f
+lda_d	tm/hlda.c	/^int lda_d(Lda * lda){$/;"	f
+lda_d	tm/lda.c	/^int lda_d(Lda * lda){$/;"	f
+lda_d	tm/lda_xy.c	/^int lda_d(Lda * lda){$/;"	f
+lda_t	tm/hlda.c	/^int lda_t(Lda * lda){$/;"	f
+lda_t	tm/lda.c	/^int lda_t(Lda * lda){$/;"	f
+lda_t	tm/lda_xy.c	/^int lda_t(Lda * lda){$/;"	f
+lda_v	tm/hlda.c	/^int lda_v(Lda * lda){$/;"	f
+lda_v	tm/lda.c	/^int lda_v(Lda * lda){$/;"	f
+lda_v	tm/lda_xy.c	/^int lda_v(Lda * lda){$/;"	f
 leaf	gbdt/dtree.c	/^    int leaf;                       \/* is leaf or not, 0 | 1     *\/$/;"	m	struct:_d_tree	file:
 learn_model	regr/regress.c	/^int learn_model(REG * reg){$/;"	f
+left_max	output/inc/median.h	/^    void * left_max;$/;"	m	struct:_median
 left_max	util/median.h	/^    void * left_max;$/;"	m	struct:_median
+len	output/inc/heap.h	/^    int len;$/;"	m	struct:_heap
 len	util/heap.h	/^    int len;$/;"	m	struct:_heap
 lfit	ts/breakout.c	/^static void lfit(double *s, int n, double * l0, double * l1){$/;"	f	file:
+ln	tm/hlda.c	/^    int * ln;                      \/* loc_cnt   *\/$/;"	m	struct:_lda	file:
+ln	tm/htm.c	/^    int   * ln;$/;"	m	struct:_tm	file:
+ln	tm/xtm.c	/^    int   *ln; $/;"	m	struct:_tm	file:
 load_data	gbdt/tdata.c	/^DTD *(*load_data(char * train_input, char * test_input, int binary))[2]{$/;"	f
 load_ds	gbdt/tdata.c	/^static DTD * load_ds(char * input, Hash * hs, int f, int bin){$/;"	f	file:
 load_test_ds	regr/regress.c	/^static int load_test_ds(REG * reg, Hash * hs){$/;"	f	file:
@@ -313,6 +694,8 @@ lr_hess	gbdt/gblr.c	/^void lr_hess(double *f, double *y, double *h, int n){$/;"	
 lr_repo	gbdt/gblr.c	/^void lr_repo(GBDT * g){$/;"	f
 lr_repo	regr/lr.c	/^int lr_repo(double *x0, double *x1, void *_ds) {$/;"	f
 lsp	ts/breakout.c	/^int * lsp(double * ts, int n, int min_size, double beta, int *ol, double * rety){$/;"	f
+lx	output/bin/filter_lc.py	/^lx = []$/;"	v
+ly	output/bin/filter_lc.py	/^ly = []$/;"	v
 m_add	util/median.c	/^void m_add(MTrace * m, void *pdata){$/;"	f
 m_clear	util/median.c	/^void m_clear(MTrace * m){$/;"	f
 m_create	util/median.c	/^MTrace * m_create(CMP_FN cmp_fn, FREE_FN free_fn){$/;"	f
@@ -321,52 +704,105 @@ m_insert_left	util/median.c	/^static void m_insert_left(MTrace * m, void *pdata)
 m_insert_right	util/median.c	/^static void m_insert_right(MTrace * m, void * pdata){$/;"	f	file:
 m_remove	util/median.c	/^void m_remove(MTrace * m, void * pdata){$/;"	f
 main	src/gblr.c	/^int main(int argc, char *argv[]) {$/;"	f
+main	src/k2d.c	/^int main(int argc, char *argv[]){$/;"	f
 main	src/lda.c	/^int main(int argc, char * argv[]) {$/;"	f
 main	src/lr.c	/^int main(int argc, char *argv[]) {$/;"	f
+main	src/tm.c	/^int main(int argc, char *argv[]){$/;"	f
+malloc_space	tm/hlda.c	/^static void malloc_space(Lda * lda){$/;"	f	file:
+malloc_space	tm/htm.c	/^static void malloc_space(TM * tm){$/;"	f	file:
 malloc_space	tm/lda.c	/^static void malloc_space(Lda *lda) {$/;"	f	file:
+malloc_space	tm/lda_xy.c	/^static void malloc_space(Lda * lda){$/;"	f	file:
+malloc_space	tm/tm.c	/^static void malloc_space(TM * tm){$/;"	f	file:
+malloc_space	tm/xtm.c	/^static void malloc_space(TM * tm){$/;"	f	file:
 mask	ts/pattern.c	/^    int mask;$/;"	m	struct:_simple_hash_map	file:
 mask	util/hash.c	/^    int mask;           \/\/ size - 1$/;"	m	struct:_hash	file:
+math	output/bin/cal_pro.py	/^import math$/;"	i
 max	ts/dist.c	/^#define max(/;"	d	file:
 max_depth	gbdt/gbdt.h	/^    int max_depth;$/;"	m	struct:_gbdt_param
+max_depth	output/inc/gbdt.h	/^    int max_depth;$/;"	m	struct:_gbdt_param
 max_leaf_nodes	gbdt/gbdt.h	/^    int max_leaf_nodes;$/;"	m	struct:_gbdt_param
+max_leaf_nodes	output/inc/gbdt.h	/^    int max_leaf_nodes;$/;"	m	struct:_gbdt_param
 max_size	ts/pattern.c	/^    int max_size;$/;"	m	struct:_cls_list_s	file:
 max_trees	gbdt/gbdt.h	/^    int max_trees;$/;"	m	struct:_gbdt_param
+max_trees	output/inc/gbdt.h	/^    int max_trees;$/;"	m	struct:_gbdt_param
+max_x	output/bin/gen_xy.py	/^max_x = max(x)$/;"	v
+max_y	output/bin/gen_xy.py	/^max_y = max(y)$/;"	v
 mean_sd	ts/breakout.c	/^static void mean_sd(double *x, int n, double *mean, double *sd) {$/;"	f	file:
 mean_sd	ts/pattern.c	/^void mean_sd(double *x, int n, double *mean, double *sd) {$/;"	f
 mergeInterval	ts/modl.c	/^static void mergeInterval(Interval a, Interval b){$/;"	f	file:
-method	regr/regress.h	/^    int    method;              \/* regualization mod 1 or 2 *\/$/;"	m	struct:__anon4
+method	output/inc/regress.h	/^    int    method;              \/* regualization mod 1 or 2 *\/$/;"	m	struct:__anon6
+method	regr/regress.h	/^    int    method;              \/* regualization mod 1 or 2 *\/$/;"	m	struct:__anon10
 min	ts/dist.c	/^#define min(/;"	d	file:
+min_x	output/bin/gen_xy.py	/^min_x = min(x)$/;"	v
+min_y	output/bin/gen_xy.py	/^min_y = min(y)$/;"	v
 modl	ts/modl.c	/^double * modl(double v[], int a[], double * LogD, int n, int * nd){$/;"	f
 mt_cmp	util/median.c	/^int mt_cmp(int * m, int *n){$/;"	f
+mx	output/bin/filter_lc.py	/^mx = sum(lx) \/ len(lx)$/;"	v
+my	output/bin/filter_lc.py	/^my = sum(ly) \/ len(ly)$/;"	v
 n	gbdt/dtree.c	/^    int n;                          \/* instance num in this node *\/$/;"	m	struct:_d_tree	file:
-nd	tm/lda.h	/^    ModelEle * nd;                 \/* doc_topic matrix  *\/$/;"	m	struct:_lda
+n	output/inc/tm_config.h	/^    int    n;$/;"	m	struct:_tmconfig
+n	tm/tm_config.h	/^    int    n;$/;"	m	struct:_tmconfig
+nd	tm/hlda.c	/^    ModelEle * nd;                 \/* doc_topic *\/$/;"	m	struct:_lda	file:
+nd	tm/htm.c	/^    ModelEle * nd;$/;"	m	struct:_tm	file:
+nd	tm/lda.c	/^    ModelEle * nd;                 \/* doc_topic matrix  *\/$/;"	m	struct:_lda	file:
+nd	tm/lda_xy.c	/^    int * nd;                      \/* theta             *\/$/;"	m	struct:_lda	file:
+nd	tm/tm.c	/^    ModelEle * nd;$/;"	m	struct:_tm	file:
+nd	tm/xtm.c	/^    int   *nd;$/;"	m	struct:_tm	file:
 nearest	cls/kmeans.c	/^static int nearest(float * s, float * cents, int c, int f, float * dd){$/;"	f	file:
 newton	regr/newton.c	/^int newton(EVAL_FN eval_fn, GRAD_FN grad_fn, REPO_FN repo_fn, NT_METHOD method, void * data, int m, int max_iter, int n, double *retx){$/;"	f
-next	tm/lda.h	/^    unsigned short next;$/;"	m	struct:__anon7
+next	tm/hlda.c	/^    unsigned short next;$/;"	m	struct:__anon12	file:
+next	tm/htm.c	/^    unsigned short next;$/;"	m	struct:__anon13	file:
+next	tm/lda.c	/^    unsigned short next;$/;"	m	struct:__anon14	file:
+next	tm/tm.c	/^    unsigned short next;$/;"	m	struct:__anon16	file:
 next	ts/pattern.c	/^    int *next;$/;"	m	struct:_simple_hash_map	file:
 next	ts/pattern.c	/^    struct _node *next;$/;"	m	struct:_node	typeref:struct:_node::_node	file:
 next	util/hash.c	/^    int * next;         \/\/ internal pointer in bucket$/;"	m	struct:_hash	file:
 next	util/hash.c	/^    union _la_node * next;$/;"	m	union:_la_node	typeref:union:_la_node::_la_node	file:
 next	util/rbtree.c	/^    union _la_node * next;$/;"	m	union:_la_node	typeref:union:_la_node::_la_node	file:
 nil	util/rbtree.c	/^    RBNode   * nil;$/;"	m	struct:_RBTree	file:
-niters	regr/regress.h	/^    int    niters;              \/* max iters                *\/$/;"	m	struct:__anon4
-niters	tm/lda.h	/^    int    niters;         \/* iter n  *\/     $/;"	m	struct:__anon6
-nkw	tm/lda.h	/^    int * nkw;                     \/* token n of topic  *\/$/;"	m	struct:_lda
+niters	output/inc/lda.h	/^    int    niters;         \/* iter n  *\/     $/;"	m	struct:__anon4
+niters	output/inc/regress.h	/^    int    niters;              \/* max iters                *\/$/;"	m	struct:__anon6
+niters	regr/regress.h	/^    int    niters;              \/* max iters                *\/$/;"	m	struct:__anon10
+niters	tm/lda.h	/^    int    niters;         \/* iter n  *\/     $/;"	m	struct:__anon15
+nkw	tm/hlda.c	/^    int * nkw;                     \/* topic_cnt *\/$/;"	m	struct:_lda	file:
+nkw	tm/htm.c	/^    int   * nkw;$/;"	m	struct:_tm	file:
+nkw	tm/lda.c	/^    int * nkw;                     \/* token n of topic  *\/$/;"	m	struct:_lda	file:
+nkw	tm/lda_xy.c	/^    int * nkw;                     \/* token n of topic  *\/$/;"	m	struct:_lda	file:
+nkw	tm/tm.c	/^    int   * nkw;$/;"	m	struct:_tm	file:
+nkw	tm/xtm.c	/^    int   *nkw;$/;"	m	struct:_tm	file:
 nod_reg	gbdt/gbdt.h	/^    double nod_reg;$/;"	m	struct:_gbdt_param
-nw	tm/lda.h	/^    ModelEle * nw;                 \/* topic_word matrix *\/$/;"	m	struct:_lda
-objs	cls/Makefile	/^objs    = kmeans.o$/;"	m
+nod_reg	output/inc/gbdt.h	/^    double nod_reg;$/;"	m	struct:_gbdt_param
+nw	tm/hlda.c	/^    ModelEle * nw;                 \/* word_topic*\/$/;"	m	struct:_lda	file:
+nw	tm/htm.c	/^    ModelEle * nw;$/;"	m	struct:_tm	file:
+nw	tm/lda.c	/^    ModelEle * nw;                 \/* topic_word matrix *\/$/;"	m	struct:_lda	file:
+nw	tm/lda_xy.c	/^    int * nw;                      \/* phi               *\/$/;"	m	struct:_lda	file:
+nw	tm/tm.c	/^    ModelEle * nw;$/;"	m	struct:_tm	file:
+nw	tm/xtm.c	/^    int   *nw;$/;"	m	struct:_tm	file:
+o	output/inc/tm_config.h	/^    char * o;$/;"	m	struct:_tmconfig
+o	tm/tm_config.h	/^    char * o;$/;"	m	struct:_tmconfig
+objs	cls/Makefile	/^objs    = kmeans.o       k2d.o$/;"	m
 objs	gbdt/Makefile	/^objs    = gblr.o gbdt.o dtree.o tdata.o$/;"	m
 objs	regr/Makefile	/^objs    = auc.o lr.o regress.o newton.o$/;"	m
-objs	tm/Makefile	/^objs    = lda.o$/;"	m
+objs	tm/Makefile	/^objs    =  lda_xy.o       tm_config.o tm_config_h.o  tm_config_x.o tm.o htm.o xtm.o $/;"	m
 objs	ts/Makefile	/^objs =      breakout.o dist.o    loess.o     modl.o     pattern.o viterbi.o$/;"	m
 objs	util/Makefile	/^objs    = hash.o     rbtree.o    str.o       median.o$/;"	m
+off_lc_l	tm/hlda.c	/^static void off_lc_l(Lda * lda, int d, int v, int l){$/;"	f	file:
+off_lc_l	tm/htm.c	/^static void off_lc_l(TM * tm, int d, int v, int l){$/;"	f	file:
+off_tp_k	tm/hlda.c	/^static void off_tp_k(Lda * lda, int d, int v, int t){$/;"	f	file:
+off_tp_k	tm/htm.c	/^static void off_tp_k(TM * tm, int d, int v, int t){$/;"	f	file:
 optimize	ts/modl.c	/^static double optimize(Interval * M, int l,  Interval * I, int m, int n, int *ol, double * LogD){$/;"	f	file:
 out_dir	gbdt/gbdt.h	/^    char * out_dir;$/;"	m	struct:_gbdt_param
-out_dir	regr/regress.h	/^    char  *out_dir;             \/* output dir               *\/$/;"	m	struct:__anon4
-out_dir	tm/lda.h	/^    char * out_dir;        \/* out dir *\/    $/;"	m	struct:__anon6
+out_dir	output/inc/gbdt.h	/^    char * out_dir;$/;"	m	struct:_gbdt_param
+out_dir	output/inc/lda.h	/^    char * out_dir;        \/* out dir *\/    $/;"	m	struct:__anon4
+out_dir	output/inc/regress.h	/^    char  *out_dir;             \/* output dir               *\/$/;"	m	struct:__anon6
+out_dir	regr/regress.h	/^    char  *out_dir;             \/* output dir               *\/$/;"	m	struct:__anon10
+out_dir	tm/lda.h	/^    char * out_dir;        \/* out dir *\/    $/;"	m	struct:__anon15
 p	gbdt/gbdt.c	/^    GBMP p;$/;"	m	struct:_gbdt	file:
+p	output/inc/regress.h	/^    RP      p;                  \/* Regression parameters    *\/$/;"	m	struct:_reg
 p	regr/regress.h	/^    RP      p;                  \/* Regression parameters    *\/$/;"	m	struct:_reg
-p	tm/lda.h	/^    ParamLda p;                    \/* lda parameter     *\/$/;"	m	struct:_lda
+p	tm/hlda.c	/^    ParamLda p;                    \/* param     *\/$/;"	m	struct:_lda	file:
+p	tm/lda.c	/^    ParamLda p;                    \/* lda parameter     *\/$/;"	m	struct:_lda	file:
+p	tm/lda_xy.c	/^    ParamLda p;                    \/* lda parameter     *\/$/;"	m	struct:_lda	file:
 p	util/hash.c	/^    LANode * p;         \/\/ current aviliable node$/;"	m	struct:_hash	file:
 p	util/rbtree.c	/^    RBLANode * p;$/;"	m	struct:_RBTree	file:
 p	util/rbtree.c	/^    struct _RBNode * p;$/;"	m	struct:_RBNode	typeref:struct:_RBNode::_RBNode	file:
@@ -375,14 +811,23 @@ parse_command_line	src/gblr.c	/^int parse_command_line(GBMP *p, int argc, char *
 parse_command_line	src/lda.c	/^int parse_command_line(ParamLda *p, int argc, char *argv[]) {$/;"	f
 parse_command_line	src/lr.c	/^int parse_command_line(RP *p, int argc, char *argv[]){$/;"	f
 pi	ts/breakout.c	/^#define pi /;"	d	file:
+pr	output/bin/cal_pro.py	/^            pr = 1.0 \/ (math.sqrt(det) * math.exp(exp))$/;"	v
 pred	ts/loess.c	/^static void pred(double *g, double (*hv)[3], int id, double *rety){$/;"	f	file:
-prev	tm/lda.h	/^    unsigned short prev;$/;"	m	struct:__anon7
-r	regr/regress.h	/^    int     r;                  \/* instance num for train   *\/$/;"	m	struct:__anon5
+prev	tm/hlda.c	/^    unsigned short prev;$/;"	m	struct:__anon12	file:
+prev	tm/htm.c	/^    unsigned short prev;$/;"	m	struct:__anon13	file:
+prev	tm/lda.c	/^    unsigned short prev;$/;"	m	struct:__anon14	file:
+prev	tm/tm.c	/^    unsigned short prev;$/;"	m	struct:__anon16	file:
+r	output/inc/regress.h	/^    int     r;                  \/* instance num for train   *\/$/;"	m	struct:__anon7
+r	regr/regress.h	/^    int     r;                  \/* instance num for train   *\/$/;"	m	struct:__anon11
 r_fn	gbdt/gbdt.c	/^    R r_fn;$/;"	m	struct:_gbdt	file:
 randd	cls/kmeans.c	/^static int randd(int d){$/;"	f	file:
 randf	cls/kmeans.c	/^static double randf(double s){$/;"	f	file:
+random	output/bin/gen_xy.py	/^import sys, random$/;"	i
 rate	gbdt/gbdt.h	/^    double rate;$/;"	m	struct:_gbdt_param
+rate	output/inc/gbdt.h	/^    double rate;$/;"	m	struct:_gbdt_param
+rb1	output/inc/median.h	/^    RBTree * rb1;$/;"	m	struct:_median
 rb1	util/median.h	/^    RBTree * rb1;$/;"	m	struct:_median
+rb2	output/inc/median.h	/^    RBTree * rb2;$/;"	m	struct:_median
 rb2	util/median.h	/^    RBTree * rb2;$/;"	m	struct:_median
 rb_capacity	util/rbtree.c	/^    int rb_capacity;$/;"	m	struct:_RBTree	file:
 rb_clear	util/rbtree.c	/^void rb_clear(RBTree * t){$/;"	f
@@ -402,47 +847,86 @@ rb_mm	util/rbtree.c	/^static RBNode * rb_mm(RBTree * t, RBNode * z, int d){$/;"	
 rb_node_space	util/rbtree.c	/^    RBLANode * rb_node_space;$/;"	m	struct:_RBTree	file:
 rb_trans	util/rbtree.c	/^static void rb_trans(RBTree *t, RBNode *z, RBNode *r) {$/;"	f	file:
 rbnode	util/rbtree.c	/^    RBNode rbnode;$/;"	m	union:_la_node	file:
+repo_fn	output/inc/regress.h	/^    REPO_FN repo_fn;            \/* report function          *\/$/;"	m	struct:_reg
 repo_fn	regr/regress.h	/^    REPO_FN repo_fn;            \/* report function          *\/$/;"	m	struct:_reg
 resize_hash	util/hash.c	/^static void resize_hash(Hash * hs){$/;"	f	file:
 rets	ts/breakout.c	/^static void rets(double *ts, int n, int *re, int k, double *rety){$/;"	f	file:
+right_min	output/inc/median.h	/^    void * right_min;$/;"	m	struct:_median
 right_min	util/median.h	/^    void * right_min;$/;"	m	struct:_median
 root	util/rbtree.c	/^    RBNode   * root;$/;"	m	struct:_RBTree	file:
 rotate	util/rbtree.c	/^static void rotate(RBTree *t, RBNode *z, int d) {$/;"	f	file:
 row	gbdt/tdata.h	/^    int row;                        \/* num of instances          *\/$/;"	m	struct:__anon2
+row	output/inc/tdata.h	/^    int row;                        \/* num of instances          *\/$/;"	m	struct:__anon8
+s	output/inc/tm_config.h	/^    int    s;$/;"	m	struct:_tmconfig
+s	tm/tm_config.h	/^    int    s;$/;"	m	struct:_tmconfig
+sample_k	tm/hlda.c	/^static int sample_k(Lda * lda, double * pse$/;"	f	file:
+sample_k	tm/htm.c	/^static int sample_k(TM * tm, double * pse$/;"	f	file:
+sample_k	tm/tm.c	/^static int sample_k(TM * tm, double * pse$/;"	f	file:
+save	src/k2d.c	/^void save(double (*cls)[6], int *ass, int n, int k, char * output){$/;"	f
 save_dtree	gbdt/dtree.c	/^void save_dtree(DTree * t, char * out_file, char (*id_map)[FKL]){$/;"	f
+save_lda	tm/hlda.c	/^void save_lda(Lda *lda, int n) {$/;"	f
 save_lda	tm/lda.c	/^void save_lda(Lda *lda, int n) {$/;"	f
+save_lda	tm/lda_xy.c	/^void save_lda(Lda * lda, int n){$/;"	f
 save_model	regr/regress.c	/^void save_model(REG * reg, int n){$/;"	f
-savestep	regr/regress.h	/^    int    savestep;            \/* save step                *\/$/;"	m	struct:__anon4
-savestep	tm/lda.h	/^    int    savestep;       \/* save s  *\/     $/;"	m	struct:__anon6
+savestep	output/inc/lda.h	/^    int    savestep;       \/* save s  *\/     $/;"	m	struct:__anon4
+savestep	output/inc/regress.h	/^    int    savestep;            \/* save step                *\/$/;"	m	struct:__anon6
+savestep	regr/regress.h	/^    int    savestep;            \/* save step                *\/$/;"	m	struct:__anon10
+savestep	tm/lda.h	/^    int    savestep;       \/* save s  *\/     $/;"	m	struct:__anon15
 scan_tree	gbdt/dtree.c	/^static void scan_tree(DTD * ts, DTree * t, DTree ** inst_nodes, int n, int m){$/;"	f	file:
+segs	output/bin/top_words.py	/^    segs = line.strip().split("\\t")$/;"	v
+set	output/inc/tm_config.h	/^    SET_CONFIG set;$/;"	m	struct:_tmconfig
+set	output/inc/tm_config_d.h	/^    SET_CONFIG set;$/;"	m	struct:_tmconfigd
+set	output/inc/tm_config_h.h	/^    SET_CONFIG set;$/;"	m	struct:_tmconfigh
+set	output/inc/tm_config_x.h	/^    SET_CONFIG set;$/;"	m	struct:_tmconfigx
+set	tm/tm_config.c	/^static int set(void * tmc, int argc, char * argv[]){$/;"	f	file:
+set	tm/tm_config.h	/^    SET_CONFIG set;$/;"	m	struct:_tmconfig
+set	tm/tm_config_h.c	/^static int set(void * tmc, int argc, char * argv[]){$/;"	f	file:
+set	tm/tm_config_h.h	/^    SET_CONFIG set;$/;"	m	struct:_tmconfigh
+set	tm/tm_config_x.c	/^static int set(void *tmc, int argc, char * argv[]){$/;"	f	file:
+set	tm/tm_config_x.h	/^    SET_CONFIG set;$/;"	m	struct:_tmconfigx
 sg	gbdt/dtree.c	/^    double sg;                      \/* sum of 1-gradient         *\/$/;"	m	struct:_d_tree	file:
 sh	gbdt/dtree.c	/^    double sh;                      \/* sum of 2-gradient         *\/$/;"	m	struct:_d_tree	file:
 sign	regr/newton.c	/^#define sign(/;"	d	file:
+size	output/inc/heap.h	/^    int size;$/;"	m	struct:_heap
 size	ts/pattern.c	/^    int size;$/;"	m	struct:_cls_list	file:
 size	util/hash.c	/^    int size;           \/\/ number of buckets 2^n$/;"	m	struct:_hash	file:
 size	util/heap.h	/^    int size;$/;"	m	struct:_heap
-sos	cls/Makefile	/^sos     = libkmeans.so$/;"	m
+sl	output/bin/top_words.py	/^    sl = sorted(top_words[i], reverse = True)$/;"	v
+sln	tm/xtm.c	/^    int   sln;$/;"	m	struct:_tm	file:
+sos	cls/Makefile	/^sos     = libkmeans.so   libk2d.so$/;"	m
 sos	gbdt/Makefile	/^sos     = libgblr.so libgbdt.so libdtree.so libtdata.so$/;"	m
 sos	regr/Makefile	/^sos     = libauc.so liblr.so libnewton.so$/;"	m
-sos	tm/Makefile	/^sos     = liblda.so$/;"	m
+sos	tm/Makefile	/^sos     =  liblda_xy.so   libtm.so  libhtm.so  libxtm.so$/;"	m
 sos	ts/Makefile	/^sos =       libbrk.so  libdst.so libloess.so libmodl.so libpat.so libvtb.so$/;"	m
 sos	util/Makefile	/^sos     = libhs.so   librbt.so   libstr.so   libmed.so$/;"	m
+sp	output/bin/cal_pro.py	/^    sp = 0.0$/;"	v
 space	util/hash.c	/^    int space;          \/\/ capacity of hash index$/;"	m	struct:_hash	file:
 splitInterval	ts/modl.c	/^static double splitInterval(Interval t, Interval sp1, Interval sp2, Interval * I, int l, int m, int n, double * LogD){$/;"	f	file:
-statics	cls/Makefile	/^statics = libkmeanss.a$/;"	m
+sps	output/bin/cal_pro.py	/^sps = [(s - min(sps)) \/ (max(sps) - min(sps)) for s in sps]$/;"	v
+sps	output/bin/cal_pro.py	/^sps = []$/;"	v
+statics	cls/Makefile	/^statics = libkmeanss.a   libk2ds.a$/;"	m
 statics	gbdt/Makefile	/^statics = libgblrs.a libgbdts.a libdtrees.a libtdatas.a$/;"	m
 statics	regr/Makefile	/^statics = libaucs.a liblrs.a libnewtons.a$/;"	m
-statics	tm/Makefile	/^statics = libldas.a$/;"	m
+statics	tm/Makefile	/^statics =  liblda_xys.a   libtms.a  libhtms.a  libxtms.a $/;"	m
 statics	ts/Makefile	/^statics =   libbrks.a  libdsts.a libloesss.a libmodls.a libpats.a libvtbs.a$/;"	m
 statics	util/Makefile	/^statics = libhss.a   librbts.a   libstrs.a   libmeds.a$/;"	m
 strsep	util/str.c	/^char *strsep(char **stringp, const char *delim) {$/;"	f
 strval	util/hash.c	/^    char * strval;$/;"	m	union:_hash_val	file:
 studentpdf	ts/breakout.c	/^static double studentpdf(double x, double mu, double var, double nu) {$/;"	f	file:
 sub	ts/pattern.c	/^    int sub[2];$/;"	m	struct:_node	file:
+sys	output/bin/cal_pro.py	/^import sys$/;"	i
+sys	output/bin/filter_lc.py	/^import sys$/;"	i
+sys	output/bin/gen_xy.py	/^import sys, random$/;"	i
+sys	output/bin/top_words.py	/^import sys$/;"	i
 sz	ts/pattern.c	/^    int sz;$/;"	m	struct:_cls_list_s	file:
 sz	ts/pattern.c	/^    int sz;$/;"	m	struct:_simple_hash_map	file:
 t	gbdt/gbdt.c	/^    double * t;$/;"	m	struct:_gbdt	file:
-t	tm/lda.h	/^    int t;                         \/* token size        *\/$/;"	m	struct:_lda
+t	tm/hlda.c	/^    unsigned int t;                \/* tkn_size  *\/$/;"	m	struct:_lda	file:
+t	tm/htm.c	/^    unsigned int t;$/;"	m	struct:_tm	file:
+t	tm/lda.c	/^    int t;                         \/* token size        *\/$/;"	m	struct:_lda	file:
+t	tm/lda_xy.c	/^    int t;                         \/* token size        *\/$/;"	m	struct:_lda	file:
+t	tm/tm.c	/^    unsigned int t;$/;"	m	struct:_tm	file:
+t	tm/xtm.c	/^    unsigned int t;$/;"	m	struct:_tm	file:
 t_label	gbdt/gbdt.c	/^double * t_label(GBDT * gbdt){$/;"	f
 t_model	gbdt/gbdt.c	/^double * t_model(GBDT * gbdt){$/;"	f
 t_rowns	gbdt/gbdt.c	/^int t_rowns(GBDT * gbdt){$/;"	f
@@ -450,36 +934,102 @@ t_size	gbdt/gbdt.c	/^int t_size(GBDT * gbdt){$/;"	f
 tabulate	ts/breakout.c	/^static void tabulate(int *x, int n, int *t1, int *t2, int *tot) {$/;"	f	file:
 tail	ts/pattern.c	/^    Node *tail;$/;"	m	struct:_cls_list	file:
 tdt_fea_cmp	gbdt/tdata.c	/^static int tdt_fea_cmp(const void * a1, const void * a2){$/;"	f	file:
-te_file	regr/regress.h	/^    char  *te_file;             \/* input file for test      *\/$/;"	m	struct:__anon4
+te_file	output/inc/regress.h	/^    char  *te_file;             \/* input file for test      *\/$/;"	m	struct:__anon6
+te_file	regr/regress.h	/^    char  *te_file;             \/* input file for test      *\/$/;"	m	struct:__anon10
 test_ds	gbdt/gbdt.c	/^    DTD *  test_ds;$/;"	m	struct:_gbdt	file:
+test_ds	output/inc/regress.h	/^    RDS   *  test_ds;           \/* test  dataset pointer    *\/$/;"	m	struct:_reg
 test_ds	regr/regress.h	/^    RDS   *  test_ds;           \/* test  dataset pointer    *\/$/;"	m	struct:_reg
 test_input	gbdt/gbdt.h	/^    char * test_input;$/;"	m	struct:_gbdt_param
+test_input	output/inc/gbdt.h	/^    char * test_input;$/;"	m	struct:_gbdt_param
 tiedrank	regr/auc.c	/^void tiedrank(int n, AucP *aucp, double *rk) {$/;"	f
-tokens	tm/lda.h	/^    int  (*tokens)[4];             \/* tokens            *\/$/;"	m	struct:_lda
+tm_create	tm/htm.c	/^TM * tm_create(int argc, char * argv[]){$/;"	f
+tm_create	tm/tm.c	/^TM * tm_create(int argc, char * argv[]){$/;"	f
+tm_create	tm/xtm.c	/^TM * tm_create(int argc, char * argv[]){$/;"	f
+tm_est	tm/htm.c	/^void tm_est(TM * tm){$/;"	f
+tm_est	tm/tm.c	/^void tm_est(TM * tm){$/;"	f
+tm_est	tm/xtm.c	/^void tm_est(TM * tm){$/;"	f
+tm_free	tm/htm.c	/^void tm_free(TM * tm){$/;"	f
+tm_free	tm/tm.c	/^void tm_free(TM * tm){$/;"	f
+tm_free	tm/xtm.c	/^void tm_free(TM * tm){$/;"	f
+tm_init	tm/htm.c	/^int tm_init(TM * tm){$/;"	f
+tm_init	tm/tm.c	/^int tm_init(TM * tm) {$/;"	f
+tm_init	tm/xtm.c	/^int tm_init(TM * tm){$/;"	f
+tm_save	tm/htm.c	/^void tm_save(TM * tm, int n){$/;"	f
+tm_save	tm/tm.c	/^void tm_save(TM * tm, int n){$/;"	f
+tm_save	tm/xtm.c	/^void tm_save(TM * tm, int n){$/;"	f
+tmc	output/inc/tm_config_d.h	/^    TMConfig * tmc;$/;"	m	struct:_tmconfigd
+tmc	output/inc/tm_config_h.h	/^    TMConfig * tmc;$/;"	m	struct:_tmconfigh
+tmc	output/inc/tm_config_x.h	/^    TMHConfig * tmc;$/;"	m	struct:_tmconfigx
+tmc	tm/htm.c	/^    TMHConfig * tmc;$/;"	m	struct:_tm	file:
+tmc	tm/tm.c	/^    TMConfig * tmc;$/;"	m	struct:_tm	file:
+tmc	tm/tm_config_h.h	/^    TMConfig * tmc;$/;"	m	struct:_tmconfigh
+tmc	tm/tm_config_x.h	/^    TMHConfig * tmc;$/;"	m	struct:_tmconfigx
+tmc	tm/xtm.c	/^    TMXConfig * tmc;$/;"	m	struct:_tm	file:
+tokens	tm/hlda.c	/^    int (*tokens)[6];              \/* tokens  : {uid, lid, vid, xid, tid, link *\/$/;"	m	struct:_lda	file:
+tokens	tm/htm.c	/^    int  (*tokens)[6];$/;"	m	struct:_tm	file:
+tokens	tm/lda.c	/^    int  (*tokens)[4];             \/* tokens            *\/$/;"	m	struct:_lda	file:
+tokens	tm/lda_xy.c	/^    int  (*tokens)[3];             \/* tokens            *\/$/;"	m	struct:_lda	file:
+tokens	tm/tm.c	/^    int  (*tokens)[4];$/;"	m	struct:_tm	file:
+tokens	tm/xtm.c	/^    int  (*tokens)[4];$/;"	m	struct:_tm	file:
+top_words	output/bin/top_words.py	/^top_words = [[] for i in range(K)]$/;"	v
 train_ds	gbdt/gbdt.c	/^    DTD * train_ds;$/;"	m	struct:_gbdt	file:
+train_ds	output/inc/regress.h	/^    RDS   * train_ds;           \/* train dataset pointer    *\/$/;"	m	struct:_reg
 train_ds	regr/regress.h	/^    RDS   * train_ds;           \/* train dataset pointer    *\/$/;"	m	struct:_reg
 train_input	gbdt/gbdt.h	/^    char * train_input;$/;"	m	struct:_gbdt_param
+train_input	output/inc/gbdt.h	/^    char * train_input;$/;"	m	struct:_gbdt_param
 tree_grow	gbdt/dtree.c	/^static int tree_grow(DTD * ds$/;"	f	file:
 tree_size	gbdt/gbdt.c	/^    int tree_size;$/;"	m	struct:_gbdt	file:
 trim	util/str.c	/^char * trim(char *c, int mode){$/;"	f
 type	util/hash.c	/^    HashType type;      \/\/ INT, LONG, STRING$/;"	m	struct:_hash	file:
+u	output/inc/tm_config_x.h	/^    double u;$/;"	m	struct:_tmconfigx
+u	tm/tm_config_x.h	/^    double u;$/;"	m	struct:_tmconfigx
 uival	util/hash.c	/^    unsigned int uival;$/;"	m	union:_hash_val	file:
 ulval	util/hash.c	/^    unsigned long long ulval;$/;"	m	union:_hash_val	file:
+update_center	cls/k2d.c	/^static void update_center(double (*c)[11], int * ks, int k){$/;"	f	file:
 update_child	gbdt/dtree.c	/^static void update_child(DTree * t, int k, int lc, double lsg, double lsh, double nr, double wr, double v, double lv){$/;"	f	file:
-v	tm/lda.h	/^    int v;                         \/* dict size         *\/$/;"	m	struct:_lda
+update_e	tm/hlda.c	/^static double update_e(Lda * lda, double * pse, int t, int delta){$/;"	f	file:
+update_e	tm/htm.c	/^static double update_e(TM * tm, double * pse, int t, int delta){$/;"	f	file:
+update_e	tm/tm.c	/^static double update_e(TM * tm, double * pse, int t, int delta){$/;"	f	file:
+update_f	tm/hlda.c	/^static double update_f(Lda * lda, double * psd, int d, int t, int delta){$/;"	f	file:
+update_f	tm/htm.c	/^static double update_f(TM * tm, double * psd, int d, int t, int delta){$/;"	f	file:
+update_f	tm/tm.c	/^static double update_f(TM * tm, double * psd, int d, int t, int delta){$/;"	f	file:
+update_g_param	tm/lda_xy.c	/^static void update_g_param(Lda * lda){$/;"	f	file:
+update_g_param	tm/xtm.c	/^static void update_g_param(TM * tm){$/;"	f	file:
+v	tm/hlda.c	/^    unsigned int v;                \/* word_size *\/$/;"	m	struct:_lda	file:
+v	tm/htm.c	/^    unsigned int v;$/;"	m	struct:_tm	file:
+v	tm/lda.c	/^    int v;                         \/* dict size         *\/$/;"	m	struct:_lda	file:
+v	tm/lda_xy.c	/^    int v;                         \/* dict size         *\/$/;"	m	struct:_lda	file:
+v	tm/tm.c	/^    unsigned int v;$/;"	m	struct:_tm	file:
+v	tm/xtm.c	/^    unsigned int v;$/;"	m	struct:_tm	file:
 val	gbdt/tdata.c	/^    double val;$/;"	m	struct:__anon1	file:
-val	regr/regress.h	/^    double *val;                \/* all feature val of train *\/$/;"	m	struct:__anon5
+val	output/inc/regress.h	/^    double *val;                \/* all feature val of train *\/$/;"	m	struct:__anon7
+val	regr/regress.h	/^    double *val;                \/* all feature val of train *\/$/;"	m	struct:__anon11
 vals	gbdt/tdata.h	/^    double * vals;                  \/* row feature value         *\/$/;"	m	struct:__anon2
+vals	output/inc/tdata.h	/^    double * vals;                  \/* row feature value         *\/$/;"	m	struct:__anon8
 vals	util/hash.c	/^    LANode * vals;      \/\/ data space for HashVal$/;"	m	struct:_hash	file:
 value	util/hash.c	/^    HashVal value;$/;"	m	union:_la_node	file:
 viterbi	ts/viterbi.c	/^int viterbi(int * l, int * o, int n, int r_t, int r_o){$/;"	f
+w	output/bin/top_words.py	/^    w = segs[0]$/;"	v
 w_regr	ts/loess.c	/^void w_regr(double *y, double *w, int s, int id, double * rv) {$/;"	f
 wei	gbdt/dtree.c	/^    double wei;                     \/* additive model value      *\/$/;"	m	struct:_d_tree	file:
 wei_reg	gbdt/gbdt.h	/^    double wei_reg;$/;"	m	struct:_gbdt_param
+wei_reg	output/inc/gbdt.h	/^    double wei_reg;$/;"	m	struct:_gbdt_param
+wl	tm/hlda.c	/^    int * wl;                      \/* word_loc  *\/$/;"	m	struct:_lda	file:
+wl	tm/htm.c	/^    int   * wl;$/;"	m	struct:_tm	file:
+wl	tm/xtm.c	/^    int   *wl;$/;"	m	struct:_tm	file:
+x	output/bin/gen_xy.py	/^    x = random.random() * (max_x - min_x) + min_x$/;"	v
+x	output/bin/gen_xy.py	/^x = []$/;"	v
+x	output/inc/regress.h	/^    double *x;                  \/* learned weight result    *\/$/;"	m	struct:_reg
 x	regr/auc.c	/^    double x;$/;"	m	struct:_aucP	file:
 x	regr/regress.h	/^    double *x;                  \/* learned weight result    *\/$/;"	m	struct:_reg
+xy	tm/lda_xy.c	/^    double (*xy)[2];               \/* pos of token      *\/$/;"	m	struct:_lda	file:
+xy	tm/xtm.c	/^    double (*xy)[2];$/;"	m	struct:_tm	file:
 y	gbdt/tdata.h	/^    double * y;                     \/* labels of data            *\/$/;"	m	struct:__anon2
-y	regr/regress.h	/^    double *y;                  \/* target label of train    *\/$/;"	m	struct:__anon5
+y	output/bin/gen_xy.py	/^    y = random.random() * (max_y - min_y) + min_y$/;"	v
+y	output/bin/gen_xy.py	/^y = []$/;"	v
+y	output/inc/regress.h	/^    double *y;                  \/* target label of train    *\/$/;"	m	struct:__anon7
+y	output/inc/tdata.h	/^    double * y;                     \/* labels of data            *\/$/;"	m	struct:__anon8
+y	regr/regress.h	/^    double *y;                  \/* target label of train    *\/$/;"	m	struct:__anon11
 y_label	gbdt/gbdt.c	/^double * y_label(GBDT * gbdt){$/;"	f
 y_model	gbdt/gbdt.c	/^double * y_model(GBDT * gbdt){$/;"	f
 y_rowns	gbdt/gbdt.c	/^int y_rowns(GBDT * gbdt){$/;"	f

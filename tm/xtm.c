@@ -22,6 +22,7 @@ struct _tm {
     unsigned int t;
     char (*id_d_map)[KEY_SIZE];
     char (*id_v_map)[KEY_SIZE];
+    double  gdisp[11];
     double (*disp)[11];
     double (*xy)[2];
     int  (*tokens)[4];
@@ -32,6 +33,7 @@ struct _tm {
     int   *wl;
     int   *ln; 
     int   sln;
+    int   gln;
     TMXConfig * tmc;
 };
 
@@ -73,6 +75,21 @@ static void update_g_param(TM * tm){
         tm->disp[t][9] = invyy;
         tm->disp[t][10] = invxy;
     }
+    mx = tm->gdisp[0] / tm->gln;
+    my = tm->gdisp[1] / tm->gln;
+    xx = tm->gdisp[2] / tm->gln - mx * mx;
+    yy = tm->gdisp[3] / tm->gln - my * my;
+    xy = tm->gdisp[4] / tm->gln - mx * my;
+    det = xx * yy - xy * xy;
+    invxx = yy / det;
+    invyy = xx / det;
+    invxy = -xy / det;
+    tm->gdisp[5] = mx;
+    tm->gdisp[6] = my;
+    tm->gdisp[7] = det;
+    tm->gdisp[8] = invxx;
+    tm->gdisp[9] = invyy;
+    tm->gdisp[10] = invxy;
 }
 
 static void fullfill_param(TM * tm){
@@ -90,19 +107,25 @@ static void fullfill_param(TM * tm){
         if (x == 0){
             tm->nd[d * k + t] += 1;
             tm->nw[v * k + t] += 1;
-            tm->nkw[t] += 1;
+            tm->nkw[t]        += 1;
             tm->doc_cnt[d][0] += 1;
+            tm->gln           += 1;
+            tm->gdisp[0]      += lx;
+            tm->gdisp[1]      += ly;
+            tm->gdisp[2]      += lx * lx;
+            tm->gdisp[3]      += ly * ly;
+            tm->gdisp[4]      += lx * ly;
         }
         else{
             tm->doc_cnt[d][1] += 1;
             tm->wl[v * l + t] += 1;
-            tm->ln[t] += 1;
-            tm->sln += 1;
-            tm->disp[t][0] += lx;
-            tm->disp[t][1] += ly;
-            tm->disp[t][2] += lx * lx;
-            tm->disp[t][3] += ly * ly;
-            tm->disp[t][4] += lx * ly;
+            tm->ln[t]         += 1;
+            tm->sln           += 1;
+            tm->disp[t][0]    += lx;
+            tm->disp[t][1]    += ly;
+            tm->disp[t][2]    += lx * lx;
+            tm->disp[t][3]    += ly * ly;
+            tm->disp[t][4]    += lx * ly;
         }
     }
     update_g_param(tm);
@@ -142,11 +165,11 @@ static void gibbs_sample(TM * tm){
             tm->ln[t]         -= 1;
             tm->sln           -= 1;
             tm->doc_cnt[d][1] -= 1;
-            tm->disp[t][0] -= lx;
-            tm->disp[t][1] -= ly;
-            tm->disp[t][2] -= lx * lx;
-            tm->disp[t][3] -= ly * ly;
-            tm->disp[t][4] -= lx * ly;
+            tm->disp[t][0]    -= lx;
+            tm->disp[t][1]    -= ly;
+            tm->disp[t][2]    -= lx * lx;
+            tm->disp[t][3]    -= ly * ly;
+            tm->disp[t][4]    -= lx * ly;
         }
         for(t = 0; t < k; t++){
             prb[t] = (g0 + tm->doc_cnt[d][0]) \
@@ -156,6 +179,13 @@ static void gibbs_sample(TM * tm){
                    * (tm->nw[v * k + t] + beta)  \
                    / (vb + tm->nkw[t])        \
                    / (at + tm->doc_cnt[d][0]);
+            dx    = lx - tm->gdisp[5];
+            dy    = ly - tm->gdisp[6];
+            det   = tm->gdisp[7];
+            invxx = tm->gdisp[8];
+            invyy = tm->gdisp[9];
+            invxy = tm->gdisp[10];
+            prb[t] *= 1.0 / (sqrt(det) * exp(0.5 * (dx * dx * invxx + dy * dy * invyy + 2.0 * dx * dy * invxy)));
             if (t > 0){
                 prb[t] += prb[t - 1];
             }
@@ -206,6 +236,7 @@ static void gibbs_sample(TM * tm){
             tm->tokens[i][3]   = t;
         }
         else{
+            fprintf(stderr, ">>sample failed !!!  ");
             break;
         }
     }
@@ -274,7 +305,7 @@ int tm_init(TM * tm){
         rnd = (0.1 + rand()) / (0.1 + RAND_MAX);
         x = 0;
         t = (int)((0.1 + rand()) / (0.1 + RAND_MAX) * k);
-        if (rnd > g0 / (g1 + g0)){
+        if (rnd > 0.5){
             x = 1;
             t = (int)((0.1 + rand()) / (0.1 + RAND_MAX) * l);
         }
@@ -312,6 +343,7 @@ void tm_est(TM * tm){
 
 void tm_save(TM * tm, int n){
     int d, v, t, k, l, o;
+    double mx, my, xx, yy, xy, det;
     FILE *fp = NULL;
     char nd_file[512];
     char nw_file[512];
@@ -341,7 +373,7 @@ void tm_save(TM * tm, int n){
     }
     for (d = 0; d < tm->d; d++){
         fprintf(fp, "%s", tm->id_d_map[d]);
-        o = t * k;
+        o = d * k;
         for (t = 0; t < k; t++){
             fprintf(fp, "\t%d", tm->nd[o + t]);
         }
@@ -376,10 +408,14 @@ void tm_save(TM * tm, int n){
         return;
     }
     for (t = 0; t < l; t++){
-        for (d = 0; d < 11; d++){
-            fprintf(fp, "%.6lf\t", tm->disp[t][d]);
-        }
-        fprintf(fp, "\n");
+        mx = tm->disp[t][5];
+        my = tm->disp[t][6];
+        xx = tm->disp[t][2] / tm->ln[t] - mx * mx;
+        yy = tm->disp[t][3] / tm->ln[t] - my * my;
+        xy = tm->disp[t][4] / tm->ln[t] - mx * my;
+        det = tm->disp[t][7];
+        fprintf(fp,"%.6lf\t%.6lf\t%.6lf\t%.6lf\t%.6lf\t%.6lf\n"
+                  , mx, my, xx, yy, xy, det);
     }
     fclose(fp);
     if (NULL == (fp = fopen(tk_file, "w"))){

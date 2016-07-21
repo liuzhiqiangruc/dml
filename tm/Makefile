@@ -5,9 +5,9 @@ LD = gcc -shared
 
 
 
-objs    =  lda_xy.o       tm_config.o tm_config_h.o  tm_config_x.o tm.o htm.o xtm.o
+objs    =  lda_xy.o       tm_config.o tm_config_h.o  tm_config_x.o tm.o htm.o xtm.o 
 sos     =  liblda_xy.so   libtm.so  libhtm.so  libxtm.so
-statics =  liblda_xys.a   libtms.a  libhtms.a  libxtms.a
+statics =  liblda_xys.a   libtms.a  libhtms.a  libxtms.a 
 
 all : $(objs) $(statics) $(sos)
 
@@ -25,6 +25,7 @@ lda_xy.o  : lda.h
 tm_config.o : tm_config.h
 tm_config_h.o : tm_config_h.h
 tm_config_x.o : tm_config_x.h
+tm_config_d.o : tm_config_d.h
 tm.o      : tm.h
 htm.o     : tm.h
 xtm.o     : tm.h
@@ -49,7 +50,6 @@ libhtms.a : htm.o tm_config.o tm_config_h.o ../util/str.o ../util/hash.o
 
 libxtms.a : xtm.o tm_config.o tm_config_h.o tm_config_x.o ../util/str.o ../util/hash.o
 	ar cr $@ $^
-
 
 liblda_xys.a : lda_xy.o ../util/str.o ../util/hash.o
 	ar cr $@ $^

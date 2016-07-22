@@ -56,40 +56,44 @@ static void malloc_space(TM * tm){
 
 static void update_g_param(TM * tm){
     double mx, my, xx, yy, xy, det, invxx, invyy, invxy;
+    mx            = tm->gdisp[0] / tm->gln;
+    my            = tm->gdisp[1] / tm->gln;
+    xx            = tm->gdisp[2] / tm->gln - mx * mx;
+    yy            = tm->gdisp[3] / tm->gln - my * my;
+    xy            = tm->gdisp[4] / tm->gln - mx * my;
+    det           = xx * yy - xy * xy;
+    invxx         = yy / det;
+    invyy         = xx / det;
+    invxy         = -xy / det;
+    tm->gdisp[5]  = mx;
+    tm->gdisp[6]  = my;
+    tm->gdisp[7]  = det;
+    tm->gdisp[8]  = invxx;
+    tm->gdisp[9]  = invyy;
+    tm->gdisp[10] = invxy;
+}
+
+static void update_l_param(TM * tm){
+    double mx, my, xx, yy, xy, det, invxx, invyy, invxy;
     int t, l;
     l = tm->tmc->get_l(tm->tmc);
     for (t = 0; t < l; t++){
-        mx = tm->disp[t][0] / tm->ln[t];
-        my = tm->disp[t][1] / tm->ln[t];
-        xx = tm->disp[t][2] / tm->ln[t] - mx * mx;
-        yy = tm->disp[t][3] / tm->ln[t] - my * my;
-        xy = tm->disp[t][4] / tm->ln[t] - mx * my;
-        det = xx * yy - xy * xy;
-        invxx = yy / det;
-        invyy = xx / det;
-        invxy = -xy / det;
-        tm->disp[t][5] = mx;
-        tm->disp[t][6] = my;
-        tm->disp[t][7] = det;
-        tm->disp[t][8] = invxx;
-        tm->disp[t][9] = invyy;
+        mx              = tm->disp[t][0] / tm->ln[t];
+        my              = tm->disp[t][1] / tm->ln[t];
+        xx              = tm->disp[t][2] / tm->ln[t] - mx * mx;
+        yy              = tm->disp[t][3] / tm->ln[t] - my * my;
+        xy              = tm->disp[t][4] / tm->ln[t] - mx * my;
+        det             = xx * yy - xy * xy;
+        invxx           = yy / det;
+        invyy           = xx / det;
+        invxy           = -xy / det;
+        tm->disp[t][5]  = mx;
+        tm->disp[t][6]  = my;
+        tm->disp[t][7]  = det;
+        tm->disp[t][8]  = invxx;
+        tm->disp[t][9]  = invyy;
         tm->disp[t][10] = invxy;
     }
-    mx = tm->gdisp[0] / tm->gln;
-    my = tm->gdisp[1] / tm->gln;
-    xx = tm->gdisp[2] / tm->gln - mx * mx;
-    yy = tm->gdisp[3] / tm->gln - my * my;
-    xy = tm->gdisp[4] / tm->gln - mx * my;
-    det = xx * yy - xy * xy;
-    invxx = yy / det;
-    invyy = xx / det;
-    invxy = -xy / det;
-    tm->gdisp[5] = mx;
-    tm->gdisp[6] = my;
-    tm->gdisp[7] = det;
-    tm->gdisp[8] = invxx;
-    tm->gdisp[9] = invyy;
-    tm->gdisp[10] = invxy;
 }
 
 static void fullfill_param(TM * tm){
@@ -98,10 +102,10 @@ static void fullfill_param(TM * tm){
     k = tm->tmc->get_k(tm->tmc);
     l = tm->tmc->get_l(tm->tmc);
     for (i = 0; i < tm->t; i++){
-        d = tm->tokens[i][0];
-        v = tm->tokens[i][1];
-        x = tm->tokens[i][2];
-        t = tm->tokens[i][3];
+        d  = tm->tokens[i][0];
+        v  = tm->tokens[i][1];
+        x  = tm->tokens[i][2];
+        t  = tm->tokens[i][3];
         lx = tm->xy[i][0];
         ly = tm->xy[i][1];
         if (x == 0){
@@ -129,6 +133,7 @@ static void fullfill_param(TM * tm){
         }
     }
     update_g_param(tm);
+    update_l_param(tm);
     tm_save(tm, 0);
 }
 
@@ -148,10 +153,10 @@ static void gibbs_sample(TM * tm){
     u     = tm->tmc->get_u(tm->tmc);
     prb = (double *)calloc(k + l, sizeof(double));
     for (i = 0; i < tm->t; i++){
-        d = tm->tokens[i][0];
-        v = tm->tokens[i][1];
-        x = tm->tokens[i][2];
-        t = tm->tokens[i][3];
+        d  = tm->tokens[i][0];
+        v  = tm->tokens[i][1];
+        x  = tm->tokens[i][2];
+        t  = tm->tokens[i][3];
         lx = tm->xy[i][0];
         ly = tm->xy[i][1];
         if (x == 0){
@@ -161,6 +166,9 @@ static void gibbs_sample(TM * tm){
             tm->doc_cnt[d][0] -= 1;
         }
         else{
+            if (tm->ln[t] < 100){
+                continue;
+            }
             tm->wl[v * l + t] -= 1;
             tm->ln[t]         -= 1;
             tm->sln           -= 1;
@@ -172,19 +180,19 @@ static void gibbs_sample(TM * tm){
             tm->disp[t][4]    -= lx * ly;
         }
         for(t = 0; t < k; t++){
-            prb[t] = (g0 + tm->doc_cnt[d][0]) \
-                   / (g0 + tm->doc_cnt[d][0]+ \
-                      g1 + tm->doc_cnt[d][1]) \
-                   * (tm->nd[d * k + t] + alpha) \
-                   * (tm->nw[v * k + t] + beta)  \
-                   / (vb + tm->nkw[t])        \
-                   / (at + tm->doc_cnt[d][0]);
-            dx    = lx - tm->gdisp[5];
-            dy    = ly - tm->gdisp[6];
-            det   = tm->gdisp[7];
-            invxx = tm->gdisp[8];
-            invyy = tm->gdisp[9];
-            invxy = tm->gdisp[10];
+            prb[t]  = (g0 + tm->doc_cnt[d][0]) \
+                    / (g0 + tm->doc_cnt[d][0]+ \
+                       g1 + tm->doc_cnt[d][1]) \
+                    * (tm->nd[d * k + t] + alpha) \
+                    * (tm->nw[v * k + t] + beta)  \
+                    / (vb + tm->nkw[t])        \
+                    / (at + tm->doc_cnt[d][0]);
+            dx      = lx - tm->gdisp[5];
+            dy      = ly - tm->gdisp[6];
+            det     = tm->gdisp[7];
+            invxx   = tm->gdisp[8];
+            invyy   = tm->gdisp[9];
+            invxy   = tm->gdisp[10];
             prb[t] *= 1.0 / (sqrt(det) * exp(0.5 * (dx * dx * invxx + dy * dy * invyy + 2.0 * dx * dy * invxy)));
             if (t > 0){
                 prb[t] += prb[t - 1];
@@ -195,8 +203,8 @@ static void gibbs_sample(TM * tm){
                        / (g0 + tm->doc_cnt[d][0]+   \
                           g1 + tm->doc_cnt[d][1])   \
                        * (u + tm->ln[t])            \
-                       / (u * l + tm->sln)          \
                        * (tm->wl[v * l + t] + beta) \
+                       / (u * l + tm->sln)          \
                        / (tm->ln[t] + vb);
             dx    = lx - tm->disp[t][5];
             dy    = ly - tm->disp[t][6];
@@ -211,6 +219,13 @@ static void gibbs_sample(TM * tm){
         for (t = 0; t < k + l; t++){
             if (prb[t] > rnd){
                 break;
+            }
+        }
+        if (t == k + l){
+            fprintf(stderr, "+");
+            t = tm->tokens[i][3];
+            if (x == 1){
+                t += k;
             }
         }
         if (t < k){
@@ -234,10 +249,6 @@ static void gibbs_sample(TM * tm){
             tm->disp[t][4]    += lx * ly;
             tm->tokens[i][2]   = 1;
             tm->tokens[i][3]   = t;
-        }
-        else{
-            fprintf(stderr, ">>sample failed !!!  ");
-            break;
         }
     }
     free(prb); prb = NULL;
@@ -335,7 +346,7 @@ void tm_est(TM * tm){
         sec2 = time(NULL);
         fprintf(stderr, "iter %d done, using %ld seconds\n", n, sec2 - sec1);
         if(n % tm->tmc->get_s(tm->tmc) == 0){
-            update_g_param(tm);
+            update_l_param(tm);
             tm_save(tm, n);
         }
     }

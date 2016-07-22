@@ -22,8 +22,8 @@ CFBASE	util/Makefile	/^CFBASE = -pedantic -pipe -Wall$/;"	m
 CFLAGS	cls/Makefile	/^CFLAGS = $(CFBASE) -O0 -fpic -DNDEBUG -DNPRINT -I..\/util$/;"	m
 CFLAGS	gbdt/Makefile	/^CFLAGS = $(CFBASE) -O0 -fpic -DNDEBUG -DNPRINT -I..\/util -I..\/regr$/;"	m
 CFLAGS	regr/Makefile	/^CFLAGS = $(CFBASE) -O0 -fpic -DNDEBUG -DNPRINT -I..\/util$/;"	m
-CFLAGS	src/Makefile	/^CFLAGS = $(CFBASE) -DNDEBUG -DNPRINT -O0 -I$(INC)$/;"	m
-CFLAGS	tm/Makefile	/^CFLAGS = $(CFBASE) -O0 -fpic -DNDEBUG -DNPRINT -I..\/util$/;"	m
+CFLAGS	src/Makefile	/^CFLAGS = $(CFBASE) -DNDEBUG -DNPRINT -O3 -I$(INC)$/;"	m
+CFLAGS	tm/Makefile	/^CFLAGS = $(CFBASE) -O3 -fpic -DNDEBUG -DNPRINT -I..\/util$/;"	m
 CFLAGS	ts/Makefile	/^CFLAGS   = $(CFBASE) -DNDEBUG -DNPRINT -O0 -fpic -I..\/util$/;"	m
 CFLAGS	util/Makefile	/^CFLAGS = $(CFBASE) -O3 -fpic -DNDEBUG -DNPRINT$/;"	m
 CLSDIR	Makefile	/^CLSDIR   = cls$/;"	m
@@ -107,6 +107,7 @@ INT	output/inc/hash.h	/^typedef enum { INT, LONG, STRING } HashType;$/;"	e	enum:
 INT	util/hash.h	/^typedef enum { INT, LONG, STRING } HashType;$/;"	e	enum:__anon17
 Interval	ts/modl.c	/^typedef int Interval[6];$/;"	t	file:
 K	output/bin/top_words.py	/^K = int(sys.argv[1])$/;"	v
+K	output/bin/top_words_b.py	/^K = int(sys.argv[1])$/;"	v
 KEY_SIZE	output/inc/lda.h	/^#define KEY_SIZE /;"	d
 KEY_SIZE	output/inc/tm.h	/^#define KEY_SIZE /;"	d
 KEY_SIZE	tm/lda.h	/^#define KEY_SIZE /;"	d
@@ -571,7 +572,9 @@ heap_item_free_fn	util/heap.h	/^    HEAP_ITEM_FREE heap_item_free_fn;$/;"	m	stru
 heap_pop	util/heap.c	/^void * heap_pop(Heap * hp){$/;"	f
 heap_remove	util/heap.c	/^void heap_remove(Heap * hp, void * pdata){$/;"	f
 heappop	output/bin/top_words.py	/^from heapq import heappop$/;"	i
+heappop	output/bin/top_words_b.py	/^from heapq import heappop$/;"	i
 heappush	output/bin/top_words.py	/^from heapq import heappush$/;"	i
+heappush	output/bin/top_words_b.py	/^from heapq import heappush$/;"	i
 help	output/inc/tm_config.h	/^    HELP       help;$/;"	m	struct:_tmconfig
 help	output/inc/tm_config_d.h	/^    HELP       help;$/;"	m	struct:_tmconfigd
 help	output/inc/tm_config_h.h	/^    HELP       help;$/;"	m	struct:_tmconfigh
@@ -874,6 +877,7 @@ savestep	regr/regress.h	/^    int    savestep;            \/* save step         
 savestep	tm/lda.h	/^    int    savestep;       \/* save s  *\/     $/;"	m	struct:__anon15
 scan_tree	gbdt/dtree.c	/^static void scan_tree(DTD * ts, DTree * t, DTree ** inst_nodes, int n, int m){$/;"	f	file:
 segs	output/bin/top_words.py	/^    segs = line.strip().split("\\t")$/;"	v
+segs	output/bin/top_words_b.py	/^    segs = line.strip().split("\\t")$/;"	v
 set	output/inc/tm_config.h	/^    SET_CONFIG set;$/;"	m	struct:_tmconfig
 set	output/inc/tm_config_d.h	/^    SET_CONFIG set;$/;"	m	struct:_tmconfigd
 set	output/inc/tm_config_h.h	/^    SET_CONFIG set;$/;"	m	struct:_tmconfigh
@@ -892,6 +896,7 @@ size	ts/pattern.c	/^    int size;$/;"	m	struct:_cls_list	file:
 size	util/hash.c	/^    int size;           \/\/ number of buckets 2^n$/;"	m	struct:_hash	file:
 size	util/heap.h	/^    int size;$/;"	m	struct:_heap
 sl	output/bin/top_words.py	/^    sl = sorted(top_words[i], reverse = True)$/;"	v
+sl	output/bin/top_words_b.py	/^    sl = map(lambda x : x[1], sorted(top_words[i], reverse = True))$/;"	v
 sln	tm/xtm.c	/^    int   sln;$/;"	m	struct:_tm	file:
 sos	cls/Makefile	/^sos     = libkmeans.so   libk2d.so$/;"	m
 sos	gbdt/Makefile	/^sos     = libgblr.so libgbdt.so libdtree.so libtdata.so$/;"	m
@@ -918,6 +923,7 @@ sys	output/bin/cal_pro.py	/^import sys$/;"	i
 sys	output/bin/filter_lc.py	/^import sys$/;"	i
 sys	output/bin/gen_xy.py	/^import sys, random$/;"	i
 sys	output/bin/top_words.py	/^import sys$/;"	i
+sys	output/bin/top_words_b.py	/^import sys$/;"	i
 sz	ts/pattern.c	/^    int sz;$/;"	m	struct:_cls_list_s	file:
 sz	ts/pattern.c	/^    int sz;$/;"	m	struct:_simple_hash_map	file:
 t	gbdt/gbdt.c	/^    double * t;$/;"	m	struct:_gbdt	file:
@@ -972,6 +978,7 @@ tokens	tm/lda_xy.c	/^    int  (*tokens)[3];             \/* tokens            *\
 tokens	tm/tm.c	/^    int  (*tokens)[4];$/;"	m	struct:_tm	file:
 tokens	tm/xtm.c	/^    int  (*tokens)[4];$/;"	m	struct:_tm	file:
 top_words	output/bin/top_words.py	/^top_words = [[] for i in range(K)]$/;"	v
+top_words	output/bin/top_words_b.py	/^top_words = [[] for i in range(K)]$/;"	v
 train_ds	gbdt/gbdt.c	/^    DTD * train_ds;$/;"	m	struct:_gbdt	file:
 train_ds	output/inc/regress.h	/^    RDS   * train_ds;           \/* train dataset pointer    *\/$/;"	m	struct:_reg
 train_ds	regr/regress.h	/^    RDS   * train_ds;           \/* train dataset pointer    *\/$/;"	m	struct:_reg
@@ -995,6 +1002,7 @@ update_f	tm/htm.c	/^static double update_f(TM * tm, double * psd, int d, int t, 
 update_f	tm/tm.c	/^static double update_f(TM * tm, double * psd, int d, int t, int delta){$/;"	f	file:
 update_g_param	tm/lda_xy.c	/^static void update_g_param(Lda * lda){$/;"	f	file:
 update_g_param	tm/xtm.c	/^static void update_g_param(TM * tm){$/;"	f	file:
+update_l_param	tm/xtm.c	/^static void update_l_param(TM * tm){$/;"	f	file:
 v	tm/hlda.c	/^    unsigned int v;                \/* word_size *\/$/;"	m	struct:_lda	file:
 v	tm/htm.c	/^    unsigned int v;$/;"	m	struct:_tm	file:
 v	tm/lda.c	/^    int v;                         \/* dict size         *\/$/;"	m	struct:_lda	file:
@@ -1010,6 +1018,7 @@ vals	util/hash.c	/^    LANode * vals;      \/\/ data space for HashVal$/;"	m	str
 value	util/hash.c	/^    HashVal value;$/;"	m	union:_la_node	file:
 viterbi	ts/viterbi.c	/^int viterbi(int * l, int * o, int n, int r_t, int r_o){$/;"	f
 w	output/bin/top_words.py	/^    w = segs[0]$/;"	v
+w	output/bin/top_words_b.py	/^    w = segs[0]$/;"	v
 w_regr	ts/loess.c	/^void w_regr(double *y, double *w, int s, int id, double * rv) {$/;"	f
 wei	gbdt/dtree.c	/^    double wei;                     \/* additive model value      *\/$/;"	m	struct:_d_tree	file:
 wei_reg	gbdt/gbdt.h	/^    double wei_reg;$/;"	m	struct:_gbdt_param

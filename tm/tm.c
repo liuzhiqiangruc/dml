@@ -36,7 +36,7 @@ struct _tm{
 };
 
 static void malloc_space(TM * tm){
-    int k = tm->tmc->get_k(tm->tmc);
+    unsigned int k = tm->tmc->get_k(tm->tmc);
     tm->id_d_map  = (char(*)[KEY_SIZE])calloc(tm->d,  sizeof(char[KEY_SIZE]));
     tm->id_v_map  = (char(*)[KEY_SIZE])calloc(tm->v,  sizeof(char[KEY_SIZE]));
     tm->tokens    = (int(*)[4])        calloc(tm->t,  sizeof(int[4]));
@@ -48,7 +48,7 @@ static void malloc_space(TM * tm){
 }
 
 static void fullfill_param(TM * tm){
-    int i, d, v, t, k, o, p;
+    unsigned int i, d, v, t, k, o, p;
     k = tm->tmc->get_k(tm->tmc);
     for (i = 0; i < tm->t; i++){
         d = tm->tokens[i][0];
@@ -116,7 +116,7 @@ static double update_e(TM * tm, double * pse, int t, int delta){
 }
 
 static double init_f(TM * tm, double * psd, int d){
-    int t, k, o;
+    unsigned int t, k, o;
     double f, beta, vb;
     k    = tm->tmc->get_k(tm->tmc);
     beta = tm->tmc->get_beta(tm->tmc);
@@ -133,7 +133,7 @@ static double init_f(TM * tm, double * psd, int d){
 }
 
 static double update_f(TM * tm, double * psd, int d, int t, int delta){
-    int k, o;
+    unsigned int k, o;
     double beta, vb, tmp;
     k    = tm->tmc->get_k(tm->tmc);
     o    = d * (k + 1);
@@ -146,7 +146,7 @@ static double update_f(TM * tm, double * psd, int d, int t, int delta){
 }
 
 static double init_g(TM * tm, double * psv, int d, int v){
-    int t, k, doffs, voffs;
+    unsigned int t, k, doffs, voffs;
     double g, beta, alpha, vb;
     k     = tm->tmc->get_k(tm->tmc);
     beta  = tm->tmc->get_beta(tm->tmc);
@@ -165,7 +165,7 @@ static double init_g(TM * tm, double * psv, int d, int v){
 }
 
 static void del_off_tp(TM * tm, int d, int v, int t){
-    int doffs, voffs, k, p, n;
+    unsigned int doffs, voffs, k, p, n;
     k = tm->tmc->get_k(tm->tmc);
     doffs = d * (k + 1);
     voffs = v * (k + 1);
@@ -187,7 +187,7 @@ static void del_off_tp(TM * tm, int d, int v, int t){
 }
 
 static void add_on_tp(TM * tm, int d, int v, int t) {
-    int doffs, voffs, k;
+    unsigned int doffs, voffs, k;
     k = tm->tmc->get_k(tm->tmc);
     doffs = d * (k + 1);
     voffs = v * (k + 1);
@@ -217,7 +217,7 @@ static int sample_k(TM * tm, double * pse
                            , double r
                            , int d
                            , int v){
-    int t, k, doffs, voffs;
+    unsigned int t, k, doffs, voffs;
     double tmp;
     k = tm->tmc->get_k(tm->tmc);
     doffs = d * (k + 1);
@@ -257,7 +257,8 @@ static int sample_k(TM * tm, double * pse
 }
 
 static int gibbs_sample(TM * tm){
-    int i, d, v, t, k;
+    int i;
+    unsigned d, v, t, k;
     k = tm->tmc->get_k(tm->tmc);
     double *pse  = (double*)calloc(k + 1, sizeof(double));
     double *psd  = (double*)calloc(k + 1, sizeof(double));
@@ -278,7 +279,7 @@ static int gibbs_sample(TM * tm){
             t = sample_k(tm, pse, psd, psv, e, f, g, r, d, v);
             if (t == 0){
                 fprintf(stderr, "sample failed\n");
-                return -1;
+                t = tm->tokens[i][2];
             }
             add_on_tp(tm, d, v, t);
             tm->tokens[i][2] = t;
@@ -377,7 +378,7 @@ void tm_est(TM * tm){
 }
 
 void tm_save(TM * tm, int n){
-    int d, v, t, k, o;
+    unsigned int d, v, t, k, o;
     FILE *fp = NULL;
     char nd_file[512];
     char nw_file[512];

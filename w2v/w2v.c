@@ -4,7 +4,7 @@
  *   filename : w2v.c
  *   author   : liuzhiqiangruc@126.com
  *   date     : 2016-09-22
- *   info     : 
+ *   info     : word2vec implementation of cbow using hsmax
  * ======================================================== */
 #include <math.h>
 #include <time.h>
@@ -41,7 +41,7 @@ static int wv_cmp(const void * a1, const void * a2){
 }
 
 static void malloc_space(WV * wv){
-    int i, v = wv->voc_size, r = wv->doc_size, t = wv->tk_size;
+    int i, v = wv->voc_size, r = wv->doc_size + 1, t = wv->tk_size;
     int k = wv->wc->get_k(wv->wc);
     wv->neu0   = (float*)calloc(v * k, sizeof(float));
     wv->neu1   = (float*)calloc(v * k, sizeof(float));
@@ -50,7 +50,7 @@ static void malloc_space(WV * wv){
     wv->p0     = (int *) calloc(v, sizeof(int));
     wv->p1     = (int *) calloc(v, sizeof(int));
     wv->indx   = (int *) calloc(v, sizeof(int));
-    wv->roffs  = (int *) calloc(r + 1, sizeof(int));
+    wv->roffs  = (int *) calloc(r, sizeof(int));
     wv->tokens = (int *) calloc(t, sizeof(int));
     wv->idm    = (char(*)[KEY_SIZE])calloc(v, sizeof(char[KEY_SIZE]));
     i = v * k;
@@ -119,7 +119,6 @@ int wv_init(WV * wv) {
     int id, tk = 0, dsize = 0, hsize = hash_size(whs);
     int (*tmp_cnt)[2] = NULL;
     int (*fea_cnt)[2] = (int(*)[2])calloc(hash_size(whs), sizeof(int[2]));
-    // word size and dict
     while (NULL != fgets(buffer, LINE_LEN, fp)){
         string = trim(buffer, 3);
         while (NULL != (token = strsep(&string, "\t"))){
@@ -137,18 +136,14 @@ int wv_init(WV * wv) {
         }
         dsize += 1;
     }
-    // malloc space for data and params
     wv->voc_size = hash_cnt(whs);
     wv->doc_size = dsize;
     wv->tk_size  = tk;
     malloc_space(wv);
-    // build huffmen tree
     build_tree(wv, fea_cnt, wv->voc_size);
     free(fea_cnt); fea_cnt = NULL;
-    // load data
     rewind(fp);
-    tk = 0;
-    dsize = 0;
+    dsize = tk = 0;
     while (NULL != fgets(buffer, LINE_LEN, fp)){
         string = trim(buffer, 3);
         while(NULL != (token = strsep(&string, "\t"))){
@@ -158,12 +153,8 @@ int wv_init(WV * wv) {
                 strncpy(wv->idm[id], token, KEY_SIZE - 1);
             }
         }
-        if (dsize > 0){
-            wv->roffs[dsize] = tk;
-        }
-        dsize += 1;
+        wv->roffs[++dsize] = tk;
     }
-    wv->roffs[dsize] = tk;
     fclose(fp);
     free(whs); whs = NULL;
     return 0;
@@ -199,33 +190,38 @@ static void learn_cw(WV * wv, float * cw, float * de, int tk){
 }
 
 void wv_est(WV * wv){
-    int w, row, d, t, k, sb, se;
-    int l, r, i, j, m;
+    int w, d, id, ds, de, l, r, wi, m, tid, c, k;
     w   = wv->wc->get_w(wv->wc) / 2;
-    k   = wv->wc->get_k(wv->wc);
-    row = wv->doc_size;
+    k = wv->wc->get_k(wv->wc);
     float * cw = (float *)malloc(k * sizeof(float));
-    float * de = (float *)malloc(k * sizeof(float));
-    for (d = 0; d < row; d++){
+    float * eu = (float *)malloc(k * sizeof(float));
+    for (d = 0; d < wv->doc_size; d++){
         memset(cw, 0, sizeof(float) * k);
-        sb = wv->roffs[d];
-        se = wv->roffs[d + 1];
-        for (i = sb; i < se; i++){
-            l = (i - w) >= sb ? (i - w) : sb;
-            r = (i + w) <= se ? (i + w) : se;
-            for (j = l; j < r; j++) if (i != j) {
-                t = wv->tokens[j];
+        ds = wv->roffs[d];
+        de = wv->roffs[d + 1];
+        if (de - ds > 1) for (id = ds; id < de; id++){
+            if (id - w < ds) l = ds;
+            else l = id - w;
+            if (id + w > de) r = de;
+            else r = id + w;
+            c = 0;
+            for (wi = l; wi < r; wi++) if (wi != id) {
+                tid = wv->tokens[wi];
                 for (m = 0; m < k; m++){
-                    cw[m] += wv->neu0[t * k + m];
+                    cw[m] += wv->neu0[tid * k + m];
                 }
+                c += 1;
             }
-            t = wv->tokens[i];
-            memset(de, 0, sizeof(float) * k);
-            learn_cw(wv, cw, de, t);
-            for (j = l; j < r; j++) if (i != j){
-                t = wv->tokens[j];
+            for (m = 0; m < k; m++){
+                cw[m] /= c;
+            }
+            tid = wv->tokens[id];
+            memset(eu, 0, sizeof(float) * k);
+            learn_cw(wv, cw, eu, tid);
+            for (wi = l; wi < r; wi++) if(wi != id){
+                tid = wv->tokens[wi];
                 for (m = 0; m < k; m++){
-                    wv->neu0[t * k + m] += de[m];
+                    wv->neu0[tid * k + m] += eu[m];
                 }
             }
         }
@@ -247,6 +243,7 @@ void wv_save(WV * wv){
         }
         fprintf(ofp, "\n");
     }
+    fclose(ofp);
 }
 
 void wv_free(WV * wv){

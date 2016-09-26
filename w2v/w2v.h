@@ -4,7 +4,7 @@
  *   filename : w2v.h
  *   author   : liuzhiqiangruc@126.com
  *   date     : 2016-09-22
- *   info     : 
+ *   info     : word2vec implementation of cbow using hsmax
  * ======================================================== */
 
 #ifndef _W2V_H

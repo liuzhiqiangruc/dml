@@ -4,6 +4,7 @@ GBDTDIR  = gbdt
 TMDIR    = tm
 TSDIR    = ts
 CLSDIR   = cls
+W2VDIR   = w2v
 SRC      = src
 INSTDIR  = .
 
@@ -18,6 +19,7 @@ libs:
 	cd $(TMDIR);   $(MAKE) clean; $(MAKE); $(MAKE) install
 	cd $(TSDIR);   $(MAKE) clean; $(MAKE); $(MAKE) install
 	cd $(CLSDIR);  $(MAKE) clean; $(MAKE); $(MAKE) install
+	cd $(W2VDIR);  $(MAKE) clean; $(MAKE); $(MAKE) install
 
 app :
 	cd $(SRC); $(MAKE) clean ; $(MAKE); $(MAKE) install
@@ -50,3 +52,4 @@ clean:
 	cd $(TMDIR);    $(MAKE) clean
 	cd $(TSDIR);    $(MAKE) clean
 	cd $(CLSDIR);   $(MAKE) clean
+	cd $(W2VDIR);   $(MAKE) clean

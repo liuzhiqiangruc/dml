@@ -587,6 +587,6 @@ void tm_free(TM * tm){
             tm->tmc->free(tm->tmc);
             tm->tmc = NULL;
         }
+        free(tm);
     }
-    free(tm);
 }

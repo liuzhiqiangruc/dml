@@ -106,8 +106,9 @@ INSTDIR	Makefile	/^INSTDIR  = .$/;"	m
 INT	output/inc/hash.h	/^typedef enum { INT, LONG, STRING } HashType;$/;"	e	enum:__anon3
 INT	util/hash.h	/^typedef enum { INT, LONG, STRING } HashType;$/;"	e	enum:__anon17
 Interval	ts/modl.c	/^typedef int Interval[6];$/;"	t	file:
+K	output/bin/script/top_words.py	/^K = int(sys.argv[1])$/;"	v
+K	output/bin/script/top_words_b.py	/^K = int(sys.argv[1])$/;"	v
 K	output/bin/top_words.py	/^K = int(sys.argv[1])$/;"	v
-K	output/bin/top_words_b.py	/^K = int(sys.argv[1])$/;"	v
 KEY_SIZE	output/inc/lda.h	/^#define KEY_SIZE /;"	d
 KEY_SIZE	output/inc/tm.h	/^#define KEY_SIZE /;"	d
 KEY_SIZE	tm/lda.h	/^#define KEY_SIZE /;"	d
@@ -309,7 +310,7 @@ binary	output/inc/regress.h	/^    int    binary;              \/* binary feature
 binary	regr/regress.h	/^    int    binary;              \/* binary feature or not    *\/$/;"	m	struct:__anon10
 c	output/inc/regress.h	/^    int     c;                  \/* unique feature count     *\/$/;"	m	struct:_reg
 c	regr/regress.h	/^    int     c;                  \/* unique feature count     *\/$/;"	m	struct:_reg
-centers	output/bin/cal_pro.py	/^centers = []$/;"	v
+centers	output/bin/script/cal_pro.py	/^centers = []$/;"	v
 charmask	util/str.c	/^static inline int charmask(unsigned char *input, int len, char *mask)$/;"	f	file:
 child	gbdt/dtree.c	/^    struct _d_tree * child[2];      \/* splited children nodes    *\/$/;"	m	struct:_d_tree	typeref:struct:_d_tree::_d_tree	file:
 child	util/rbtree.c	/^    struct _RBNode * child[2];$/;"	m	struct:_RBNode	typeref:struct:_RBNode::_RBNode	file:
@@ -371,8 +372,8 @@ doc_entry	tm/lda.c	/^    int  * doc_entry;              \/* doc entry         *\
 doc_entry	tm/tm.c	/^    int   * doc_entry;$/;"	m	struct:_tm	file:
 dts	gbdt/gbdt.c	/^    DTree ** dts;$/;"	m	struct:_gbdt	file:
 dtw	ts/dist.c	/^double dtw(double * x, int nx, double * y, int ny){$/;"	f
-dx	output/bin/cal_pro.py	/^        dx = x - mx$/;"	v
-dy	output/bin/cal_pro.py	/^        dy = y - my$/;"	v
+dx	output/bin/script/cal_pro.py	/^        dx = x - mx$/;"	v
+dy	output/bin/script/cal_pro.py	/^        dy = y - my$/;"	v
 ed	ts/dist.c	/^int ed(char * x, char * y){$/;"	f
 ed_bak	ts/dist.c	/^int ed_bak(char * x, char * y){$/;"	f
 edm	ts/breakout.c	/^int * edm(double * ts, int n, int min_size, double beta, int degree, int *ol){$/;"	f
@@ -384,7 +385,7 @@ eval_fn	regr/regress.h	/^    EVAL_FN eval_fn;            \/* loss function      
 eval_test	gbdt/gbdt.c	/^static void eval_test(GBDT * gbdt){$/;"	f	file:
 eval_tree	gbdt/dtree.c	/^double * eval_tree(DTD * ts, DTree * t, double * F, int n){$/;"	f
 exMerge	ts/modl.c	/^static Interval * exMerge(Interval * I, int m, int n, int *l, double * LogD){$/;"	f	file:
-exp	output/bin/cal_pro.py	/^        exp = 0.5 * (dx * dx * invxx + dy * dy * invyy + 2.0 * dx * dy * invxy)$/;"	v
+exp	output/bin/script/cal_pro.py	/^        exp = 0.5 * (dx * dx * invxx + dy * dy * invyy + 2.0 * dx * dy * invxy)$/;"	v
 ext_obj	gbdt/Makefile	/^ext_obj = ..\/util\/hash.o ..\/util\/str.o ..\/regr\/auc.o$/;"	m
 extend_hash	util/hash.c	/^static void extend_hash(Hash * hs){$/;"	f	file:
 f	gbdt/gbdt.c	/^    double * f;$/;"	m	struct:_gbdt	file:
@@ -571,10 +572,12 @@ heap_item_free_fn	output/inc/heap.h	/^    HEAP_ITEM_FREE heap_item_free_fn;$/;"	
 heap_item_free_fn	util/heap.h	/^    HEAP_ITEM_FREE heap_item_free_fn;$/;"	m	struct:_heap
 heap_pop	util/heap.c	/^void * heap_pop(Heap * hp){$/;"	f
 heap_remove	util/heap.c	/^void heap_remove(Heap * hp, void * pdata){$/;"	f
+heappop	output/bin/script/top_words.py	/^from heapq import heappop$/;"	i
+heappop	output/bin/script/top_words_b.py	/^from heapq import heappop$/;"	i
 heappop	output/bin/top_words.py	/^from heapq import heappop$/;"	i
-heappop	output/bin/top_words_b.py	/^from heapq import heappop$/;"	i
+heappush	output/bin/script/top_words.py	/^from heapq import heappush$/;"	i
+heappush	output/bin/script/top_words_b.py	/^from heapq import heappush$/;"	i
 heappush	output/bin/top_words.py	/^from heapq import heappush$/;"	i
-heappush	output/bin/top_words_b.py	/^from heapq import heappush$/;"	i
 help	output/inc/tm_config.h	/^    HELP       help;$/;"	m	struct:_tmconfig
 help	output/inc/tm_config_d.h	/^    HELP       help;$/;"	m	struct:_tmconfigd
 help	output/inc/tm_config_h.h	/^    HELP       help;$/;"	m	struct:_tmconfigh
@@ -639,9 +642,9 @@ init_lda	tm/lda_xy.c	/^int init_lda(Lda * lda){$/;"	f
 init_model	regr/regress.c	/^int init_model(REG * reg){$/;"	f
 init_root	gbdt/dtree.c	/^static DTree * init_root(double * g, double * h, int n, double nr, double wr){$/;"	f	file:
 init_x_config	tm/tm_config_x.c	/^TMXConfig * init_x_config(){$/;"	f
-invxx	output/bin/cal_pro.py	/^        invxx = xx \/ det$/;"	v
-invxy	output/bin/cal_pro.py	/^        invxy = -xy \/ det$/;"	v
-invyy	output/bin/cal_pro.py	/^        invyy = yy \/ det$/;"	v
+invxx	output/bin/script/cal_pro.py	/^        invxx = xx \/ det$/;"	v
+invxy	output/bin/script/cal_pro.py	/^        invxy = -xy \/ det$/;"	v
+invyy	output/bin/script/cal_pro.py	/^        invyy = yy \/ det$/;"	v
 iterno	output/inc/regress.h	/^    int    iterno;              \/* current iter number      *\/$/;"	m	struct:__anon6
 iterno	regr/regress.h	/^    int    iterno;              \/* current iter number      *\/$/;"	m	struct:__anon10
 k	output/inc/lda.h	/^    int    k;              \/* topic n *\/     $/;"	m	struct:__anon4
@@ -697,8 +700,8 @@ lr_hess	gbdt/gblr.c	/^void lr_hess(double *f, double *y, double *h, int n){$/;"	
 lr_repo	gbdt/gblr.c	/^void lr_repo(GBDT * g){$/;"	f
 lr_repo	regr/lr.c	/^int lr_repo(double *x0, double *x1, void *_ds) {$/;"	f
 lsp	ts/breakout.c	/^int * lsp(double * ts, int n, int min_size, double beta, int *ol, double * rety){$/;"	f
-lx	output/bin/filter_lc.py	/^lx = []$/;"	v
-ly	output/bin/filter_lc.py	/^ly = []$/;"	v
+lx	output/bin/script/filter_lc.py	/^lx = []$/;"	v
+ly	output/bin/script/filter_lc.py	/^ly = []$/;"	v
 m_add	util/median.c	/^void m_add(MTrace * m, void *pdata){$/;"	f
 m_clear	util/median.c	/^void m_clear(MTrace * m){$/;"	f
 m_create	util/median.c	/^MTrace * m_create(CMP_FN cmp_fn, FREE_FN free_fn){$/;"	f
@@ -719,7 +722,7 @@ malloc_space	tm/tm.c	/^static void malloc_space(TM * tm){$/;"	f	file:
 malloc_space	tm/xtm.c	/^static void malloc_space(TM * tm){$/;"	f	file:
 mask	ts/pattern.c	/^    int mask;$/;"	m	struct:_simple_hash_map	file:
 mask	util/hash.c	/^    int mask;           \/\/ size - 1$/;"	m	struct:_hash	file:
-math	output/bin/cal_pro.py	/^import math$/;"	i
+math	output/bin/script/cal_pro.py	/^import math$/;"	i
 max	ts/dist.c	/^#define max(/;"	d	file:
 max_depth	gbdt/gbdt.h	/^    int max_depth;$/;"	m	struct:_gbdt_param
 max_depth	output/inc/gbdt.h	/^    int max_depth;$/;"	m	struct:_gbdt_param
@@ -728,20 +731,20 @@ max_leaf_nodes	output/inc/gbdt.h	/^    int max_leaf_nodes;$/;"	m	struct:_gbdt_pa
 max_size	ts/pattern.c	/^    int max_size;$/;"	m	struct:_cls_list_s	file:
 max_trees	gbdt/gbdt.h	/^    int max_trees;$/;"	m	struct:_gbdt_param
 max_trees	output/inc/gbdt.h	/^    int max_trees;$/;"	m	struct:_gbdt_param
-max_x	output/bin/gen_xy.py	/^max_x = max(x)$/;"	v
-max_y	output/bin/gen_xy.py	/^max_y = max(y)$/;"	v
+max_x	output/bin/script/gen_xy.py	/^max_x = max(x)$/;"	v
+max_y	output/bin/script/gen_xy.py	/^max_y = max(y)$/;"	v
 mean_sd	ts/breakout.c	/^static void mean_sd(double *x, int n, double *mean, double *sd) {$/;"	f	file:
 mean_sd	ts/pattern.c	/^void mean_sd(double *x, int n, double *mean, double *sd) {$/;"	f
 mergeInterval	ts/modl.c	/^static void mergeInterval(Interval a, Interval b){$/;"	f	file:
 method	output/inc/regress.h	/^    int    method;              \/* regualization mod 1 or 2 *\/$/;"	m	struct:__anon6
 method	regr/regress.h	/^    int    method;              \/* regualization mod 1 or 2 *\/$/;"	m	struct:__anon10
 min	ts/dist.c	/^#define min(/;"	d	file:
-min_x	output/bin/gen_xy.py	/^min_x = min(x)$/;"	v
-min_y	output/bin/gen_xy.py	/^min_y = min(y)$/;"	v
+min_x	output/bin/script/gen_xy.py	/^min_x = min(x)$/;"	v
+min_y	output/bin/script/gen_xy.py	/^min_y = min(y)$/;"	v
 modl	ts/modl.c	/^double * modl(double v[], int a[], double * LogD, int n, int * nd){$/;"	f
 mt_cmp	util/median.c	/^int mt_cmp(int * m, int *n){$/;"	f
-mx	output/bin/filter_lc.py	/^mx = sum(lx) \/ len(lx)$/;"	v
-my	output/bin/filter_lc.py	/^my = sum(ly) \/ len(ly)$/;"	v
+mx	output/bin/script/filter_lc.py	/^mx = sum(lx) \/ len(lx)$/;"	v
+my	output/bin/script/filter_lc.py	/^my = sum(ly) \/ len(ly)$/;"	v
 n	gbdt/dtree.c	/^    int n;                          \/* instance num in this node *\/$/;"	m	struct:_d_tree	file:
 n	output/inc/tm_config.h	/^    int    n;$/;"	m	struct:_tmconfig
 n	tm/tm_config.h	/^    int    n;$/;"	m	struct:_tmconfig
@@ -814,7 +817,7 @@ parse_command_line	src/gblr.c	/^int parse_command_line(GBMP *p, int argc, char *
 parse_command_line	src/lda.c	/^int parse_command_line(ParamLda *p, int argc, char *argv[]) {$/;"	f
 parse_command_line	src/lr.c	/^int parse_command_line(RP *p, int argc, char *argv[]){$/;"	f
 pi	ts/breakout.c	/^#define pi /;"	d	file:
-pr	output/bin/cal_pro.py	/^            pr = 1.0 \/ (math.sqrt(det) * math.exp(exp))$/;"	v
+pr	output/bin/script/cal_pro.py	/^            pr = 1.0 \/ (math.sqrt(det) * math.exp(exp))$/;"	v
 pred	ts/loess.c	/^static void pred(double *g, double (*hv)[3], int id, double *rety){$/;"	f	file:
 prev	tm/hlda.c	/^    unsigned short prev;$/;"	m	struct:__anon12	file:
 prev	tm/htm.c	/^    unsigned short prev;$/;"	m	struct:__anon13	file:
@@ -825,7 +828,7 @@ r	regr/regress.h	/^    int     r;                  \/* instance num for train   
 r_fn	gbdt/gbdt.c	/^    R r_fn;$/;"	m	struct:_gbdt	file:
 randd	cls/kmeans.c	/^static int randd(int d){$/;"	f	file:
 randf	cls/kmeans.c	/^static double randf(double s){$/;"	f	file:
-random	output/bin/gen_xy.py	/^import sys, random$/;"	i
+random	output/bin/script/gen_xy.py	/^import sys, random$/;"	i
 rate	gbdt/gbdt.h	/^    double rate;$/;"	m	struct:_gbdt_param
 rate	output/inc/gbdt.h	/^    double rate;$/;"	m	struct:_gbdt_param
 rb1	output/inc/median.h	/^    RBTree * rb1;$/;"	m	struct:_median
@@ -876,8 +879,9 @@ savestep	output/inc/regress.h	/^    int    savestep;            \/* save step   
 savestep	regr/regress.h	/^    int    savestep;            \/* save step                *\/$/;"	m	struct:__anon10
 savestep	tm/lda.h	/^    int    savestep;       \/* save s  *\/     $/;"	m	struct:__anon15
 scan_tree	gbdt/dtree.c	/^static void scan_tree(DTD * ts, DTree * t, DTree ** inst_nodes, int n, int m){$/;"	f	file:
+segs	output/bin/script/top_words.py	/^    segs = line.strip().split("\\t")$/;"	v
+segs	output/bin/script/top_words_b.py	/^    segs = line.strip().split("\\t")$/;"	v
 segs	output/bin/top_words.py	/^    segs = line.strip().split("\\t")$/;"	v
-segs	output/bin/top_words_b.py	/^    segs = line.strip().split("\\t")$/;"	v
 set	output/inc/tm_config.h	/^    SET_CONFIG set;$/;"	m	struct:_tmconfig
 set	output/inc/tm_config_d.h	/^    SET_CONFIG set;$/;"	m	struct:_tmconfigd
 set	output/inc/tm_config_h.h	/^    SET_CONFIG set;$/;"	m	struct:_tmconfigh
@@ -895,8 +899,9 @@ size	output/inc/heap.h	/^    int size;$/;"	m	struct:_heap
 size	ts/pattern.c	/^    int size;$/;"	m	struct:_cls_list	file:
 size	util/hash.c	/^    int size;           \/\/ number of buckets 2^n$/;"	m	struct:_hash	file:
 size	util/heap.h	/^    int size;$/;"	m	struct:_heap
+sl	output/bin/script/top_words.py	/^    sl = sorted(top_words[i], reverse = True)$/;"	v
+sl	output/bin/script/top_words_b.py	/^    sl = map(lambda x : x[1], sorted(top_words[i], reverse = True))$/;"	v
 sl	output/bin/top_words.py	/^    sl = sorted(top_words[i], reverse = True)$/;"	v
-sl	output/bin/top_words_b.py	/^    sl = map(lambda x : x[1], sorted(top_words[i], reverse = True))$/;"	v
 sln	tm/xtm.c	/^    int   sln;$/;"	m	struct:_tm	file:
 sos	cls/Makefile	/^sos     = libkmeans.so   libk2d.so$/;"	m
 sos	gbdt/Makefile	/^sos     = libgblr.so libgbdt.so libdtree.so libtdata.so$/;"	m
@@ -904,11 +909,11 @@ sos	regr/Makefile	/^sos     = libauc.so liblr.so libnewton.so$/;"	m
 sos	tm/Makefile	/^sos     =  liblda_xy.so   libtm.so  libhtm.so  libxtm.so$/;"	m
 sos	ts/Makefile	/^sos =       libbrk.so  libdst.so libloess.so libmodl.so libpat.so libvtb.so$/;"	m
 sos	util/Makefile	/^sos     = libhs.so   librbt.so   libstr.so   libmed.so$/;"	m
-sp	output/bin/cal_pro.py	/^    sp = 0.0$/;"	v
+sp	output/bin/script/cal_pro.py	/^    sp = 0.0$/;"	v
 space	util/hash.c	/^    int space;          \/\/ capacity of hash index$/;"	m	struct:_hash	file:
 splitInterval	ts/modl.c	/^static double splitInterval(Interval t, Interval sp1, Interval sp2, Interval * I, int l, int m, int n, double * LogD){$/;"	f	file:
-sps	output/bin/cal_pro.py	/^sps = [(s - min(sps)) \/ (max(sps) - min(sps)) for s in sps]$/;"	v
-sps	output/bin/cal_pro.py	/^sps = []$/;"	v
+sps	output/bin/script/cal_pro.py	/^sps = [(s - min(sps)) \/ (max(sps) - min(sps)) for s in sps]$/;"	v
+sps	output/bin/script/cal_pro.py	/^sps = []$/;"	v
 statics	cls/Makefile	/^statics = libkmeanss.a   libk2ds.a$/;"	m
 statics	gbdt/Makefile	/^statics = libgblrs.a libgbdts.a libdtrees.a libtdatas.a$/;"	m
 statics	regr/Makefile	/^statics = libaucs.a liblrs.a libnewtons.a$/;"	m
@@ -919,11 +924,12 @@ strsep	util/str.c	/^char *strsep(char **stringp, const char *delim) {$/;"	f
 strval	util/hash.c	/^    char * strval;$/;"	m	union:_hash_val	file:
 studentpdf	ts/breakout.c	/^static double studentpdf(double x, double mu, double var, double nu) {$/;"	f	file:
 sub	ts/pattern.c	/^    int sub[2];$/;"	m	struct:_node	file:
-sys	output/bin/cal_pro.py	/^import sys$/;"	i
-sys	output/bin/filter_lc.py	/^import sys$/;"	i
-sys	output/bin/gen_xy.py	/^import sys, random$/;"	i
+sys	output/bin/script/cal_pro.py	/^import sys$/;"	i
+sys	output/bin/script/filter_lc.py	/^import sys$/;"	i
+sys	output/bin/script/gen_xy.py	/^import sys, random$/;"	i
+sys	output/bin/script/top_words.py	/^import sys$/;"	i
+sys	output/bin/script/top_words_b.py	/^import sys$/;"	i
 sys	output/bin/top_words.py	/^import sys$/;"	i
-sys	output/bin/top_words_b.py	/^import sys$/;"	i
 sz	ts/pattern.c	/^    int sz;$/;"	m	struct:_cls_list_s	file:
 sz	ts/pattern.c	/^    int sz;$/;"	m	struct:_simple_hash_map	file:
 t	gbdt/gbdt.c	/^    double * t;$/;"	m	struct:_gbdt	file:
@@ -977,8 +983,9 @@ tokens	tm/lda.c	/^    int  (*tokens)[4];             \/* tokens            *\/$/
 tokens	tm/lda_xy.c	/^    int  (*tokens)[3];             \/* tokens            *\/$/;"	m	struct:_lda	file:
 tokens	tm/tm.c	/^    int  (*tokens)[4];$/;"	m	struct:_tm	file:
 tokens	tm/xtm.c	/^    int  (*tokens)[4];$/;"	m	struct:_tm	file:
+top_words	output/bin/script/top_words.py	/^top_words = [[] for i in range(K)]$/;"	v
+top_words	output/bin/script/top_words_b.py	/^top_words = [[] for i in range(K)]$/;"	v
 top_words	output/bin/top_words.py	/^top_words = [[] for i in range(K)]$/;"	v
-top_words	output/bin/top_words_b.py	/^top_words = [[] for i in range(K)]$/;"	v
 train_ds	gbdt/gbdt.c	/^    DTD * train_ds;$/;"	m	struct:_gbdt	file:
 train_ds	output/inc/regress.h	/^    RDS   * train_ds;           \/* train dataset pointer    *\/$/;"	m	struct:_reg
 train_ds	regr/regress.h	/^    RDS   * train_ds;           \/* train dataset pointer    *\/$/;"	m	struct:_reg
@@ -1017,8 +1024,9 @@ vals	output/inc/tdata.h	/^    double * vals;                  \/* row feature va
 vals	util/hash.c	/^    LANode * vals;      \/\/ data space for HashVal$/;"	m	struct:_hash	file:
 value	util/hash.c	/^    HashVal value;$/;"	m	union:_la_node	file:
 viterbi	ts/viterbi.c	/^int viterbi(int * l, int * o, int n, int r_t, int r_o){$/;"	f
+w	output/bin/script/top_words.py	/^    w = segs[0]$/;"	v
+w	output/bin/script/top_words_b.py	/^    w = segs[0]$/;"	v
 w	output/bin/top_words.py	/^    w = segs[0]$/;"	v
-w	output/bin/top_words_b.py	/^    w = segs[0]$/;"	v
 w_regr	ts/loess.c	/^void w_regr(double *y, double *w, int s, int id, double * rv) {$/;"	f
 wei	gbdt/dtree.c	/^    double wei;                     \/* additive model value      *\/$/;"	m	struct:_d_tree	file:
 wei_reg	gbdt/gbdt.h	/^    double wei_reg;$/;"	m	struct:_gbdt_param
@@ -1026,16 +1034,16 @@ wei_reg	output/inc/gbdt.h	/^    double wei_reg;$/;"	m	struct:_gbdt_param
 wl	tm/hlda.c	/^    int * wl;                      \/* word_loc  *\/$/;"	m	struct:_lda	file:
 wl	tm/htm.c	/^    int   * wl;$/;"	m	struct:_tm	file:
 wl	tm/xtm.c	/^    int   *wl;$/;"	m	struct:_tm	file:
-x	output/bin/gen_xy.py	/^    x = random.random() * (max_x - min_x) + min_x$/;"	v
-x	output/bin/gen_xy.py	/^x = []$/;"	v
+x	output/bin/script/gen_xy.py	/^    x = random.random() * (max_x - min_x) + min_x$/;"	v
+x	output/bin/script/gen_xy.py	/^x = []$/;"	v
 x	output/inc/regress.h	/^    double *x;                  \/* learned weight result    *\/$/;"	m	struct:_reg
 x	regr/auc.c	/^    double x;$/;"	m	struct:_aucP	file:
 x	regr/regress.h	/^    double *x;                  \/* learned weight result    *\/$/;"	m	struct:_reg
 xy	tm/lda_xy.c	/^    double (*xy)[2];               \/* pos of token      *\/$/;"	m	struct:_lda	file:
 xy	tm/xtm.c	/^    double (*xy)[2];$/;"	m	struct:_tm	file:
 y	gbdt/tdata.h	/^    double * y;                     \/* labels of data            *\/$/;"	m	struct:__anon2
-y	output/bin/gen_xy.py	/^    y = random.random() * (max_y - min_y) + min_y$/;"	v
-y	output/bin/gen_xy.py	/^y = []$/;"	v
+y	output/bin/script/gen_xy.py	/^    y = random.random() * (max_y - min_y) + min_y$/;"	v
+y	output/bin/script/gen_xy.py	/^y = []$/;"	v
 y	output/inc/regress.h	/^    double *y;                  \/* target label of train    *\/$/;"	m	struct:__anon7
 y	output/inc/tdata.h	/^    double * y;                     \/* labels of data            *\/$/;"	m	struct:__anon8
 y	regr/regress.h	/^    double *y;                  \/* target label of train    *\/$/;"	m	struct:__anon11

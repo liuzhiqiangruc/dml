@@ -5,7 +5,7 @@ TMDIR    = tm
 TSDIR    = ts
 CLSDIR   = cls
 W2VDIR   = w2v
-SRC      = src
+SRC      = main
 INSTDIR  = .
 
 

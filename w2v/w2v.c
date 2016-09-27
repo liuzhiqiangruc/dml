@@ -7,7 +7,6 @@
  *   info     : word2vec implementation of cbow using hsmax
  * ======================================================== */
 #include <math.h>
-#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -191,7 +190,7 @@ static void learn_cw(WV * wv, float * cw, float * de, int tk){
 
 void wv_est(WV * wv){
     int w, d, id, ds, de, l, r, wi, m, tid, c, k;
-    w   = wv->wc->get_w(wv->wc) / 2;
+    w   = wv->wc->get_w(wv->wc);
     k = wv->wc->get_k(wv->wc);
     float * cw = (float *)malloc(k * sizeof(float));
     float * eu = (float *)malloc(k * sizeof(float));
@@ -200,10 +199,10 @@ void wv_est(WV * wv){
         ds = wv->roffs[d];
         de = wv->roffs[d + 1];
         if (de - ds > 1) for (id = ds; id < de; id++){
-            if (id - w < ds) l = ds;
-            else l = id - w;
-            if (id + w > de) r = de;
-            else r = id + w;
+            if (id - w / 2 < ds) l = ds;
+            else l = id - w / 2;
+            r = l + w;
+            if (r > de) r = de;
             c = 0;
             for (wi = l; wi < r; wi++) if (wi != id) {
                 tid = wv->tokens[wi];

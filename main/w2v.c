@@ -6,12 +6,14 @@
  *   date     : 2016-09-26
  *   info     : 
  * ======================================================== */
+#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "w2v.h"
 
 int main(int argc, char *argv[]){
     WV * wv = wv_create(argc, argv);
+    srand(time(NULL));
     if (! wv){
         return -1;
     }

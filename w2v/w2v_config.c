@@ -54,6 +54,9 @@ static int set(void * wc, int argc, char * argv[]){
     if (NULL == d){
         return -2;
     }
+    if (w < 2){
+        fprintf(stderr, "w can not be less than 2\n");
+    }
     ((W2VConfig *)wc)->a = a;
     ((W2VConfig *)wc)->k = k;
     ((W2VConfig *)wc)->w = w;

@@ -9,6 +9,7 @@ CC	cls/Makefile	/^CC = gcc -std=c99 -g$/;"	m
 CC	gbdt/Makefile	/^CC = gcc -std=c99 -g$/;"	m
 CC	main/Makefile	/^CC = gcc -std=c99 -g$/;"	m
 CC	regr/Makefile	/^CC = gcc -std=c99 -g$/;"	m
+CC	repo/Makefile	/^CC = gcc -std=c99 -g$/;"	m
 CC	tm/Makefile	/^CC = gcc -std=c99 -g$/;"	m
 CC	ts/Makefile	/^CC       = gcc -std=c99$/;"	m
 CC	util/Makefile	/^CC = gcc -std=c99 -g$/;"	m
@@ -17,6 +18,7 @@ CFBASE	cls/Makefile	/^CFBASE = -pedantic -pipe -Wall$/;"	m
 CFBASE	gbdt/Makefile	/^CFBASE = -pedantic -pipe -Wall$/;"	m
 CFBASE	main/Makefile	/^CFBASE = -Wall -pedantic -pipe$/;"	m
 CFBASE	regr/Makefile	/^CFBASE = -pedantic -pipe -Wall$/;"	m
+CFBASE	repo/Makefile	/^CFBASE = -pedantic -pipe -Wall$/;"	m
 CFBASE	tm/Makefile	/^CFBASE = -pedantic -pipe -Wall$/;"	m
 CFBASE	ts/Makefile	/^CFBASE   = -Wall -pedantic -pipe$/;"	m
 CFBASE	util/Makefile	/^CFBASE = -pedantic -pipe -Wall$/;"	m
@@ -25,10 +27,11 @@ CFLAGS	cls/Makefile	/^CFLAGS = $(CFBASE) -O0 -fpic -DNDEBUG -DNPRINT -I..\/util$
 CFLAGS	gbdt/Makefile	/^CFLAGS = $(CFBASE) -O0 -fpic -DNDEBUG -DNPRINT -I..\/util -I..\/regr$/;"	m
 CFLAGS	main/Makefile	/^CFLAGS = $(CFBASE) -DNDEBUG -DNPRINT -O3 -I$(INC)$/;"	m
 CFLAGS	regr/Makefile	/^CFLAGS = $(CFBASE) -O0 -fpic -DNDEBUG -DNPRINT -I..\/util$/;"	m
+CFLAGS	repo/Makefile	/^CFLAGS = $(CFBASE) -O0 -fpic -DNDEBUG -DNPRINT -I..\/util$/;"	m
 CFLAGS	tm/Makefile	/^CFLAGS = $(CFBASE) -O3 -fpic -DNDEBUG -DNPRINT -I..\/util$/;"	m
 CFLAGS	ts/Makefile	/^CFLAGS   = $(CFBASE) -DNDEBUG -DNPRINT -O0 -fpic -I..\/util$/;"	m
 CFLAGS	util/Makefile	/^CFLAGS = $(CFBASE) -O3 -fpic -DNDEBUG -DNPRINT$/;"	m
-CFLAGS	w2v/Makefile	/^CFLAGS = $(CFBASE) -O0 -fpic -DNDEBUG -DNPRINT -I..\/util$/;"	m
+CFLAGS	w2v/Makefile	/^CFLAGS = $(CFBASE) -O0 -fpic -DNDEBUG -DNPRINT -I..\/util -I..\/repo$/;"	m
 CLSDIR	Makefile	/^CLSDIR   = cls$/;"	m
 CMP_FN	util/rbtree.h	/^typedef int    (*CMP_FN)(void *, void*);$/;"	t
 ClsList	ts/pattern.c	/^} ClsList;$/;"	t	typeref:struct:_cls_list	file:
@@ -91,6 +94,7 @@ LBFGS	regr/newton.h	/^typedef enum { OWLQN = 1, LBFGS } NT_METHOD;$/;"	e	enum:__
 LD	cls/Makefile	/^LD = gcc -shared$/;"	m
 LD	gbdt/Makefile	/^LD = gcc -shared$/;"	m
 LD	regr/Makefile	/^LD = gcc -shared$/;"	m
+LD	repo/Makefile	/^LD = gcc -shared$/;"	m
 LD	tm/Makefile	/^LD = gcc -shared$/;"	m
 LD	ts/Makefile	/^LD       = gcc -shared$/;"	m
 LD	util/Makefile	/^LD = gcc -shared$/;"	m
@@ -161,6 +165,7 @@ _RBTREE_H	util/rbtree.h	/^#define _RBTREE_H$/;"	d
 _RBTree	util/rbtree.c	/^struct _RBTree{$/;"	s	file:
 _REGRESS_H	regr/regress.h	/^#define _REGRESS_H$/;"	d
 _REGR_FN_H	regr/regr_fn.h	/^#define _REGR_FN_H$/;"	d
+_REPO_H	repo/repo.h	/^#define _REPO_H$/;"	d
 _STR_H	util/str.h	/^#define _STR_H$/;"	d
 _TDATA_H	gbdt/tdata.h	/^#define _TDATA_H$/;"	d
 _TM_CONFIG_H	tm/tm_config.h	/^#define _TM_CONFIG_H$/;"	d
@@ -549,6 +554,7 @@ o	w2v/w2v_config.h	/^    char * o;$/;"	m	struct:_w2vconfig
 objs	cls/Makefile	/^objs    = kmeans.o       k2d.o$/;"	m
 objs	gbdt/Makefile	/^objs    = gblr.o gbdt.o dtree.o tdata.o$/;"	m
 objs	regr/Makefile	/^objs    = auc.o lr.o regress.o newton.o$/;"	m
+objs	repo/Makefile	/^objs    =  repo.o$/;"	m
 objs	tm/Makefile	/^objs    =  tm_config.o    tm_config_h.o  tm_config_x.o tm.o htm.o xtm.o $/;"	m
 objs	ts/Makefile	/^objs =      breakout.o dist.o    loess.o     modl.o     pattern.o viterbi.o$/;"	m
 objs	util/Makefile	/^objs    = hash.o     rbtree.o    str.o       median.o$/;"	m
@@ -573,6 +579,7 @@ pi	ts/breakout.c	/^#define pi /;"	d	file:
 pred	ts/loess.c	/^static void pred(double *g, double (*hv)[3], int id, double *rety){$/;"	f	file:
 prev	tm/htm.c	/^    unsigned short prev;$/;"	m	struct:__anon6	file:
 prev	tm/tm.c	/^    unsigned short prev;$/;"	m	struct:__anon7	file:
+progress	repo/repo.c	/^void progress(FILE * fp, double s, double b){$/;"	f
 r	regr/regress.h	/^    int     r;                  \/* instance num for train   *\/$/;"	m	struct:__anon5
 r_fn	gbdt/gbdt.c	/^    R r_fn;$/;"	m	struct:_gbdt	file:
 randd	cls/kmeans.c	/^static int randd(int d){$/;"	f	file:
@@ -729,10 +736,13 @@ wl	tm/htm.c	/^    int   * wl;$/;"	m	struct:_tm	file:
 wl	tm/xtm.c	/^    int   *wl;$/;"	m	struct:_tm	file:
 wv_cmp	w2v/w2v.c	/^static int wv_cmp(const void * a1, const void * a2){$/;"	f	file:
 wv_create	w2v/w2v.c	/^WV * wv_create(int argc, char * argv[]){$/;"	f
+wv_dsize	w2v/w2v.c	/^int wv_dsize(WV * wv){$/;"	f
 wv_est	w2v/w2v.c	/^void wv_est(WV * wv){$/;"	f
 wv_free	w2v/w2v.c	/^void wv_free(WV * wv){$/;"	f
 wv_init	w2v/w2v.c	/^int wv_init(WV * wv) {$/;"	f
 wv_save	w2v/w2v.c	/^void wv_save(WV * wv){$/;"	f
+wv_tsize	w2v/w2v.c	/^int wv_tsize(WV * wv){$/;"	f
+wv_vsize	w2v/w2v.c	/^int wv_vsize(WV * wv){$/;"	f
 x	regr/auc.c	/^    double x;$/;"	m	struct:_aucP	file:
 x	regr/regress.h	/^    double *x;                  \/* learned weight result    *\/$/;"	m	struct:_reg
 xy	tm/xtm.c	/^    double (*xy)[2];$/;"	m	struct:_tm	file:

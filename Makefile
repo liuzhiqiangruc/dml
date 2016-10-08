@@ -5,6 +5,7 @@ TMDIR    = tm
 TSDIR    = ts
 CLSDIR   = cls
 W2VDIR   = w2v
+REPDIR   = repo
 SRC      = main
 INSTDIR  = .
 
@@ -53,3 +54,4 @@ clean:
 	cd $(TSDIR);    $(MAKE) clean
 	cd $(CLSDIR);   $(MAKE) clean
 	cd $(W2VDIR);   $(MAKE) clean
+	cd $(REPDIR);   $(MAKE) clean

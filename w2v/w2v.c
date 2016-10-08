@@ -245,6 +245,28 @@ void wv_save(WV * wv){
         fprintf(ofp, "\n");
     }
     fclose(ofp);
+    sprintf(outf, "%s/noleaf", wv->wc->get_o(wv->wc));
+    if (NULL == (ofp = fopen(outf, "w"))){
+        return;
+    }
+    for (i = 0; i < v; i++){
+        for (t = 0; t < k; t++){
+            fprintf(ofp, "%.3f\t", wv->neu1[i * k + t]);
+        }
+        fprintf(ofp, "\n");
+    }
+    fclose(ofp);
+    sprintf(outf, "%s/index", wv->wc->get_o(wv->wc));
+    if (NULL == (ofp = fopen(outf, "w"))){
+        return;
+    }
+    for (i = 0; i < v; i++){
+        fprintf(ofp, "%d\t%d\t%d\t%d\n"    \
+                   , wv->p0[wv->indx[i]]   \
+                   , wv->b0[wv->indx[i]]   \
+                   , wv->p1[i], wv->b1[i]);
+    }
+    fclose(ofp);
 }
 
 void wv_free(WV * wv){

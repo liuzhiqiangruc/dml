@@ -225,7 +225,7 @@ void wv_est(WV * wv){
                 }
             }
         }
-        progress(stderr, wv->doc_size, d + 2);
+        progress(stderr, wv->doc_size, d + 1);
     }
 }
 

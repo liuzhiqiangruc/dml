@@ -20,5 +20,8 @@ int  wv_init(WV * wv);
 void wv_est (WV * wv);
 void wv_save(WV * wv);
 void wv_free(WV * wv);
+int  wv_dsize(WV * wv);
+int  wv_vsize(WV * wv);
+int  wv_tsize(WV * wv);
 
 #endif //W2V_H

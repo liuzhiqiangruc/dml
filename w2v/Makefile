@@ -1,6 +1,6 @@
 CC = gcc -std=c99 -g
 CFBASE = -pedantic -pipe -Wall
-CFLAGS = $(CFBASE) -O0 -fpic -DNDEBUG -DNPRINT -I../util
+CFLAGS = $(CFBASE) -O0 -fpic -DNDEBUG -DNPRINT -I../util -I../repo
 LD = gcc -shared
 
 objs    =  w2v.o w2v_config.o
@@ -22,10 +22,10 @@ inc_install :
 w2v.o  : w2v.h
 w2v_config.o : w2v_config.h
 
-libw2v.so  : w2v.o w2v_config.o ../util/str.o ../util/hash.o
+libw2v.so  : w2v.o ../repo/repo.o w2v_config.o ../util/str.o ../util/hash.o
 	$(LD) $^ -o $@
 
-libw2vs.a  : w2v.o w2v_config.o ../util/str.o ../util/hash.o
+libw2vs.a  : w2v.o ../repo/repo.o w2v_config.o ../util/str.o ../util/hash.o
 	ar cr $@ $^
 
 install :

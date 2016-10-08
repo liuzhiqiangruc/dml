@@ -13,6 +13,7 @@
 #include "w2v_config.h"
 #include "hash.h"
 #include "str.h"
+#include "repo.h"
 #include "w2v.h"
 
 struct _w2v {
@@ -189,12 +190,12 @@ static void learn_cw(WV * wv, float * cw, float * de, int tk){
 }
 
 void wv_est(WV * wv){
-    int w, d, id, ds, de, l, r, wi, m, tid, c, k;
+    int w, d, id, ds, de, l, r, wi, m, tid, c, k, n = 7;
     w   = wv->wc->get_w(wv->wc);
     k = wv->wc->get_k(wv->wc);
     float * cw = (float *)malloc(k * sizeof(float));
     float * eu = (float *)malloc(k * sizeof(float));
-    for (d = 0; d < wv->doc_size; d++){
+    while (n-- > 0) for (d = 0; d < wv->doc_size; d++){
         memset(cw, 0, sizeof(float) * k);
         ds = wv->roffs[d];
         de = wv->roffs[d + 1];
@@ -224,6 +225,7 @@ void wv_est(WV * wv){
                 }
             }
         }
+        progress(stderr, wv->doc_size, d + 2);
     }
 }
 
@@ -293,4 +295,16 @@ void wv_free(WV * wv){
         }
         free(wv);
     }
+}
+
+int wv_dsize(WV * wv){
+        return wv->doc_size;
+}
+
+int wv_vsize(WV * wv){
+        return wv->voc_size;
+}
+
+int wv_tsize(WV * wv){
+        return wv->tk_size;
 }

@@ -20,6 +20,7 @@ int main(int argc, char *argv[]){
     if(0 != wv_init(wv)){
         return -1;
     }
+    fprintf(stderr, "init done, doc_size: %d, voc_size: %d, tk_size: %d\n", wv_dsize(wv), wv_vsize(wv), wv_tsize(wv));
     wv_est(wv);
     wv_save(wv);
     wv_free(wv);

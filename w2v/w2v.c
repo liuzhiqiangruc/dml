@@ -366,6 +366,7 @@ int wv_pred(WV * wv, char * query, char * result){
     double *sc = (double*)calloc(v, sizeof(double));
     double *ps = (double*)calloc(v, sizeof(double));
     double min = -10e100;
+    string = trim(query, 3);
     while (NULL != (token = strsep(&string, "\t"))){
         for (i = 0; i < v; i++) if (0 == strcmp(wv->idm[i], token)){
             for(j = 0; j < k; j++){

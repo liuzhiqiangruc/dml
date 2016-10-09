@@ -13,11 +13,11 @@
 
 static void help(void){
     fprintf(stderr, "Command Line Usage: \n");
-    fprintf(stderr, "w2v -a [double] -k [int] -t [0|1] -w [int] -d [string] -o [string]\n");
+    fprintf(stderr, "w2v -a [double] -k [int] -t [0|1|2] -w [int] -d [string] -o [string]\n");
     fprintf(stderr, "    -a learning rate\n");
     fprintf(stderr, "    -k vector length\n");
     fprintf(stderr, "    -n iter number  \n");
-    fprintf(stderr, "    -t continue learn or not \n");
+    fprintf(stderr, "    -t 0:learn, 1:continue learn, 2: pred\n");
     fprintf(stderr, "    -w window size  \n");
     fprintf(stderr, "    -d input data   \n");
     fprintf(stderr, "    -o out    dir   \n");
@@ -59,7 +59,7 @@ static int set(void * wc, int argc, char * argv[]){
         }
         i += 1;
     }
-    if (NULL == d){
+    if (t < 2 && NULL == d){
         return -2;
     }
     if (w < 2){

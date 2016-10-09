@@ -4,7 +4,7 @@
  *   filename : w2v.c
  *   author   : liuzhiqiangruc@126.com
  *   date     : 2016-09-22
- *   info     : word2vec implementation of cbow using hsmax
+ *   info     : including train, continue train, predict
  * ======================================================== */
 #include <math.h>
 #include <stdio.h>
@@ -19,6 +19,7 @@
 #define KEY_SIZE 64
 #define LINE_LEN 1024
 #define MLEN     8192
+
 struct _w2v {
     int   voc_size;
     int   doc_size;
@@ -250,7 +251,7 @@ static void learn_cw(WV * wv, float * cw, float * de, int tk){
         for (t = 0; t < k; t++){
             loss += cw[t] * wv->neu1[st[s] * k + t];
         }
-        loss = 1 / (1 + exp(-loss));
+        loss = 1.0 / (1.0 + exp(-loss));
         loss = learn_rate * (sb[s] - loss);
         for (t = 0; t < k; t++){
             de[t] += loss * wv->neu1[st[s] * k + t];
@@ -321,6 +322,84 @@ void wv_est(WV * wv){
         }
         progress(stderr, wv->doc_size, d + 1);
     }
+}
+
+double wv_ps(WV * wv, int i, double * sc, double * cw){
+    int s = 0, t = 0, st[40] = {-1}, sb[40] = {-1};
+    double l = 0.0;
+    sb[t] = wv->b0[wv->indx[i]];
+    st[t] = wv->p0[wv->indx[i]];
+    while(-1 != st[t]){
+        s = t;
+        t = (t + 1) % 40;
+        st[t] = wv->p1[st[s]];
+        sb[t] = wv->b1[st[s]];
+    }
+    while (-1 != st[s]){
+        if (sb[s] == 1){
+            l += log(sc[st[s]]);
+        }
+        else {
+            l += log(1.0 - sc[st[s]]);
+        }
+        s -= 1;
+        s = s < 0 ? (s + 40) : s;
+    }
+    return l;
+}
+
+int wv_pred(WV * wv, char * query, char * result){
+    static int load = 0;
+    if (load == 0){
+        if (0 != wv_load_model(wv)){
+            fprintf(stderr, "can not load model, failed\n");
+            wv->wc->help();
+            return -1;
+        }
+        load = 1;
+    }
+    int i, j, c = 0;
+    int k = wv->wc->get_k(wv->wc);
+    int v = wv->voc_size;
+    char *string = NULL, *token = NULL;
+    double *cw = (double*)calloc(k, sizeof(double));
+    double *sc = (double*)calloc(v, sizeof(double));
+    double *ps = (double*)calloc(v, sizeof(double));
+    double min = -10e100;
+    while (NULL != (token = strsep(&string, "\t"))){
+        for (i = 0; i < v; i++) if (0 == strcmp(wv->idm[i], token)){
+            for(j = 0; j < k; j++){
+                cw[j] += wv->neu0[i * k + j];
+            }
+            c += 1;
+        }
+    }
+    if (c > 1){
+        for (j = 0; j < k; j++){
+            cw[j] /= c;
+        }
+    }
+    for (i = 0; i < v - 1; i++) {
+        for (j = 0; j < k; j++) {
+            sc[i] += cw[j] * wv->neu1[i * k + j];
+        }
+        sc[i] = 1.0 / (1.0 + exp(-sc[i]));
+    }
+    for (i = 0; i < v; i++){
+        ps[i] = wv_ps(wv, i, sc, cw);
+    }
+    j = 0;
+    for (i = 0; i < v; i++){
+        if (ps[i] > min){
+            j = i;
+            min = ps[i];
+        }
+    }
+    strncpy(result, wv->idm[j], KEY_SIZE - 1);
+    free(cw); cw = NULL;
+    free(sc); sc = NULL;
+    free(ps); ps = NULL;
+    return 0;
 }
 
 void wv_save(WV * wv){

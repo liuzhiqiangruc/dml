@@ -283,9 +283,10 @@ int wv_init(WV * wv){
 }
 
 void wv_est(WV * wv){
-    int w, d, id, ds, de, l, r, wi, m, tid, c, k, n = 7;
-    w   = wv->wc->get_w(wv->wc);
+    int w, d, id, ds, de, l, r, wi, m, tid, c, k, n;
+    w = wv->wc->get_w(wv->wc);
     k = wv->wc->get_k(wv->wc);
+    n = wv->wc->get_n(wv->wc);
     float * cw = (float *)malloc(k * sizeof(float));
     float * eu = (float *)malloc(k * sizeof(float));
     while (n-- > 0) for (d = 0; d < wv->doc_size; d++){

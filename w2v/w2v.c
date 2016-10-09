@@ -324,7 +324,7 @@ void wv_est(WV * wv){
     }
 }
 
-double wv_ps(WV * wv, int i, double * sc, double * cw){
+static double wv_ps(WV * wv, int i, double * sc, double * cw){
     int s = 0, t = 0, st[40] = {-1}, sb[40] = {-1};
     double l = 0.0;
     sb[t] = wv->b0[wv->indx[i]];

@@ -13,19 +13,20 @@
 
 static void help(void){
     fprintf(stderr, "Command Line Usage: \n");
-    fprintf(stderr, "w2v -a [double] -k [int] -w [int] -d [string] -o [string]\n");
+    fprintf(stderr, "w2v -a [double] -k [int] -t [0|1] -w [int] -d [string] -o [string]\n");
     fprintf(stderr, "    -a learning rate\n");
     fprintf(stderr, "    -k vector length\n");
+    fprintf(stderr, "    -t continue learn or not \n");
     fprintf(stderr, "    -w window size  \n");
     fprintf(stderr, "    -d input data   \n");
     fprintf(stderr, "    -o out    dir   \n");
 }
 
 static int set(void * wc, int argc, char * argv[]){
-    int k, w, i;
+    int k, w, i, t;
     double a;
     char *d, *o, *arg;
-    k = 20, w = 5;
+    k = 20, w = 5, t = 0;
     a = 0.025;
     d = NULL, o = ".";
     if ((argc & 1) == 0){
@@ -39,6 +40,9 @@ static int set(void * wc, int argc, char * argv[]){
         }
         else if (0 == strcmp(arg, "-k")){
             k = atoi(argv[++i]);
+        }
+        else if (0 == strcmp(arg, "-o")){
+            t = atoi(argv[++i]);
         }
         else if (0 == strcmp(arg, "-w")){
             w = atoi(argv[++i]);
@@ -59,6 +63,7 @@ static int set(void * wc, int argc, char * argv[]){
     }
     ((W2VConfig *)wc)->a = a;
     ((W2VConfig *)wc)->k = k;
+    ((W2VConfig *)wc)->t = t;
     ((W2VConfig *)wc)->w = w;
     ((W2VConfig *)wc)->d = d;
     ((W2VConfig *)wc)->o = o;
@@ -71,6 +76,10 @@ static void free_conf(void *wc){
 
 static double get_alpha(void *wc){
     return ((W2VConfig*)wc)->a;
+}
+
+static int get_t(void *wc){
+    return ((W2VConfig*)wc)->t;
 }
 
 static int get_k(void *wc){
@@ -96,6 +105,7 @@ W2VConfig * init_config(){
     wc->free       = free_conf;
     wc->get_alpha  = get_alpha;
     wc->get_k      = get_k;
+    wc->get_t      = get_t;
     wc->get_w      = get_w;
     wc->get_d      = get_d;
     wc->get_o      = get_o;

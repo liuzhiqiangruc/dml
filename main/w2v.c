@@ -13,7 +13,7 @@
 
 int main(int argc, char *argv[]){
     WV * wv = wv_create(argc, argv);
-    srand(time(NULL));
+    //srand(time(NULL));
     if (! wv){
         return -1;
     }

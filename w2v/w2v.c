@@ -16,6 +16,9 @@
 #include "repo.h"
 #include "w2v.h"
 
+#define KEY_SIZE 64
+#define LINE_LEN 1024
+#define MLEN     8192
 struct _w2v {
     int   voc_size;
     int   doc_size;
@@ -45,13 +48,13 @@ static void malloc_space(WV * wv){
     int k = wv->wc->get_k(wv->wc);
     wv->neu0   = (float*)calloc(v * k, sizeof(float));
     wv->neu1   = (float*)calloc(v * k, sizeof(float));
-    wv->b0     = (int *) calloc(v, sizeof(int));
-    wv->b1     = (int *) calloc(v, sizeof(int));
-    wv->p0     = (int *) calloc(v, sizeof(int));
-    wv->p1     = (int *) calloc(v, sizeof(int));
-    wv->indx   = (int *) calloc(v, sizeof(int));
-    wv->roffs  = (int *) calloc(r, sizeof(int));
-    wv->tokens = (int *) calloc(t, sizeof(int));
+    wv->b0     = (int *) calloc(v,     sizeof(int));
+    wv->b1     = (int *) calloc(v,     sizeof(int));
+    wv->p0     = (int *) calloc(v,     sizeof(int));
+    wv->p1     = (int *) calloc(v,     sizeof(int));
+    wv->indx   = (int *) calloc(v,     sizeof(int));
+    wv->roffs  = (int *) calloc(r,     sizeof(int));
+    wv->tokens = (int *) calloc(t,     sizeof(int));
     wv->idm    = (char(*)[KEY_SIZE])calloc(v, sizeof(char[KEY_SIZE]));
     i = v * k;
     while (i-- > 0){
@@ -97,17 +100,7 @@ inner_link:
     }
 }
 
-WV * wv_create(int argc, char * argv[]){
-    WV * wv = (WV*)calloc(1, sizeof(WV));
-    wv->wc = init_config();
-    if (0 != wv->wc->set(wv->wc, argc, argv)){
-        wv->wc->help();
-        return NULL;
-    }
-    return wv;
-}
-
-int wv_init(WV * wv) {
+static int wv_load_data(WV * wv) {
     FILE * fp = NULL;
     if (NULL == (fp = fopen(wv->wc->get_d(wv->wc), "r"))){
         fprintf(stderr, "can not open input file\n");
@@ -160,6 +153,87 @@ int wv_init(WV * wv) {
     return 0;
 }
 
+static int wv_load_model(WV * wv) {
+    int i, r, v = wv->voc_size, k = wv->wc->get_k(wv->wc);
+    char *outdir = wv->wc->get_o(wv->wc);
+    char *string = NULL, *token = NULL;
+    char outs[512] = {'\0'}, buf[MLEN] = {'\0'};
+    FILE * fp = NULL;
+    sprintf(outs, "%s/vectors", outdir);
+    if (NULL == (fp = fopen(outs, "r"))){
+        return -1;
+    }
+    if (v == 0){
+        while(NULL != fgets(buf, MLEN, fp)){
+            v += 1;
+        }
+        wv->voc_size = v;
+        rewind(fp);
+    }
+    if (!wv->neu0){
+        wv->neu0 = (float*)calloc(v * k, sizeof(float));
+    }
+    if (!wv->idm){
+        wv->idm = (char(*)[KEY_SIZE])calloc(v, sizeof(char[KEY_SIZE]));
+    }
+    i = r = 0;
+    while (NULL != fgets(buf, MLEN, fp)){
+        string = trim(buf, 3);
+        token = strsep(&string, "\t");
+        strncpy(wv->idm[r++], token, KEY_SIZE - 1);
+        while(NULL != (token = strsep(&string, "\t"))){
+            wv->neu0[i++] = atof(token);
+        }
+    }
+    fclose(fp);
+    sprintf(outs, "%s/noleaf", outdir);
+    if (NULL == (fp = fopen(outs, "r"))){
+        return -1;
+    }
+    if (!wv->neu1){
+        wv->neu1 = (float*)calloc(v * k, sizeof(float));
+    }
+    i = 0;
+    while (NULL != fgets(buf, MLEN, fp)){
+        string = trim(buf, 3);
+        while(NULL != (token = strsep(&string, "\t"))){
+            wv->neu1[i++] = atof(token);
+        }
+    }
+    fclose(fp);
+    sprintf(outs, "%s/index", outdir);
+    if (NULL == (fp = fopen(outs, "r"))){
+        return -1;
+    }
+    if (!wv->p0){
+        wv->p0     = (int *) calloc(v,     sizeof(int));
+    }
+    if (!wv->p1){
+        wv->p1     = (int *) calloc(v,     sizeof(int));
+    }
+    if (!wv->b0){
+        wv->b0     = (int *) calloc(v,     sizeof(int));
+    }
+    if (!wv->b1){
+        wv->b1     = (int *) calloc(v,     sizeof(int));
+    }
+    if (!wv->indx){
+        wv->indx   = (int *) calloc(v,     sizeof(int));
+    }
+    i = 0;
+    while(NULL != fgets(buf, MLEN, fp)){
+        string = trim(buf, 3);
+        wv->p0[i] = atoi(strsep(&string, "\t"));
+        wv->b0[i] = atoi(strsep(&string, "\t"));
+        wv->p1[i] = atoi(strsep(&string, "\t"));
+        wv->b1[i] = atoi(strsep(&string, "\t"));
+        wv->indx[i] = i;
+        i += 1;
+    }
+    fclose(fp);
+    return 0;
+}
+
 static void learn_cw(WV * wv, float * cw, float * de, int tk){
     int k = wv->wc->get_k(wv->wc);
     int s = 0, t = 0, st[40] = {-1}, sb[40] = {-1};
@@ -187,6 +261,25 @@ static void learn_cw(WV * wv, float * cw, float * de, int tk){
         s -= 1;
         s = s < 0 ? (s + 40) : s;
     }
+}
+
+WV * wv_create(int argc, char * argv[]){
+    WV * wv = (WV*)calloc(1, sizeof(WV));
+    wv->wc = init_config();
+    if (0 != wv->wc->set(wv->wc, argc, argv)){
+        wv->wc->help();
+        return NULL;
+    }
+    return wv;
+}
+
+int wv_init(WV * wv){
+    int c = wv_load_data(wv);
+    int t = wv->wc->get_t(wv->wc);
+    if (c == 0 && t == 1){
+        wv_load_model(wv);
+    }
+    return 0;
 }
 
 void wv_est(WV * wv){
@@ -320,13 +413,13 @@ void wv_free(WV * wv){
 }
 
 int wv_dsize(WV * wv){
-        return wv->doc_size;
+    return wv->doc_size;
 }
 
 int wv_vsize(WV * wv){
-        return wv->voc_size;
+    return wv->voc_size;
 }
 
 int wv_tsize(WV * wv){
-        return wv->tk_size;
+    return wv->tk_size;
 }

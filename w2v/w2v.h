@@ -10,9 +10,6 @@
 #ifndef _W2V_H
 #define _W2V_H
 
-#define KEY_SIZE 64
-#define LINE_LEN 1024
-
 typedef struct _w2v WV;
 
 WV * wv_create(int argc, char * argv[]);

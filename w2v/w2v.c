@@ -397,12 +397,13 @@ int wv_pred(WV * wv, char * query, char * result){
         id[c] = i;
         j = (j + 1) > 9 ? 9 : (j + 1);
     }
+    *result = 0;
     for (i = 0; i < j; i++){
-        strncpy(result, wv->idm[id[i]], strlen(wv->idm[id[i]]));
-        result[strlen(result)] = ',';
-        result += strlen(wv->idm[id[i]]) + 1;
+        sprintf(result, "%s,%s", result, wv->idm[id[i]]);
+//      strncpy(result, wv->idm[id[i]], strlen(wv->idm[id[i]]));
+//      result[strlen(result)] = ',';
+//      result += strlen(wv->idm[id[i]]) + 1;
     }
-    *(--result) = 0;
     free(cw); cw = NULL;
     free(sc); sc = NULL;
     return 0;

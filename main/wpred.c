@@ -21,13 +21,15 @@ int main(int argc, char *argv[]){
         return -1;
     }
 
+    fgets(query, 1024, stdin);
     while(!feof(stdin)){
-        fgets(query, 1024, stdin);
-        r = wv_pred(wv, query, resul);
+        memmove(resul, query, 1024);
+        r = wv_pred(wv, resul, resul);
         if (0 != r) break;
         if(strlen(resul) > 0){
-            printf("%s\t%s\n", query, resul);
+            printf("%s: %s\n", query, resul);
         }
+        fgets(query, 1024, stdin);
     }
     wv_free(wv);
     wv = NULL;

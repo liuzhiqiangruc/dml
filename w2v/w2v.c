@@ -19,6 +19,7 @@
 #define KEY_SIZE 64
 #define LINE_LEN 1024
 #define MLEN     8192
+#define MTDEPT   40
 
 struct _w2v {
     int   voc_size;
@@ -237,30 +238,28 @@ static int wv_load_model(WV * wv) {
 
 static void learn_cw(WV * wv, float * cw, float * de, int tk){
     int k = wv->wc->get_k(wv->wc);
-    int s = 0, t = 0, st[40] = {-1}, sb[40] = {-1};
+    int s = 0, t = 0, st[MTDEPT] = {-1}, sb[MTDEPT] = {-1};
     double loss = 0.0, learn_rate = wv->wc->get_alpha(wv->wc);
     sb[t] = wv->b0[wv->indx[tk]];
     st[t] = wv->p0[wv->indx[tk]];
     while (-1 != st[t]){
         s = t;
-        t = (t + 1) % 40;
+        t = (t + 1) % MTDEPT;
         st[t] = wv->p1[st[s]];
         sb[t] = wv->b1[st[s]];
     }
     while (-1 != st[s]){
+        loss = 0.0;
         for (t = 0; t < k; t++){
             loss += cw[t] * wv->neu1[st[s] * k + t];
         }
-        loss = 1.0 / (1.0 + exp(-loss));
-        loss = learn_rate * (sb[s] - loss);
-        for (t = 0; t < k; t++){
+        loss = learn_rate * (sb[s] - 1.0 / (1.0 + exp(-loss)));
+        if (fabs(loss) > 1e-9) for (t = 0; t < k; t++){
             de[t] += loss * wv->neu1[st[s] * k + t];
-        }
-        for (t = 0; t < k; t++){
             wv->neu1[st[s] * k + t] += loss * cw[t];
         }
         s -= 1;
-        s = s < 0 ? (s + 40) : s;
+        s = s < 0 ? (s + MTDEPT) : s;
     }
 }
 
@@ -307,7 +306,7 @@ void wv_est(WV * wv){
                 }
                 c += 1;
             }
-            for (m = 0; m < k; m++){
+            if (c > 1) for (m = 0; m < k; m++){
                 cw[m] /= c;
             }
             tid = wv->tokens[id];
@@ -322,28 +321,25 @@ void wv_est(WV * wv){
         }
         progress(stderr, wv->doc_size, d + 1);
     }
+    free(cw); cw = NULL;
+    free(eu); eu = NULL;
 }
 
 static double wv_ps(WV * wv, int i, double * sc, double * cw){
-    int s = 0, t = 0, st[40] = {-1}, sb[40] = {-1};
+    int s = 0, t = 0, st[MTDEPT] = {-1}, sb[MTDEPT] = {-1};
     double l = 0.0;
     sb[t] = wv->b0[wv->indx[i]];
     st[t] = wv->p0[wv->indx[i]];
     while(-1 != st[t]){
         s = t;
-        t = (t + 1) % 40;
+        t = (t + 1) % MTDEPT;
         st[t] = wv->p1[st[s]];
         sb[t] = wv->b1[st[s]];
     }
     while (-1 != st[s]){
-        if (sb[s] == 1){
-            l += log(sc[st[s]]);
-        }
-        else {
-            l += log(1.0 - sc[st[s]]);
-        }
+        l = l + ((1 == sb[s]) ? log(sc[st[s]]) : log(1.0 - sc[st[s]]));
         s -= 1;
-        s = s < 0 ? (s + 40) : s;
+        s = s < 0 ? (s + MTDEPT) : s;
     }
     return l;
 }
@@ -364,8 +360,9 @@ int wv_pred(WV * wv, char * query, char * result){
     char *string = NULL, *token = NULL;
     double *cw = (double*)calloc(k, sizeof(double));
     double *sc = (double*)calloc(v, sizeof(double));
-    double *ps = (double*)calloc(v, sizeof(double));
-    double min = -10e100;
+    double ps[10] = {0};
+    int    id[10] = {0};
+    double tps = 0.0;
     string = trim(query, 3);
     while (NULL != (token = strsep(&string, "\t"))){
         for (i = 0; i < v; i++) if (0 == strcmp(wv->idm[i], token)){
@@ -375,10 +372,8 @@ int wv_pred(WV * wv, char * query, char * result){
             c += 1;
         }
     }
-    if (c > 1){
-        for (j = 0; j < k; j++){
-            cw[j] /= c;
-        }
+    if (c > 1) for (j = 0; j < k; j++){
+        cw[j] /= c;
     }
     for (i = 0; i < v - 1; i++) {
         for (j = 0; j < k; j++) {
@@ -386,20 +381,30 @@ int wv_pred(WV * wv, char * query, char * result){
         }
         sc[i] = 1.0 / (1.0 + exp(-sc[i]));
     }
-    for (i = 0; i < v; i++){
-        ps[i] = wv_ps(wv, i, sc, cw);
-    }
     j = 0;
-    for (i = 0; i < v; i++){
-        if (ps[i] > min){
-            j = i;
-            min = ps[i];
+    ps[j] = wv_ps(wv, 0, sc, cw);
+    id[j] = j;
+    j += 1;
+    for (i = 1; i < v; i++){
+        tps = wv_ps(wv, i, sc, cw);
+        c = j;
+        while(c > 0 && ps[c - 1] < tps){
+            ps[c] = ps[c - 1];
+            id[c] = id[c - 1];
+            c -= 1;
         }
+        ps[c] = tps;
+        id[c] = i;
+        j = (j + 1) > 9 ? 9 : (j + 1);
     }
-    strncpy(result, wv->idm[j], KEY_SIZE - 1);
+    for (i = 0; i < j; i++){
+        strncpy(result, wv->idm[id[i]], KEY_SIZE - 1);
+        result[strlen(result)] = ',';
+        result += strlen(result) + 1;
+    }
+    *(--result) = 0;
     free(cw); cw = NULL;
     free(sc); sc = NULL;
-    free(ps); ps = NULL;
     return 0;
 }
 

@@ -398,9 +398,9 @@ int wv_pred(WV * wv, char * query, char * result){
         j = (j + 1) > 9 ? 9 : (j + 1);
     }
     for (i = 0; i < j; i++){
-        strncpy(result, wv->idm[id[i]], KEY_SIZE - 1);
+        strncpy(result, wv->idm[id[i]], strlen(wv->idm[id[i]]));
         result[strlen(result)] = ',';
-        result += strlen(result) + 1;
+        result += strlen(wv->idm[id[i]]) + 1;
     }
     *(--result) = 0;
     free(cw); cw = NULL;

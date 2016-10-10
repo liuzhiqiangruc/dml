@@ -400,9 +400,6 @@ int wv_pred(WV * wv, char * query, char * result){
     *result = 0;
     for (i = 0; i < j; i++){
         sprintf(result, "%s,%s", result, wv->idm[id[i]]);
-//      strncpy(result, wv->idm[id[i]], strlen(wv->idm[id[i]]));
-//      result[strlen(result)] = ',';
-//      result += strlen(wv->idm[id[i]]) + 1;
     }
     free(cw); cw = NULL;
     free(sc); sc = NULL;

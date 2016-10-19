@@ -3,8 +3,8 @@
  *   
  *   filename : w2v.c
  *   author   : liuzhiqiangruc@126.com
- *   date     : 2016-09-22
- *   info     : including train, continue train, predict
+ *   date     : 2016-10-18
+ *   info     : 
  * ======================================================== */
 #include <math.h>
 #include <stdio.h>
@@ -22,18 +22,14 @@
 #define MTDEPT   40
 
 struct _w2v {
-    int   voc_size;
-    int   doc_size;
-    int   tk_size;
-    int   * roffs;
-    int   * tokens;
-    int   * b0;
-    int   * b1;
-    int   * p0;
-    int   * p1;
-    int   * indx;
-    float * neu0;
-    float * neu1;
+    int   v_size;
+    int   d_size;
+    int   t_size;
+    int   * roffs;    // doc offset
+    int   * tokens;   // data
+    int  (*hbt)[5];   // {p0, b0, p1, b1, indx}
+    float * neu0;     // word vec
+    float * neu1;     // hsoftmax vec
     char (*idm)[KEY_SIZE];
     W2VConfig * wc;
 };
@@ -46,17 +42,13 @@ static int wv_cmp(const void * a1, const void * a2){
 }
 
 static void malloc_space(WV * wv){
-    int i, v = wv->voc_size, r = wv->doc_size + 1, t = wv->tk_size;
+    int i, v = wv->v_size, r = wv->d_size + 1, t = wv->t_size;
     int k = wv->wc->get_k(wv->wc);
-    wv->neu0   = (float*)calloc(v * k, sizeof(float));
-    wv->neu1   = (float*)calloc(v * k, sizeof(float));
-    wv->b0     = (int *) calloc(v,     sizeof(int));
-    wv->b1     = (int *) calloc(v,     sizeof(int));
-    wv->p0     = (int *) calloc(v,     sizeof(int));
-    wv->p1     = (int *) calloc(v,     sizeof(int));
-    wv->indx   = (int *) calloc(v,     sizeof(int));
-    wv->roffs  = (int *) calloc(r,     sizeof(int));
-    wv->tokens = (int *) calloc(t,     sizeof(int));
+    wv->neu0   = (float*)    calloc(v * k, sizeof(float));
+    wv->neu1   = (float*)    calloc(v * k, sizeof(float));
+    wv->hbt    = (int(*)[5]) calloc(v,     sizeof(int[5]));
+    wv->roffs  = (int *)     calloc(r,     sizeof(int));
+    wv->tokens = (int *)     calloc(t,     sizeof(int));
     wv->idm    = (char(*)[KEY_SIZE])calloc(v, sizeof(char[KEY_SIZE]));
     i = v * k;
     while (i-- > 0){
@@ -76,9 +68,9 @@ static void build_tree(WV * wv, int (*wc)[2], int n){
                 goto inner_link;
             }
             inner_cnt[ipi] += wc[p][1];
-            wv->p0[p] = ipi;
+            wv->hbt[p][0] = ipi;
             if (t){
-                wv->b0[p] = 1;
+                wv->hbt[p][1] = 1;
                 ipi += 1;
             }
             p -= 1;
@@ -86,19 +78,19 @@ static void build_tree(WV * wv, int (*wc)[2], int n){
         else{
 inner_link:
             inner_cnt[ipi] += inner_cnt[ip];
-            wv->p1[ip] = ipi;
+            wv->hbt[ip][2] = ipi;
             if (t){
-                wv->b1[ip] = 1;
+                wv->hbt[ip][3] = 1;
                 ipi += 1;
             }
             ip += 1;
         }
         t ^= 1;
     }
-    wv->p1[ipi - 1] = -1; // root has no parent
+    wv->hbt[ipi - 1][2] = -1; // root has no parent
     free(inner_cnt); inner_cnt = NULL;
     for (t = 0; t < n; t++){
-        wv->indx[wc[t][0]] = t;
+        wv->hbt[wc[t][0]][4] = t;
     }
 }
 
@@ -131,11 +123,11 @@ static int wv_load_data(WV * wv) {
         }
         dsize += 1;
     }
-    wv->voc_size = hash_cnt(whs);
-    wv->doc_size = dsize;
-    wv->tk_size  = tk;
+    wv->v_size = hash_cnt(whs);
+    wv->d_size = dsize;
+    wv->t_size = tk;
     malloc_space(wv);
-    build_tree(wv, fea_cnt, wv->voc_size);
+    build_tree(wv, fea_cnt, wv->v_size);
     free(fea_cnt); fea_cnt = NULL;
     rewind(fp);
     dsize = tk = 0;
@@ -156,7 +148,7 @@ static int wv_load_data(WV * wv) {
 }
 
 static int wv_load_model(WV * wv) {
-    int i, r, v = wv->voc_size, k = wv->wc->get_k(wv->wc);
+    int i, r, v = wv->v_size, k = wv->wc->get_k(wv->wc);
     char *outdir = wv->wc->get_o(wv->wc);
     char *string = NULL, *token = NULL;
     char outs[512] = {'\0'}, buf[MLEN] = {'\0'};
@@ -169,7 +161,7 @@ static int wv_load_model(WV * wv) {
         while(NULL != fgets(buf, MLEN, fp)){
             v += 1;
         }
-        wv->voc_size = v;
+        wv->v_size = v;
         rewind(fp);
     }
     if (!wv->neu0){
@@ -207,29 +199,17 @@ static int wv_load_model(WV * wv) {
     if (NULL == (fp = fopen(outs, "r"))){
         return -1;
     }
-    if (!wv->p0){
-        wv->p0     = (int *) calloc(v,     sizeof(int));
-    }
-    if (!wv->p1){
-        wv->p1     = (int *) calloc(v,     sizeof(int));
-    }
-    if (!wv->b0){
-        wv->b0     = (int *) calloc(v,     sizeof(int));
-    }
-    if (!wv->b1){
-        wv->b1     = (int *) calloc(v,     sizeof(int));
-    }
-    if (!wv->indx){
-        wv->indx   = (int *) calloc(v,     sizeof(int));
+    if (!wv->hbt){
+        wv->hbt = (int(*)[5]) calloc(v, sizeof(int[5]));
     }
     i = 0;
     while(NULL != fgets(buf, MLEN, fp)){
         string = trim(buf, 3);
-        wv->p0[i] = atoi(strsep(&string, "\t"));
-        wv->b0[i] = atoi(strsep(&string, "\t"));
-        wv->p1[i] = atoi(strsep(&string, "\t"));
-        wv->b1[i] = atoi(strsep(&string, "\t"));
-        wv->indx[i] = i;
+        wv->hbt[i][0] = atoi(strsep(&string, "\t"));
+        wv->hbt[i][1] = atoi(strsep(&string, "\t"));
+        wv->hbt[i][2] = atoi(strsep(&string, "\t"));
+        wv->hbt[i][3] = atoi(strsep(&string, "\t"));
+        wv->hbt[i][4] = i;
         i += 1;
     }
     fclose(fp);
@@ -240,13 +220,13 @@ static void learn_cw(WV * wv, float * cw, float * de, int tk){
     int k = wv->wc->get_k(wv->wc);
     int s = 0, t = 0, st[MTDEPT] = {-1}, sb[MTDEPT] = {-1};
     double loss = 0.0, learn_rate = wv->wc->get_alpha(wv->wc);
-    sb[t] = wv->b0[wv->indx[tk]];
-    st[t] = wv->p0[wv->indx[tk]];
+    st[t] = wv->hbt[wv->hbt[tk][4]][0];
+    sb[t] = wv->hbt[wv->hbt[tk][4]][1];
     while (-1 != st[t]){
         s = t;
         t = (t + 1) % MTDEPT;
-        st[t] = wv->p1[st[s]];
-        sb[t] = wv->b1[st[s]];
+        st[t] = wv->hbt[st[s]][2];
+        sb[t] = wv->hbt[st[s]][3];
     }
     while (-1 != st[s]){
         loss = 0.0;
@@ -289,7 +269,7 @@ void wv_est(WV * wv){
     n = wv->wc->get_n(wv->wc);
     float * cw = (float *)malloc(k * sizeof(float));
     float * eu = (float *)malloc(k * sizeof(float));
-    while (n-- > 0) for (d = 0; d < wv->doc_size; d++){
+    while (n-- > 0) for (d = 0; d < wv->d_size; d++){
         memset(cw, 0, sizeof(float) * k);
         ds = wv->roffs[d];
         de = wv->roffs[d + 1];
@@ -319,7 +299,7 @@ void wv_est(WV * wv){
                 }
             }
         }
-        progress(stderr, wv->doc_size, d + 1);
+        progress(stderr, wv->d_size, d + 1);
     }
     free(cw); cw = NULL;
     free(eu); eu = NULL;
@@ -328,13 +308,13 @@ void wv_est(WV * wv){
 static double wv_ps(WV * wv, int i, double * sc, double * cw){
     int s = 0, t = 0, st[MTDEPT] = {-1}, sb[MTDEPT] = {-1};
     double l = 0.0;
-    sb[t] = wv->b0[wv->indx[i]];
-    st[t] = wv->p0[wv->indx[i]];
+    st[t] = wv->hbt[wv->hbt[i][4]][0];
+    sb[t] = wv->hbt[wv->hbt[i][4]][1];
     while(-1 != st[t]){
         s = t;
         t = (t + 1) % MTDEPT;
-        st[t] = wv->p1[st[s]];
-        sb[t] = wv->b1[st[s]];
+        st[t] = wv->hbt[st[s]][2];
+        sb[t] = wv->hbt[st[s]][3];
     }
     while (-1 != st[s]){
         l = l + ((1 == sb[s]) ? log(sc[st[s]]) : log(1.0 - sc[st[s]]));
@@ -356,7 +336,7 @@ int wv_pred(WV * wv, char * query, char * result){
     }
     int i, j, c = 0;
     int k = wv->wc->get_k(wv->wc);
-    int v = wv->voc_size;
+    int v = wv->v_size;
     char *string = NULL, *token = NULL;
     double *cw = (double*)calloc(k, sizeof(double));
     double *sc = (double*)calloc(v, sizeof(double));
@@ -409,7 +389,7 @@ int wv_pred(WV * wv, char * query, char * result){
 void wv_save(WV * wv){
     char outf[512] = {'\0'};
     FILE * ofp = NULL;
-    int i, t, v = wv->voc_size, k = wv->wc->get_k(wv->wc);
+    int i, t, v = wv->v_size, k = wv->wc->get_k(wv->wc);
     sprintf(outf, "%s/vectors", wv->wc->get_o(wv->wc));
     if (NULL == (ofp = fopen(outf, "w"))){
         return;
@@ -438,10 +418,11 @@ void wv_save(WV * wv){
         return;
     }
     for (i = 0; i < v; i++){
-        fprintf(ofp, "%d\t%d\t%d\t%d\n"    \
-                   , wv->p0[wv->indx[i]]   \
-                   , wv->b0[wv->indx[i]]   \
-                   , wv->p1[i], wv->b1[i]);
+        fprintf(ofp, "%d\t%d\t%d\t%d\n"           \
+                   , wv->hbt[wv->hbt[i][4]][0]    \
+                   , wv->hbt[wv->hbt[i][4]][1]    \
+                   , wv->hbt[wv->hbt[i][4]][2]    \
+                   , wv->hbt[wv->hbt[i][4]][3]);
     }
     fclose(ofp);
 }
@@ -456,25 +437,9 @@ void wv_free(WV * wv){
             free(wv->tokens);
             wv->tokens = NULL;
         }
-        if (wv->b0){
-            free(wv->b0);
-            wv->b0 = NULL;
-        }
-        if (wv->b1){
-            free(wv->b1);
-            wv->b1 = NULL;
-        }
-        if (wv->p0){
-            free(wv->p0);
-            wv->p1 = NULL;
-        }
-        if (wv->p1){
-            free(wv->p1);
-            wv->p1 = NULL;
-        }
-        if (wv->indx){
-            free(wv->indx);
-            wv->indx = NULL;
+        if (wv->hbt){
+            free(wv->hbt);
+            wv->hbt = NULL;
         }
         if (wv->neu0){
             free(wv->neu0);
@@ -497,13 +462,13 @@ void wv_free(WV * wv){
 }
 
 int wv_dsize(WV * wv){
-    return wv->doc_size;
+    return wv->d_size;
 }
 
 int wv_vsize(WV * wv){
-    return wv->voc_size;
+    return wv->v_size;
 }
 
 int wv_tsize(WV * wv){
-    return wv->tk_size;
+    return wv->t_size;
 }

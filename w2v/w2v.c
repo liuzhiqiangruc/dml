@@ -421,8 +421,7 @@ void wv_save(WV * wv){
         fprintf(ofp, "%d\t%d\t%d\t%d\n"           \
                    , wv->hbt[wv->hbt[i][4]][0]    \
                    , wv->hbt[wv->hbt[i][4]][1]    \
-                   , wv->hbt[wv->hbt[i][4]][2]    \
-                   , wv->hbt[wv->hbt[i][4]][3]);
+                   , wv->hbt[i][2], wv->hbt[i][3]);
     }
     fclose(ofp);
 }

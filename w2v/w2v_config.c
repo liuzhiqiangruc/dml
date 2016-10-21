@@ -13,7 +13,7 @@
 
 static void help(void){
     fprintf(stderr, "Command Line Usage: \n");
-    fprintf(stderr, "w2v -a [double] -k [int] -t [0|1|2] -w [int] -d [string] -o [string]\n");
+    fprintf(stderr, "w2v -a [double] -k [int] -n [int] -t [0|1|2] -w [int] -d [string] -o [string]\n");
     fprintf(stderr, "    -a learning rate\n");
     fprintf(stderr, "    -k vector length\n");
     fprintf(stderr, "    -n iter number  \n");

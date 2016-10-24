@@ -218,8 +218,10 @@ static int wv_load_model(WV * wv) {
 
 static void learn_cw(WV * wv, float * cw, float * de, int tk){
     int k = wv->wc->get_k(wv->wc);
-    int s = 0, t = 0, st[MTDEPT] = {-1}, sb[MTDEPT] = {-1};
+    int s = 0, t = 0, st[MTDEPT], sb[MTDEPT];
     double loss = 0.0, learn_rate = wv->wc->get_alpha(wv->wc);
+    memset(st, -1, sizeof(int) * MTDEPT);
+    memset(sb, -1, sizeof(int) * MTDEPT);
     st[t] = wv->hbt[wv->hbt[tk][4]][0];
     sb[t] = wv->hbt[wv->hbt[tk][4]][1];
     while (-1 != st[t]){

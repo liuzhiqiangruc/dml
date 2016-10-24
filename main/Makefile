@@ -8,11 +8,15 @@ CC = gcc -std=c99 -g
 CFBASE = -Wall -pedantic -pipe
 CFLAGS = $(CFBASE) -DNDEBUG -DNPRINT -O3 -I$(INC)
 
-PRGS   = lr gblr k2d lda hlda xlda w2v wpred
+PRGS   = lr gblr k2d lda hlda xlda w2v wpred d2v
 
 all : $(PRGS)
 
 w2v.o : w2v.c
+	$(CC) $(CFLAGS) -c $^ -o $@
+
+
+d2v.o : d2v.c
 	$(CC) $(CFLAGS) -c $^ -o $@
 
 wpred.o : wpred.c
@@ -32,6 +36,9 @@ k2d.o : k2d.c
 
 w2v : w2v.o
 	$(CC) -L$(LIB) $^ -lw2vs -lm -o $@
+
+d2v : d2v.o
+	$(CC) -L$(LIB) $^ -ld2vs -lm -o $@
 
 wpred : wpred.o
 	$(CC) -L$(LIB) $^ -lw2vs -lm -o $@

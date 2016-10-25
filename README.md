@@ -1,14 +1,14 @@
 DML
 ==
 
-机器学习算法库，主要涉及：分类、回归、聚类(GMM)、主题模型、词向量、时间序列分析等方面。
+机器学习算法库，主要涉及：分类、回归、聚类(GMM)、主题模型、词(文档)向量、时间序列分析等方面。
 
 ###目前提供的binary包括：
 
 * topic model (`lda`,`hlda`,`xlda`)  
 * logistic regression(`lr`) 
 * gradient boosting decision tree(`gblr`) 
-* word2vec(`w2v`)
+* word2vec(`w2v`), doc2vec(`d2v`)
 * clustering(`k2d`)
 * ...
 

@@ -148,12 +148,12 @@ static int wv_load_data(WV * wv) {
 }
 
 static int wv_load_model(WV * wv) {
-    int i, r, v = wv->v_size, k = wv->wc->get_k(wv->wc);
+    int i, v = wv->v_size, k = wv->wc->get_k(wv->wc);
     char *outdir = wv->wc->get_o(wv->wc);
     char *string = NULL, *token = NULL;
     char outs[512] = {'\0'}, buf[MLEN] = {'\0'};
     FILE * fp = NULL;
-    sprintf(outs, "%s/vectors", outdir);
+    sprintf(outs, "%s/noleaf", outdir);
     if (NULL == (fp = fopen(outs, "r"))){
         return -1;
     }
@@ -163,26 +163,6 @@ static int wv_load_model(WV * wv) {
         }
         wv->v_size = v;
         rewind(fp);
-    }
-    if (!wv->neu0){
-        wv->neu0 = (float*)calloc(v * k, sizeof(float));
-    }
-    if (!wv->idm){
-        wv->idm = (char(*)[KEY_SIZE])calloc(v, sizeof(char[KEY_SIZE]));
-    }
-    i = r = 0;
-    while (NULL != fgets(buf, MLEN, fp)){
-        string = trim(buf, 3);
-        token = strsep(&string, "\t");
-        strncpy(wv->idm[r++], token, KEY_SIZE - 1);
-        while(NULL != (token = strsep(&string, "\t"))){
-            wv->neu0[i++] = atof(token);
-        }
-    }
-    fclose(fp);
-    sprintf(outs, "%s/noleaf", outdir);
-    if (NULL == (fp = fopen(outs, "r"))){
-        return -1;
     }
     if (!wv->neu1){
         wv->neu1 = (float*)calloc(v * k, sizeof(float));
@@ -199,18 +179,38 @@ static int wv_load_model(WV * wv) {
     if (NULL == (fp = fopen(outs, "r"))){
         return -1;
     }
+    if (!wv->idm){
+        wv->idm = (char(*)[KEY_SIZE])calloc(v, sizeof(char[KEY_SIZE]));
+    }
     if (!wv->hbt){
         wv->hbt = (int(*)[5]) calloc(v, sizeof(int[5]));
     }
     i = 0;
     while(NULL != fgets(buf, MLEN, fp)){
         string = trim(buf, 3);
+        token = strsep(&string, "\t");
+        strncpy(wv->idm[i], token, KEY_SIZE - 1);
         wv->hbt[i][0] = atoi(strsep(&string, "\t"));
         wv->hbt[i][1] = atoi(strsep(&string, "\t"));
         wv->hbt[i][2] = atoi(strsep(&string, "\t"));
         wv->hbt[i][3] = atoi(strsep(&string, "\t"));
         wv->hbt[i][4] = i;
         i += 1;
+    }
+    fclose(fp);
+    sprintf(outs, "%s/vectors", outdir);
+    if (NULL == (fp = fopen(outs, "r"))){
+        return -1;
+    }
+    if (!wv->neu0){
+        wv->neu0 = (float*)calloc(v * k, sizeof(float));
+    }
+    i = 0;
+    while (NULL != fgets(buf, MLEN, fp)){
+        string = trim(buf, 3);
+        while(NULL != (token = strsep(&string, "\t"))){
+            wv->neu0[i++] = atof(token);
+        }
     }
     fclose(fp);
     return 0;
@@ -397,8 +397,8 @@ void wv_save(WV * wv){
         return;
     }
     for (i = 0; i < v; i++){
-        fprintf(ofp, "%s", wv->idm[i]);
-        for (t = 0; t < k; t++){
+        fprintf(ofp, "%.3f", wv->neu0[i * k]);
+        for (t = 1; t < k; t++){
             fprintf(ofp, "\t%.3f", wv->neu0[i * k + t]);
         }
         fprintf(ofp, "\n");
@@ -409,8 +409,9 @@ void wv_save(WV * wv){
         return;
     }
     for (i = 0; i < v; i++){
-        for (t = 0; t < k; t++){
-            fprintf(ofp, "%.3f\t", wv->neu1[i * k + t]);
+        fprintf(ofp, "%.3f", wv->neu1[i * k]);
+        for (t = 1; t < k; t++){
+            fprintf(ofp, "\t%.3f", wv->neu1[i * k + t]);
         }
         fprintf(ofp, "\n");
     }
@@ -420,7 +421,8 @@ void wv_save(WV * wv){
         return;
     }
     for (i = 0; i < v; i++){
-        fprintf(ofp, "%d\t%d\t%d\t%d\n"           \
+        fprintf(ofp, "%s\t%d\t%d\t%d\t%d\n"       \
+                   , wv->idm[i]                   \
                    , wv->hbt[wv->hbt[i][4]][0]    \
                    , wv->hbt[wv->hbt[i][4]][1]    \
                    , wv->hbt[i][2], wv->hbt[i][3]);

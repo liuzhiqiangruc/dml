@@ -153,28 +153,6 @@ static int dv_load_model(DV * dv) {
     char *string = NULL, *token = NULL;
     char outs[512] = {'\0'}, buf[MLEN] = {'\0'};
     FILE * fp = NULL;
-    sprintf(outs, "%s/dvectors", outdir);
-    if (NULL == (fp = fopen(outs, "r"))){
-        return -1;
-    }
-    if (r == 0){
-        while(NULL != fgets(buf, MLEN, fp)){
-            r += 1;
-        }
-        dv->d_size = r;
-        rewind(fp);
-    }
-    if (!dv->neu0){
-        dv->neu0 = (float*)calloc(r * k, sizeof(float));
-    }
-    i = 0;
-    while (NULL != fgets(buf, MLEN, fp)){
-        string = trim(buf, 3);
-        while(NULL != (token = strsep(&string, "\t"))){
-            dv->neu0[i++] = atof(token);
-        }
-    }
-    fclose(fp);
     sprintf(outs, "%s/noleaf", outdir);
     if (NULL == (fp = fopen(outs, "r"))){
         return -1;
@@ -218,6 +196,28 @@ static int dv_load_model(DV * dv) {
         dv->hbt[i][3] = atoi(strsep(&string, "\t"));
         dv->hbt[i][4] = i;
         i += 1;
+    }
+    fclose(fp);
+    sprintf(outs, "%s/dvectors", outdir);
+    if (NULL == (fp = fopen(outs, "r"))){
+        return -1;
+    }
+    if (r == 0){
+        while(NULL != fgets(buf, MLEN, fp)){
+            r += 1;
+        }
+        dv->d_size = r;
+        rewind(fp);
+    }
+    if (!dv->neu0){
+        dv->neu0 = (float*)calloc(r * k, sizeof(float));
+    }
+    i = 0;
+    while (NULL != fgets(buf, MLEN, fp)){
+        string = trim(buf, 3);
+        while(NULL != (token = strsep(&string, "\t"))){
+            dv->neu0[i++] = atof(token);
+        }
     }
     fclose(fp);
     return 0;
@@ -266,7 +266,7 @@ DV * dv_create(int argc, char * argv[]){
 int dv_init(DV * dv){
     int c = dv_load_data(dv);
     int t = dv->dc->get_t(dv->dc);
-    if (c == 0 && t == 1){
+    if (c == 0 && t > 0){
         dv_load_model(dv);
     }
     return 0;

@@ -23,12 +23,12 @@ D2V * d2v_create(int argc, char * argv[]){
 }
 
 int d2v_init(D2V * d2v){
-    int i, k = d2v->dc->get_k(d2v->dc);
+    int i, k = d2v->dc->get_k(d2v->dc), t = d2v->dc->get_t(d2v->dc);
     d2v->ds          = tsd_load(d2v->dc->get_d(d2v->dc));
     d2v->model       = (Vec*)calloc(1, sizeof(Vec));
     d2v->model->k    = k;
     d2v->model->t    = 0;
-    if (d2v->dc->get_t(d2v->dc) == 2){
+    if (t == 2){
         d2v->model->t = 1;
     }
     d2v->model->hbt  = (int(*)[5])calloc(d2v->ds->v, sizeof(int[5]));
@@ -38,6 +38,9 @@ int d2v_init(D2V * d2v){
     i = d2v->ds->d * k;
     while (i-- > 0){
         d2v->model->neu0[i] = ((rand() + 0.1) / (RAND_MAX + 0.1) - 0.5) / k;
+    }
+    if (t > 0){
+        vec_load_tree(d2v->model, d2v->ds, d2v->dc->get_o(d2v->dc), "dvector");
     }
     return 0;
 }

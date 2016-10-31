@@ -23,7 +23,7 @@ W2V * w2v_create(int argc, char * argv[]){
 }
 
 int w2v_init(W2V * w2v){
-    int i, k = w2v->wc->get_k(w2v->wc);
+    int i, k = w2v->wc->get_k(w2v->wc), t = w2v->wc->get_t(w2v->wc);
     w2v->ds          = tsd_load(w2v->wc->get_d(w2v->wc));
     w2v->model       = (Vec*)calloc(1, sizeof(Vec));
     w2v->model->k    = k;
@@ -35,6 +35,9 @@ int w2v_init(W2V * w2v){
     i = w2v->ds->v * k;
     while (i-- > 0){
         w2v->model->neu0[i] = ((rand() + 0.1) / (RAND_MAX + 0.1) - 0.5) / k;
+    }
+    if (t == 1){
+        vec_load_tree(w2v->model, w2v->ds, w2v->wc->get_o(w2v->wc), "vector");
     }
     return 0;
 }
@@ -114,7 +117,6 @@ void w2v_free(W2V * w2v){
     w2v->ds = NULL;
     free(w2v);
 }
-
 
 int   w2v_dsize (W2V * w2v){
     return w2v->ds->d;

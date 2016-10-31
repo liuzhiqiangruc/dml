@@ -10,9 +10,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "str.h"
 #include "vec.h"
 
 #define MTDEPT 40
+#define MLEN   8192
 
 static int vec_cmp(const void *a, const void *b){
     int c = ((int*)a)[1] - ((int*)b)[1];
@@ -78,7 +80,7 @@ void vec_learn_tree(Vec * vec, float * cw, float * de, int vid, double learn_rat
         loss = learn_rate * (sb[s] - 1.0 / (1.0 + exp(-loss)));
         if (fabs(loss) > 1e-9) for (t = 0; t < k; t++){
             de[t] += loss * vec->neu1[st[s] * k + t];
-            if (t == 0){
+            if (vec->t == 0){
                 vec->neu1[st[s] * k + t] += loss * cw[t];
             }
         }
@@ -113,6 +115,79 @@ void vec_save_tree(Vec * vec, TSD * ds, char * outdir){
                   , vec->hbt[vec->hbt[i][4]][0]     \
                   , vec->hbt[vec->hbt[i][4]][1]     \
                   , vec->hbt[i][2], vec->hbt[i][3]);
+    }
+    fclose(fp);
+}
+
+void vec_load_tree(Vec * vec, TSD * ds, char * outdir, char * leaff){
+    int v = ds->v, i;
+    char *string = NULL, *token = NULL;
+    char out[512] = {0};
+    char buf[MLEN] = {0};
+    FILE * fp = NULL;
+    sprintf(out, "%s/index", outdir);
+    if (NULL == (fp = fopen(out, "r"))){
+        return ;
+    }
+    if (v == 0){
+        while (NULL != fgets(buf, MLEN, fp)){
+            v += 1;
+        }
+        ds->v = v;
+        rewind(fp);
+    }
+    if (!vec->hbt){
+        vec->hbt = (int(*)[5])calloc(v, sizeof(int[5]));
+    }
+    if (!ds->idm){
+        ds->idm = (char(*)[KEY_SIZE])calloc(v, sizeof(char[KEY_SIZE]));
+    }
+    i = 0;
+    while (NULL != fgets(buf, MLEN, fp)){
+        string = trim(buf, 3);
+        token = strsep(&string, "\t");
+        strncpy(ds->idm[i], token, KEY_SIZE - 1);
+        vec->hbt[i][0] = atoi(strsep(&string, "\t"));
+        vec->hbt[i][1] = atoi(strsep(&string, "\t"));
+        vec->hbt[i][2] = atoi(strsep(&string, "\t"));
+        vec->hbt[i][3] = atoi(strsep(&string, "\t"));
+        vec->hbt[i][4] = i;
+        i += 1;
+    }
+    fclose(fp);
+    sprintf(out, "%s/noleaf", outdir);
+    if (NULL == (fp = fopen(out, "r"))){
+        return;
+    }
+    if (!vec->neu1){
+        vec->neu1 = (float*)calloc(v * vec->k, sizeof(float));
+    }
+    i = 0;
+    while (NULL != fgets(buf, MLEN, fp)){
+        string = trim(buf, 3);
+        while (NULL != (token = strsep(&string, "\t"))){
+            vec->neu1[i++] = atof(token);
+        }
+    }
+    fclose(fp);
+    sprintf(out, "%s/%s", outdir, leaff);
+    if (NULL == (fp = fopen(out, "r"))){
+        return;
+    }
+    v = 0;
+    while (NULL != fgets(buf, MLEN, fp)){
+        v += 1;
+    }
+    rewind(fp);
+    if (!vec->neu1){
+        vec->neu1 = (float*)calloc(v * vec->k, sizeof(float));
+    }
+    i = 0;
+    while (NULL != fgets(buf, MLEN, fp)){
+        string = trim(buf, 3);
+        while (NULL != (token = strsep(&string, "\t"))){
+            vec->neu1[i++] = atof(token);
+        }
     }
     fclose(fp);
 }

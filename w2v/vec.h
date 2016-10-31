@@ -23,6 +23,7 @@ typedef struct _vec {
 void vec_build_tree(Vec * vec, int (*wc)[2], int n);
 void vec_learn_tree(Vec * vec, float * cw, float * de, int vid, double learn_rate);
 void vec_save_tree(Vec * vec, TSD * ds, char * outdir);
+void vec_load_tree(Vec * vec, TSD * ds, char * outdir, char * leaff);
 void vec_free_tree(Vec * vec);
 
 #endif //VEC_H

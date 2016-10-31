@@ -10,21 +10,21 @@
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "d2v.h"
+#include "doc2vec.h"
 
 int main(int argc, char *argv[]){
-    DV * dv = dv_create(argc, argv);
- //   srand(time(NULL));
-    if (! dv){
+    D2V * d2v = d2v_create(argc, argv);
+    //srand(time(NULL));
+    if (! d2v){
         return -1;
     }
-    if(0 != dv_init(dv)){
+    if(0 != d2v_init(d2v)){
         return -1;
     }
-    fprintf(stderr, "init done, doc_size: %d, voc_size: %d, tk_size: %d\n", dv_dsize(dv), dv_vsize(dv), dv_tsize(dv));
-    dv_est(dv);
-    dv_save(dv);
-    dv_free(dv);
-    dv = NULL;
+    fprintf(stderr, "init done, doc_size: %d, voc_size: %d, tk_size: %d\n", d2v_dsize(d2v), d2v_vsize(d2v), d2v_tsize(d2v));
+    d2v_learn(d2v);
+    d2v_save(d2v);
+    d2v_free(d2v);
+    d2v = NULL;
     return 0;
 }

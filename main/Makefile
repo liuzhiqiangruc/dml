@@ -6,9 +6,9 @@ INS = ../output
 
 CC = gcc -std=c99 -g
 CFBASE = -Wall -pedantic -pipe
-CFLAGS = $(CFBASE) -DNDEBUG -DNPRINT -O3 -I$(INC)
+CFLAGS = $(CFBASE) -DNDEBUG -DNPRINT -O0 -I$(INC)
 
-PRGS   = lr gblr k2d lda hlda xlda w2v wpred d2v
+PRGS   = lr gblr k2d lda hlda xlda w2v d2v
 
 all : $(PRGS)
 

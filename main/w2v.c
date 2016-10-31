@@ -9,21 +9,21 @@
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "w2v.h"
+#include "word2vec.h"
 
 int main(int argc, char *argv[]){
-    WV * wv = wv_create(argc, argv);
-    srand(time(NULL));
-    if (! wv){
+    W2V * w2v = w2v_create(argc, argv);
+    //srand(time(NULL));
+    if (! w2v){
         return -1;
     }
-    if(0 != wv_init(wv)){
+    if(0 != w2v_init(w2v)){
         return -1;
     }
-    fprintf(stderr, "init done, doc_size: %d, voc_size: %d, tk_size: %d\n", wv_dsize(wv), wv_vsize(wv), wv_tsize(wv));
-    wv_est(wv);
-    wv_save(wv);
-    wv_free(wv);
-    wv = NULL;
+    fprintf(stderr, "init done, doc_size: %d, voc_size: %d, tk_size: %d\n", w2v_dsize(w2v), w2v_vsize(w2v), w2v_tsize(w2v));
+    w2v_learn(w2v);
+    w2v_save(w2v);
+    w2v_free(w2v);
+    w2v = NULL;
     return 0;
 }

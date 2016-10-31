@@ -186,7 +186,7 @@ void vec_load_tree(Vec * vec, TSD * ds, char * outdir, char * leaff){
     while (NULL != fgets(buf, MLEN, fp)){
         string = trim(buf, 3);
         while (NULL != (token = strsep(&string, "\t"))){
-            vec->neu1[i++] = atof(token);
+            vec->neu0[i++] = atof(token);
         }
     }
     fclose(fp);

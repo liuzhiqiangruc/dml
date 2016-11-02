@@ -14,7 +14,7 @@
 
 int main(int argc, char *argv[]){
     D2V * d2v = d2v_create(argc, argv);
-    //srand(time(NULL));
+    srand(time(NULL));
     if (! d2v){
         return -1;
     }

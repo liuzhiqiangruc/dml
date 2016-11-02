@@ -13,7 +13,7 @@
 
 int main(int argc, char *argv[]){
     W2V * w2v = w2v_create(argc, argv);
-    //srand(time(NULL));
+    srand(time(NULL));
     if (! w2v){
         return -1;
     }

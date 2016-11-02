@@ -13,7 +13,7 @@
 #include "hash.h"
 #include "tsdata.h"
 
-#define LINE_LEN 1024
+#define LINE_LEN 1048576
 
 TSD * tsd_load(char * infile) {
     FILE * fp = NULL;

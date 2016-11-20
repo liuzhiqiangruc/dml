@@ -179,7 +179,7 @@ void vec_load_tree(Vec * vec, TSD * ds, char * outdir, char * leaff){
         v += 1;
     }
     rewind(fp);
-    if (!vec->neu1){
+    if (!vec->neu0){
         vec->neu0 = (float*)calloc(v * vec->k, sizeof(float));
     }
     i = 0;

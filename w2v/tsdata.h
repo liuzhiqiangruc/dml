@@ -10,7 +10,7 @@
 #ifndef _TDDAT_H
 #define _TDDAT_H
 
-#define KEY_SIZE 64
+#define KEY_SIZE 128
 
 // transaction type define
 typedef struct _tdata {

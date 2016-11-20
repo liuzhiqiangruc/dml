@@ -13,6 +13,7 @@
 #include "tsdata.h"
 
 typedef struct _vec {
+    int v;
     int k;
     int t;
     int (*hbt)[5];    // huffman tree {p0, b0, p1, b1, indx}

@@ -180,7 +180,7 @@ void vec_load_tree(Vec * vec, TSD * ds, char * outdir, char * leaff){
     }
     rewind(fp);
     if (!vec->neu1){
-        vec->neu1 = (float*)calloc(v * vec->k, sizeof(float));
+        vec->neu0 = (float*)calloc(v * vec->k, sizeof(float));
     }
     i = 0;
     while (NULL != fgets(buf, MLEN, fp)){

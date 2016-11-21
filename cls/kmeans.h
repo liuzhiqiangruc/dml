@@ -19,7 +19,7 @@
  * int   * c : cluster ID from 0 ~ k-1
  * return    : 0 success else failed
  * ------------------------------------------------ */
-int kmeans(float * m, int n, int f, int k, int * c);
+int kmeans(double* m, int n, int f, int k, int * c);
 
 
 #endif //KMEANS_H

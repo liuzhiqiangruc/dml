@@ -9,7 +9,7 @@ DML
 * logistic regression(`lr`) 
 * gradient boosting decision tree(`gblr`) 
 * word2vec(`w2v`), doc2vec(`d2v`)
-* clustering(`k2d`)
+* clustering(`k2d`, `kmeans`)
 * ...
 
 ###时间序列分析中主要涉及了:

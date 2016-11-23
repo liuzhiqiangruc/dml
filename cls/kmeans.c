@@ -144,7 +144,7 @@ int kmeans(double * m, int n, int f, int k, int * c){
         for (int i = 0 ; i < n; i ++){
             int oldcent = c[i];
             int newcent = nearest(m + i * f, cents, k, f, NULL);
-            if (newcent != oldcent) if (centsC[oldcent] > 5) {
+            if (newcent != oldcent) if (centsC[oldcent] > 2) {
                 update += 1;
                 centsC[oldcent] -= 1;
                 centsC[newcent] += 1;

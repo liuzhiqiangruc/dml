@@ -52,10 +52,10 @@ void w2v_learn(W2V * w2v){
     float * cw = (float*)malloc(k * sizeof(float));
     float * eu = (float*)malloc(k * sizeof(float));
     while (n-- > 0) for (d = 0; d < w2v->ds->d; d++){
-        memset(cw, 0, sizeof(float) * k);
         ds = w2v->ds->doffs[d];
         de = w2v->ds->doffs[d + 1];
         if (de - ds > 1) for (id = ds; id < de; id++){
+            memset(cw, 0, sizeof(float) * k);
             if (id - w / 2 < ds) l = ds;
             else l = id - w / 2;
             r = l + w;

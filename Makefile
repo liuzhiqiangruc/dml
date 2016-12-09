@@ -10,6 +10,14 @@ SRC      = main
 INSTDIR  = .
 
 
+INC = -I../$(UTILDIR) -I../$(REPDIR) -I../$(REGRDIR)
+
+CC = gcc -std=c99 -g -O3
+LD = gcc -shared
+CFBASE = -Wall -pedantic -pipe
+CFLAGS = $(CFBASE) -DNDEBUG -DNPRINT $(INC)
+
+export CC LD CFLAGS
 
 all: libs app
 

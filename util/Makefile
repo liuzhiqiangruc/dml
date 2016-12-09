@@ -1,10 +1,3 @@
-CC = gcc -std=c99 -g
-CFBASE = -pedantic -pipe -Wall
-CFLAGS = $(CFBASE) -O3 -fpic -DNDEBUG -DNPRINT
-LD = gcc -shared
-
-
-
 objs    = hash.o     rbtree.o    str.o       median.o
 sos     = libhs.so   librbt.so   libstr.so   libmed.so
 statics = libhss.a   librbts.a   libstrs.a   libmeds.a

@@ -1,8 +1,3 @@
-CC = gcc -std=c99 -g
-CFBASE = -pedantic -pipe -Wall
-CFLAGS = $(CFBASE) -O0 -fpic -DNDEBUG -DNPRINT -I../util -I../regr
-LD = gcc -shared
-
 ext_obj = ../util/hash.o ../util/str.o ../regr/auc.o
 
 objs    = gblr.o gbdt.o dtree.o tdata.o

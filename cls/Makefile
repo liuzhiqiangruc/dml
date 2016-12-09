@@ -1,10 +1,3 @@
-CC = gcc -std=c99 -g
-CFBASE = -pedantic -pipe -Wall
-CFLAGS = $(CFBASE) -O0 -fpic -DNDEBUG -DNPRINT -I../util
-LD = gcc -shared
-
-
-
 objs    = kmeans.o       k2d.o
 sos     = libkmeans.so   libk2d.so
 statics = libkmeanss.a   libk2ds.a

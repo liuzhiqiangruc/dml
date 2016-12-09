@@ -1,10 +1,3 @@
-CC = gcc -std=c99 -g
-CFBASE = -pedantic -pipe -Wall
-CFLAGS = $(CFBASE) -O3 -fpic -DNDEBUG -DNPRINT -I../util
-LD = gcc -shared
-
-
-
 objs    =  tm_config.o    tm_config_h.o  tm_config_x.o tm.o htm.o xtm.o 
 sos     =  libtm.so  libhtm.so  libxtm.so
 statics =  libtms.a  libhtms.a  libxtms.a 

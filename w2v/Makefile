@@ -1,8 +1,3 @@
-CC = gcc -std=c99 -g
-CFBASE = -pedantic -pipe -Wall
-CFLAGS = $(CFBASE) -O0 -fpic -DNDEBUG -DNPRINT -I../util -I../repo
-LD = gcc -shared
-
 objs    =  tsdata.o w2v_config.o d2v_config.o vec.o word2vec.o doc2vec.o  rnnlm.o rnn_config.o hsoft.o
 sos     =  libw2v.so   libd2v.so   librnnlm.so
 statics =  libw2vs.a   libd2vs.a   librnnlms.a

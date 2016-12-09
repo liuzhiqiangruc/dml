@@ -1,14 +1,3 @@
-CC       = gcc -std=c99
-CFBASE   = -Wall -pedantic -pipe
-CFLAGS   = $(CFBASE) -DNDEBUG -DNPRINT -O0 -fpic -I../util
-
-UTIL     = ../util
-INCS     = -I../util
-LIBS     = -L../util
-
-
-LD       = gcc -shared
-
 objs =      breakout.o dist.o    loess.o     modl.o     pattern.o viterbi.o
 sos =       libbrk.so  libdst.so libloess.so libmodl.so libpat.so libvtb.so
 statics =   libbrks.a  libdsts.a libloesss.a libmodls.a libpats.a libvtbs.a

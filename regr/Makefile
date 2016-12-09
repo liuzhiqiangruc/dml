@@ -1,10 +1,3 @@
-CC = gcc -std=c99 -g
-CFBASE = -pedantic -pipe -Wall
-CFLAGS = $(CFBASE) -O0 -fpic -DNDEBUG -DNPRINT -I../util
-LD = gcc -shared
-
-
-
 objs    = auc.o lr.o regress.o newton.o
 sos     = libauc.so liblr.so libnewton.so
 statics = libaucs.a liblrs.a libnewtons.a

@@ -43,5 +43,6 @@ typedef struct _w2vconfig {
 } W2VConfig;
 
 W2VConfig * init_config();
+W2VConfig * init_w2v_config();
 
 #endif //W2V_CONFIG_H

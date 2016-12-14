@@ -122,3 +122,6 @@ W2VConfig * init_config(){
     return wc;
 }
 
+W2VConfig * init_w2v_config(){
+    return init_config();
+}

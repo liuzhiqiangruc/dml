@@ -8,9 +8,11 @@
  * ======================================================== */
 
 #include <math.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "hsoft.h"
+#include "str.h"
 
 #define MXDEPT 40
 
@@ -108,3 +110,111 @@ void hsoft_learn(HSoft * hsf, double *in, double *out, int tid, double alpha){
         s = s < 0 ? (s + MXDEPT) : s;
     }
 }
+
+void hsoft_free(HSoft * hsf){
+    if (hsf->hbt){
+        free(hsf->hbt);
+        hsf->hbt = NULL;
+    }
+    if (hsf->tree){
+        free(hsf->tree);
+        hsf->tree = NULL;
+    }
+    free(hsf);
+}
+
+void hsoft_save(HSoft * hsf, const char * outdir){
+    char out[512] = {0};
+    int i, j, off;
+    FILE *fp = NULL;
+
+    sprintf(out, "%s/inner_huff_treenode", outdir);
+    if (NULL == (fp = fopen(out, "w"))){
+        return;
+    }
+
+    for (i = 0; i < hsf->v; i++){
+        off = i * hsf->k;
+        fprintf(fp, "%.3f", hsf->tree[off]);
+        for (j = 1; j < hsf->k; j++){
+            fprintf(fp, "\t%.3f", hsf->tree[off + j]);
+        }
+        fprintf(fp, "\n");
+    }
+    fclose(fp);
+
+    sprintf(out, "%s/huff_tree", outdir);
+    if (NULL == (fp = fopen(out, "w"))) {
+        return;
+    }
+
+    for (i = 0; i < hsf->v; i++){
+        fprintf(fp, "%d\t%d\t%d\t%d\n"                \
+                  , hsf->hbt[hsf->hbt[i][4]][0]       \
+                  , hsf->hbt[hsf->hbt[i][4]][1]       \
+                  , hsf->hbt[i][2], hsf->hbt[i][3]);
+    }
+    fclose(fp);
+}
+
+int hsoft_load(HSoft ** dhsf, const char * outdir, int k){
+    HSoft * hsf = (HSoft*)calloc(1, sizeof(HSoft));
+    *dhsf = hsf;
+    hsf->k = k;
+
+    int v, i;
+    char *string, *token;
+    char out[512] = {0};
+    char buf[10000] = {0};
+    FILE * fp = NULL;
+
+    sprintf(out, "%s/huff_tree", outdir);
+    if (NULL == (fp = fopen(out, "r"))){
+        goto fail1;
+    }
+    v = 0;
+    while (NULL != fgets(out, 10000, fp)){
+        v += 1;
+    }
+    rewind(fp);
+    hsf->v = v;
+    hsf->hbt = (int(*)[5])calloc(v, sizeof(int[5]));
+    i = 0;
+    while (NULL != fgets(buf, 10000, fp)){
+        string = trim(buf, 3);
+        hsf->hbt[i][0] = atoi(strsep(&string, "\t"));
+        hsf->hbt[i][1] = atoi(strsep(&string, "\t"));
+        hsf->hbt[i][2] = atoi(strsep(&string, "\t"));
+        hsf->hbt[i][3] = atoi(strsep(&string, "\t"));
+        hsf->hbt[i][4] = i;
+        i += 1;
+    }
+    fclose(fp);
+
+    sprintf(out, "%s/inner_huff_treenode", outdir);
+    if (NULL == (fp = fopen(out, "r"))){
+        goto fail2;
+    }
+    i = 0; 
+    hsf->tree = (double *)calloc(v * k, sizeof(double));
+    while (NULL != fgets(buf, 10000, fp)){
+        string = trim(buf, 3);
+        while (NULL != (token = strsep(&string, "\t"))){
+            hsf->tree[i++] = atof(token);
+        }
+    }
+    fclose(fp);
+
+    return 0;
+
+fail2:
+    free(hsf->hbt);
+    hsf->hbt = NULL;
+
+fail1:
+    free(hsf);
+    *dhsf = hsf = NULL;
+    return -1;
+}
+
+

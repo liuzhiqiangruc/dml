@@ -14,21 +14,22 @@
 
 static void help(void){
     fprintf(stderr, "Command line usage: \n");
-    fprintf(stderr, "./rnnlm -a [double] -k [int] -w [int] -n [int] -d [string] -o [string]\n");
+    fprintf(stderr, "./rnnlm -a [double] -k [int] -w [int] -t [0|1] -n [int] -d [string] -o [string]\n");
     fprintf(stderr, "        -a learning rate      \n");
     fprintf(stderr, "        -k latent space dim   \n");
     fprintf(stderr, "        -w bp depth for learn \n");
+    fprintf(stderr, "        -t 0:learn 1:continue \n");
     fprintf(stderr, "        -n iteration number   \n");
     fprintf(stderr, "        -d input data         \n");
     fprintf(stderr, "        -d output dir         \n");
 }
 
 static int set(void *rc, int argc, char *argv[]){
-    int k, w, n, i;
+    int k, w, n, i, t;
     double a;
     char *in, *out, *arg;
 
-    k = 50, w = 3, n = 1;
+    k = 50, w = 3, n = 1, t = 0;
     a = 0.001;
     in = NULL, out = ".";
 
@@ -50,6 +51,9 @@ static int set(void *rc, int argc, char *argv[]){
         else if (0 == strcmp(arg, "-w")){
             w = atoi(argv[++i]);
         }
+        else if (0 == strcmp(arg, "-t")){
+            t = atoi(argv[++i]);
+        }
         else if (0 == strcmp(arg, "-n")){
             n = atoi(argv[++i]);
         }
@@ -67,6 +71,7 @@ static int set(void *rc, int argc, char *argv[]){
     ((RNNConfig*)rc)->a = a;
     ((RNNConfig*)rc)->k = k;
     ((RNNConfig*)rc)->w = w;
+    ((RNNConfig*)rc)->t = t;
     ((RNNConfig*)rc)->n = n;
     ((RNNConfig*)rc)->d = in;
     ((RNNConfig*)rc)->o = out;
@@ -90,6 +95,10 @@ static int get_w(void *rc){
     return ((RNNConfig*)rc)->w;
 }
 
+static int get_t(void *rc){
+    return ((RNNConfig*)rc)->t;
+}
+
 static int get_n(void *rc){
     return ((RNNConfig*)rc)->n;
 }
@@ -110,6 +119,7 @@ RNNConfig * init_rnn_config(){
     rc->get_alpha  = get_alpha;
     rc->get_k      = get_k;
     rc->get_w      = get_w;
+    rc->get_t      = get_t;
     rc->get_n      = get_n;
     rc->get_d      = get_d;
     rc->get_o      = get_o;

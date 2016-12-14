@@ -12,26 +12,80 @@
 #include <stdlib.h>
 #include <string.h>
 #include "rnnlm.h"
+#include "hash.h"
+#include "str.h"
 
-static void rnn_weight_init(RNNLM * rnnlm){
-    int i, l, v, k;
+static Hash * rnn_load_model(RNNLM * rnnlm){
+    char * outdir = rnnlm->rc->get_o(rnnlm->rc);
+    char out[512] = {0};
+    char buf[10000] = {0};
+    char *string, *token;
+    FILE * fp = NULL;
+    int v, k, i;
+    Hash * vhs = hash_create(STRING, 1<<20);
+    v = rnnlm->hsf->v;
+    k = rnnlm->rc->get_k(rnnlm->rc);
+    sprintf(out, "%s/vector", outdir);
+    if (NULL == (fp = fopen(out, "r"))){
+        goto failer;
+    }
+    i = 0;
+    while (NULL != fgets(buf, 10000, fp)){
+        string = trim(buf, 3);
+        token = strsep(&string, "\t");
+        hash_add(vhs, token);
+        while (NULL != (token = strsep(&string, "\t"))){
+            rnnlm->rnn->u[i++] = atof(token);
+        }
+    }
+    fclose(fp);
 
-    v = rnnlm->ds->v;
+    sprintf(out, "%s/smatrix", outdir);
+    if (NULL == (fp = fopen(out, "r"))){
+        goto failer;
+    }
+    fscanf(fp, "%lf", rnnlm->rnn->w);
+    i = 1;
+    while (!feof(fp)){
+        fscanf(fp, "%lf", rnnlm->rnn->w + i);
+        i += 1;
+    }
+    fclose(fp);
+
+    return vhs;
+
+failer:
+    hash_free(vhs);
+    vhs = NULL;
+    return NULL;
+}
+
+static Hash * rnn_weight_init(RNNLM * rnnlm){
+    int i, l, v, k, t;
+
+    v = rnnlm->hsf->v;
     k = rnnlm->rc->get_k(rnnlm->rc);
     l = rnnlm->rc->get_w(rnnlm->rc);
+    t = rnnlm->rc->get_t(rnnlm->rc);
 
     rnnlm->rnn->u = calloc(v * k, sizeof(double));
     rnnlm->rnn->w = calloc(k * k, sizeof(double));
     rnnlm->rnn->s = calloc(l * k, sizeof(double));
 
-    i = v * k;
-    while (i-- > 0){
-        rnnlm->rnn->u[i] = ((rand() + 0.1) / (RAND_MAX + 0.1) - 0.5) / v;
-    }
+    if (t == 0){
+        i = v * k;
+        while (i-- > 0){
+            rnnlm->rnn->u[i] = ((rand() + 0.1) / (RAND_MAX + 0.1) - 0.5) / v;
+        }
 
-    i = k * k;
-    while (i-- > 0){
-        rnnlm->rnn->w[i] = ((rand() + 0.1) / (RAND_MAX + 0.1) - 0.5) / k;
+        i = k * k;
+        while (i-- > 0){
+            rnnlm->rnn->w[i] = ((rand() + 0.1) / (RAND_MAX + 0.1) - 0.5) / k;
+        }
+        return NULL;
+    }
+    else {
+        return rnn_load_model(rnnlm);
     }
 }
 
@@ -49,18 +103,35 @@ RNNLM * rnn_create(int argc, char *argv[]){
     return rnnlm;
 }
 
-int rnn_init  (RNNLM * rnnlm){
-    int v, k;
 
-    // load train data
+
+int rnn_init  (RNNLM * rnnlm){
+    int v, k, t;
+    char * outdir;
+
+    t = rnnlm->rc->get_t(rnnlm->rc);
+    k = rnnlm->rc->get_k(rnnlm->rc);
+
+    // init by pretrained model
+    if (t == 1){
+        outdir = rnnlm->rc->get_o(rnnlm->rc);
+        if (0 != hsoft_load(&(rnnlm->hsf), outdir, k)){
+            return -1;
+        }
+        Hash * vhs = rnn_weight_init(rnnlm);
+        if (vhs){
+            rnnlm->ds = tsd_load_v(rnnlm->rc->get_d(rnnlm->rc), vhs);
+            hash_free(vhs);
+            vhs = NULL;
+            return 0;
+        }
+        return -1;
+    }
+
+    // init from beginning
     rnnlm->ds     = tsd_load(rnnlm->rc->get_d(rnnlm->rc));
     v             = rnnlm->ds->v;
-    k             = rnnlm->rc->get_k(rnnlm->rc);
-
-    // consturct the hierarchical softmax tree
     hsoft_build(&(rnnlm->hsf), rnnlm->ds->fcnt, v, k);
-
-    // init the rnnlm parameters
     rnn_weight_init(rnnlm);
 
     return 0;

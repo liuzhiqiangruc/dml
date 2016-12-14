@@ -61,6 +61,57 @@ TSD * tsd_load(char * infile) {
     return ds;
 }
 
+TSD * tsd_load_v(char * infile, Hash * vhs){
+    FILE * fp = NULL;
+    if (NULL == (fp = fopen(infile, "r"))){
+        fprintf(stderr, "can not open input file\n");
+        return NULL;
+    }
+    TSD * ds = (TSD*)calloc(1, sizeof(TSD));
+    char buffer[LINE_LEN] = {0};
+    char *string, *token;
+    int tk = 0, ltk = 0, dsize = 0, id = 0;
+    while (NULL != fgets(buffer, LINE_LEN, fp)){
+        string = trim(buffer, 3);
+        while (NULL != (token = strsep(&string, "\t"))){
+            if (hash_find(vhs, token) >= 0){
+                tk += 1;
+            }
+        }
+        if (tk - ltk > 0){
+            dsize += 1;
+            ltk = tk;
+        }
+    }
+    ds->v = hash_cnt(vhs);
+    ds->d = dsize;
+    ds->t = tk;
+    ds->doffs  = (int*)calloc(ds->d + 1,   sizeof(int));
+    ds->tokens = (int*)calloc(ds->t,       sizeof(int));
+    ds->idm    = (char(*)[KEY_SIZE])calloc(ds->v, sizeof(char[KEY_SIZE]));
+    rewind(fp);
+    dsize = tk = ltk = 0;
+    while (NULL != fgets(buffer, LINE_LEN, fp)){
+        string = trim(buffer, 3);
+        while (NULL != (token = strsep(&string, "\t"))){
+            id = hash_find(vhs, token);
+            if (id >= 0){
+                ds->tokens[tk++] = id;
+                if (ds->idm[id][0] == '\0'){
+                    strncpy(ds->idm[id], token, KEY_SIZE - 1);
+                }
+            }
+        }
+        if (tk - ltk > 0){
+            ds->doffs[++dsize] = tk;
+            ltk = tk;
+        }
+    }
+    fclose(fp);
+
+    return ds;
+}
+
 void tsd_free(TSD * ds){
     if (ds){
         if (ds->doffs){

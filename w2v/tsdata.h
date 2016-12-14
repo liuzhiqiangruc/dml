@@ -10,6 +10,8 @@
 #ifndef _TDDAT_H
 #define _TDDAT_H
 
+#include "hash.h"
+
 #define KEY_SIZE 128
 
 // transaction type define
@@ -24,6 +26,8 @@ typedef struct _tdata {
 } TSD;
 
 TSD * tsd_load(char * infile);
+
+TSD * tsd_load_v(char * infile, Hash * vhs);
 
 void tsd_free(TSD * ds);
 

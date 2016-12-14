@@ -30,7 +30,11 @@ void hsoft_learn(HSoft * hsf, double *in, double *out, int tid, double alpha);
 
 // free
 void hsoft_free (HSoft * hsf);
+
 // save
-void hsoft_save (HSoft * hsf);
+void hsoft_save (HSoft * hsf, const char * outdir);
+
+// load
+int  hsoft_load (HSoft ** hsf, const char * outdir, int k);
 
 #endif //HSOFT_H

@@ -9,7 +9,7 @@
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "word2vec.h"
+#include "w2v.h"
 
 int main(int argc, char *argv[]){
     W2V * w2v = w2v_create(argc, argv);

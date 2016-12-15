@@ -55,7 +55,7 @@ static Hash * w2v_load_model(W2V * w2v){
     FILE *fp = NULL;
 
     int v, k, i;
-    Hash * vhs = hash_create(STRING, 1 << 20);
+    Hash * vhs = hash_create(1 << 20, STRING);
     v = w2v->hsf->v;
     k = w2v->wc->get_k(w2v->wc);
     sprintf(out, "%s/vector", outdir);
@@ -80,7 +80,7 @@ ret:
 }
 
 static Hash * w2v_weight_init(W2V * w2v){
-    int i, l, v, k, t;
+    int i, v, k, t;
     v = w2v->hsf->v;
     k = w2v->wc->get_k(w2v->wc);
     t = w2v->wc->get_t(w2v->wc);
@@ -147,7 +147,7 @@ int w2v_init(W2V * w2v){
 }
 
 void w2v_learn (W2V * w2v){
-    int i, k, n, w, d, id, ds, de, l, r;
+    int k, n, w, d, id, ds, de, l, r;
     double *st, *sg;
     double alpha;
 
@@ -223,4 +223,16 @@ void w2v_free(W2V * w2v){
         w2v->wc = NULL;
     }
     free(w2v);
+}
+
+int w2v_dsize(W2V * w2v){
+    return w2v->ds->d;
+}
+
+int w2v_vsize(W2V * w2v){
+    return w2v->ds->v;
+}
+
+int w2v_tsize(W2V * w2v){
+    return w2v->ds->t;
 }

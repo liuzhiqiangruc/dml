@@ -27,5 +27,8 @@ void  w2v_learn (W2V * w2v);
 void  w2v_save  (W2V * w2v);
 void  w2v_free  (W2V * w2v);
 
+int   w2v_dsize (W2V * w2v);
+int   w2v_vsize (W2V * w2v);
+int   w2v_tsize (W2V * w2v);
 
 #endif //W2V_H

@@ -10,7 +10,7 @@
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "doc2vec.h"
+#include "d2v.h"
 
 int main(int argc, char *argv[]){
     D2V * d2v = d2v_create(argc, argv);

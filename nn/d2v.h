@@ -1,22 +1,24 @@
 /* ========================================================
  *   Copyright (C) 2016 All rights reserved.
  *   
- *   filename : doc2vec.h
- *   author   : liuzhiqiangruc@126.com
- *   date     : 2016-10-27
+ *   filename : d2v.h
+ *   author   : ***
+ *   date     : 2016-12-15
  *   info     : 
  * ======================================================== */
 
-#ifndef _DOC2VEC_H
-#define _DOC2VEC_H
+#ifndef _D2V_H
+#define _D2V_H
 
-
-#include "vec.h"
+#include "hsoft.h"
 #include "d2v_config.h"
+#include "tsdata.h"
 
-typedef struct _dw{
+typedef struct _d2v_s {
     TSD * ds;
-    Vec * model;
+    HSoft * hsf;
+    double * u;
+    int    * id;
     D2VConfig * dc;
 } D2V;
 
@@ -30,5 +32,4 @@ int   d2v_dsize (D2V * d2v);
 int   d2v_vsize (D2V * d2v);
 int   d2v_tsize (D2V * d2v);
 
-
-#endif //DOC2VEC_H
+#endif //D2V_H

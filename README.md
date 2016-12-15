@@ -8,7 +8,7 @@ DML
 * topic model (`lda`,`hlda`,`xlda`)  
 * logistic regression(`lr`) 
 * gradient boosting decision tree(`gblr`) 
-* word2vec(`w2v`), doc2vec(`d2v`)
+* neural network (`rnnlm`,  `w2v`, `d2v`)
 * clustering(`k2d`, `kmeans`)
 * ...
 

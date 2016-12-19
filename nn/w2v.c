@@ -54,10 +54,8 @@ static Hash * w2v_load_model(W2V * w2v){
     char *string, *token;
     FILE *fp = NULL;
 
-    int v, k, i;
+    int i;
     Hash * vhs = hash_create(1 << 20, STRING);
-    v = w2v->hsf->v;
-    k = w2v->wc->get_k(w2v->wc);
     sprintf(out, "%s/vector", outdir);
     if (NULL == (fp = fopen(out, "r"))){
         hash_free(vhs);

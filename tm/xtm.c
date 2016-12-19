@@ -269,9 +269,7 @@ int tm_init(TM * tm){
     char  buffer[LDA_LINE_LEN] = {'\0'};
     char *string, *token;
     int tk, d, v, x, t, k, l;
-    double g0, g1, rnd;
-    g0 = tm->tmc->get_g0(tm->tmc);
-    g1 = tm->tmc->get_g1(tm->tmc);
+    double rnd;
     k  = tm->tmc->get_k(tm->tmc);
     l  = tm->tmc->get_l(tm->tmc);
     if (NULL == (fp = fopen(tm->tmc->get_d(tm->tmc), "r"))){

@@ -21,10 +21,8 @@ static Hash * rnn_load_model(RNNLM * rnnlm){
     char buf[10000] = {0};
     char *string, *token;
     FILE * fp = NULL;
-    int v, k, i;
+    int i;
     Hash * vhs = hash_create(STRING, 1<<20);
-    v = rnnlm->hsf->v;
-    k = rnnlm->rc->get_k(rnnlm->rc);
     sprintf(out, "%s/vector", outdir);
     if (NULL == (fp = fopen(out, "r"))){
         goto failer;
@@ -35,7 +33,7 @@ static Hash * rnn_load_model(RNNLM * rnnlm){
         token = strsep(&string, "\t");
         hash_add(vhs, token);
         while (NULL != (token = strsep(&string, "\t"))){
-            rnnlm->rnn->u[i++] = atof(token);
+            rnnlm->rnn.u[i++] = atof(token);
         }
     }
     fclose(fp);
@@ -44,10 +42,10 @@ static Hash * rnn_load_model(RNNLM * rnnlm){
     if (NULL == (fp = fopen(out, "r"))){
         goto failer;
     }
-    fscanf(fp, "%lf", rnnlm->rnn->w);
+    fscanf(fp, "%lf", rnnlm->rnn.w);
     i = 1;
     while (!feof(fp)){
-        fscanf(fp, "%lf", rnnlm->rnn->w + i);
+        fscanf(fp, "%lf", rnnlm->rnn.w + i);
         i += 1;
     }
     fclose(fp);
@@ -68,19 +66,19 @@ static Hash * rnn_weight_init(RNNLM * rnnlm){
     l = rnnlm->rc->get_w(rnnlm->rc);
     t = rnnlm->rc->get_t(rnnlm->rc);
 
-    rnnlm->rnn->u = calloc(v * k, sizeof(double));
-    rnnlm->rnn->w = calloc(k * k, sizeof(double));
-    rnnlm->rnn->s = calloc(l * k, sizeof(double));
+    rnnlm->rnn.u = calloc(v * k, sizeof(double));
+    rnnlm->rnn.w = calloc(k * k, sizeof(double));
+    rnnlm->rnn.s = calloc(l * k, sizeof(double));
 
     if (t == 0){
         i = v * k;
         while (i-- > 0){
-            rnnlm->rnn->u[i] = ((rand() + 0.1) / (RAND_MAX + 0.1) - 0.5) / v;
+            rnnlm->rnn.u[i] = ((rand() + 0.1) / (RAND_MAX + 0.1) - 0.5) / v;
         }
 
         i = k * k;
         while (i-- > 0){
-            rnnlm->rnn->w[i] = ((rand() + 0.1) / (RAND_MAX + 0.1) - 0.5) / k;
+            rnnlm->rnn.w[i] = ((rand() + 0.1) / (RAND_MAX + 0.1) - 0.5) / k;
         }
         return NULL;
     }
@@ -143,18 +141,18 @@ static inline double * forward_st (RNNLM * rnnlm, int id, int sid, int w, int k)
     int i, j, tid, lsid;
 
     tid = rnnlm->ds->tokens[id];
-    st = rnnlm->rnn->s + (sid % w) * k;
-    in = rnnlm->rnn->u + tid * k;
+    st = rnnlm->rnn.s + (sid % w) * k;
+    in = rnnlm->rnn.u + tid * k;
 
     memcpy(st, in, sizeof(double) * k);
     if (sid > 0){
         lsid = (sid - 1) % w;
-        ls = rnnlm->rnn->s + lsid  * k;
+        ls = rnnlm->rnn.s + lsid  * k;
     }
 
     for (i = 0; i < k; i++){
         if (sid > 0) for (j = 0; j < k; j++){
-            st[i] += rnnlm->rnn->w[i * k + j] * ls[j];
+            st[i] += rnnlm->rnn.w[i * k + j] * ls[j];
         }
         st[i] = 1.0 / (1.0 + exp(-st[i]));
     }
@@ -166,7 +164,7 @@ static inline void accumulate_grad_w (RNNLM * rnnlm, double * sg, double * wg, i
     double *ls;
     int i, j;
 
-    ls = rnnlm->rnn->s + lsid * k;
+    ls = rnnlm->rnn.s + lsid * k;
 
     for (i = 0; i < k; i++){
         for (j = 0; j < k; j++){
@@ -180,7 +178,7 @@ static inline void update_input_u (RNNLM * rnnlm, double * sg, double alpha, int
     double * in;
 
     tid = rnnlm->ds->tokens[id];
-    in  = rnnlm->rnn->u + tid * k;
+    in  = rnnlm->rnn.u + tid * k;
 
     for (i = 0; i < k; i++){
         in[i] += alpha * sg[i];
@@ -190,13 +188,13 @@ static inline void update_input_u (RNNLM * rnnlm, double * sg, double alpha, int
 static inline void back_propgation_s (RNNLM * rnnlm, double * sg, double *tg, int lsid, int k) {
     int i, j;
     double *ls;
-    ls = rnnlm->rnn->s + lsid * k;
+    ls = rnnlm->rnn.s + lsid * k;
 
     memset(tg, 0, sizeof(double) * k);
 
     for (i = 0; i < k; i++){
         for (j = 0; j < k; j++){
-            tg[i] += rnnlm->rnn->w[j * k + i] * sg[j];
+            tg[i] += rnnlm->rnn.w[j * k + i] * sg[j];
         }
         tg[i] *= ls[i] * (1.0 - ls[i]);
     }
@@ -208,7 +206,7 @@ static inline void update_w (RNNLM * rnnlm, double * wg, int k, double alpha){
     int i, j;
     for (i = 0; i < k; i++){
         for(j = 0; j < k; j++){
-            rnnlm->rnn->w[i * k + j] += alpha * wg[i * k + j];
+            rnnlm->rnn.w[i * k + j] += alpha * wg[i * k + j];
         }
     }
 }

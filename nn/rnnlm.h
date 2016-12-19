@@ -15,14 +15,14 @@
 #include "rnn_config.h"
 
 typedef struct _rnn_lm{
-    TSD       * ds;
-    HSoft     * hsf;
+    TSD       * ds;         // data set for training
+    HSoft     * hsf;        // hierarchical soft max optimized
     struct {
-        double *u;
-        double *w;
-        double *s;
-    } *rnn;
-    RNNConfig * rc;
+        double *u;          // input embeddings
+        double *w;          // shared rec parameter
+        double *s;          // last k hidden status
+    } rnn;                  // model parameters
+    RNNConfig * rc;         // rnnlm command line configure
 } RNNLM;
 
 

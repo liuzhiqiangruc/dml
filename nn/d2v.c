@@ -96,7 +96,7 @@ int d2v_init(D2V * d2v){
     t = d2v->dc->get_t(d2v->dc);
     k = d2v->dc->get_k(d2v->dc);
 
-    if (t == 1){
+    if (t > 0){
         outdir = d2v->dc->get_o(d2v->dc);
         if (0 != hsoft_load(&(d2v->hsf), outdir, k)){
             return -1;

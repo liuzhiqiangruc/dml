@@ -84,7 +84,7 @@ static void d2v_weight_init(D2V * d2v){
         d2v->u[i] = ((rand() + 0.1) / (RAND_MAX + 0.1) - 0.5) / k;
     }
 
-    if (t == 1){
+    if (t > 0){
         d2v_load_model(d2v);
     }
 }
@@ -124,7 +124,6 @@ initd:
 
 }
 
-
 void d2v_learn(D2V * d2v){
     int d, id, ds, de, m, tid, k, n, t;
     double alpha;
@@ -142,14 +141,15 @@ void d2v_learn(D2V * d2v){
             tid = d2v->ds->tokens[id];
             memset(eu, 0, k * sizeof(double));
 
-            if (t == 2){
+            if (t == 2){ // h fix
                 hsoft_learn(d2v->hsf, cw, eu, tid, 0.0);
             }
             else {
                 hsoft_learn(d2v->hsf, cw, eu, tid, alpha);
             }
 
-            for (m = 0; m < k; m++){
+            // doc fix
+            if (t != 3) for (m = 0; m < k; m++){
                 cw[m] += alpha * eu[m];
             }
         }

@@ -17,7 +17,7 @@ static void help(void){
     fprintf(stderr, "    -a learning rate\n");
     fprintf(stderr, "    -k vector length\n");
     fprintf(stderr, "    -n iter number  \n");
-    fprintf(stderr, "    -t 0:learn, 1:continue learn, 2: pred\n");
+    fprintf(stderr, "    -t 0:learn, 1:continue learn, 2: hidden fix\n");
     fprintf(stderr, "    -w window size  \n");
     fprintf(stderr, "    -d input data   \n");
     fprintf(stderr, "    -o out    dir   \n");

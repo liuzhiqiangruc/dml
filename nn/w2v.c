@@ -85,16 +85,15 @@ static Hash * w2v_weight_init(W2V * w2v){
 
     w2v->u = (double *)calloc(v * k, sizeof(double));
 
-    if (t == 0){
-        i = v * k;
-        while (i-- > 0){
-            w2v->u[i] = ((rand() + 0.1) / (RAND_MAX + 0.1) - 0.5) / v;
-        }
-        return NULL;
+    i = v * k;
+    while (i-- > 0){
+        w2v->u[i] = ((rand() + 0.1) / (RAND_MAX + 0.1) - 0.5) / v;
     }
-    else {
+
+    if (t > 0) {
         return w2v_load_model(w2v);
     }
+    return NULL;
 }
 
 W2V * w2v_create(int argc, char *argv[]){
@@ -118,7 +117,7 @@ int w2v_init(W2V * w2v){
     t = w2v->wc->get_t(w2v->wc);
     k = w2v->wc->get_k(w2v->wc);
 
-    if (t == 1){
+    if (t > 0){
         outdir = w2v->wc->get_o(w2v->wc);
         if (0 != hsoft_load(&(w2v->hsf), outdir, k)){
             return -1;
@@ -145,13 +144,14 @@ int w2v_init(W2V * w2v){
 }
 
 void w2v_learn (W2V * w2v){
-    int k, n, w, d, id, ds, de, l, r;
+    int t, k, n, w, d, id, ds, de, l, r;
     double *st, *sg;
     double alpha;
 
     w     = w2v->wc->get_w(w2v->wc);
     n     = w2v->wc->get_n(w2v->wc);
     k     = w2v->wc->get_k(w2v->wc);
+    t     = w2v->wc->get_t(w2v->wc);
     alpha = w2v->wc->get_alpha(w2v->wc);
 
     st = (double *)calloc(k, sizeof(double));
@@ -171,7 +171,12 @@ void w2v_learn (W2V * w2v){
             memset(sg, 0, sizeof(double) * k);
 
             w2v_st(w2v, st, id, k, l, r);
-            hsoft_learn(w2v->hsf, st, sg, w2v->ds->tokens[id], alpha);
+            if (t == 2){ // h fix
+                hsoft_learn(w2v->hsf, st, sg, w2v->ds->tokens[id], 0.0);
+            }
+            else {
+                hsoft_learn(w2v->hsf, st, sg, w2v->ds->tokens[id], alpha);
+            }
             w2v_ut(w2v, sg, id, k, l, r, alpha);
         }
         progress(stderr, w2v->ds->d, d + 1);

@@ -13,11 +13,11 @@
 
 static void help(void){
     fprintf(stderr, "Command Line Usage: \n");
-    fprintf(stderr, "d2v -a [double] -k [int] -n [int] -t [0|1|2] -d [string] -o [string]\n");
+    fprintf(stderr, "d2v -a [double] -k [int] -n [int] -t [0|1|2|3] -d [string] -o [string]\n");
     fprintf(stderr, "    -a learning rate\n");
     fprintf(stderr, "    -k vector length\n");
     fprintf(stderr, "    -n iter number  \n");
-    fprintf(stderr, "    -t 0:learn, 1:continue learn, 2: continue learn while huftree not change\n");
+    fprintf(stderr, "    -t 0:learn, 1:continue learn, 2: hidden fix, 3: doc fix\n");
     fprintf(stderr, "    -d input data   \n");
     fprintf(stderr, "    -o out    dir   \n");
 }

@@ -23,6 +23,7 @@ typedef struct _gbdt_param {
     int max_leaf_nodes;
     int max_trees;
     int max_depth;
+    int min_node_ins;
     int binary;
     char * train_input;
     char * test_input;

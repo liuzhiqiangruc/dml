@@ -40,7 +40,7 @@ static double dist(double x1, double y1, double x2, double y2){
 }
 
 static void init_centers(double (*x)[2], double (*c)[11], int *ks, int *assign, int n, int k){
-    int i, j, d;
+    int i, j, d = 0;
     int    *cents    = (int*)malloc(sizeof(int) * k);
     double *min_dist = (double*)malloc(sizeof(double) * n);
     double _dist, __dist, rnd;

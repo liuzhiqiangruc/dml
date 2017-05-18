@@ -14,10 +14,11 @@
 
 void help() {
     fprintf(stderr, "\ngblr usage:        \n");
-    fprintf(stderr, "\n./gblr -n <int> -m <int> -d <int> -b <int> -a <double> -g <double> -r <double> -f <string> -t <string> -o <string>\n");
+    fprintf(stderr, "\n./gblr -n <int> -m <int> -d <int> -l <int> -b <int> -a <double> -g <double> -r <double> -f <string> -t <string> -o <string>\n");
     fprintf(stderr, "     -n  tree capicity                   \n");
     fprintf(stderr, "     -m  max leaf node in per tree       \n");
     fprintf(stderr, "     -d  max depth of trees              \n");
+    fprintf(stderr, "     -l  min instance num for each node  \n");
     fprintf(stderr, "     -b  1:binary or else                \n");
     fprintf(stderr, "     -a  node regulization               \n");
     fprintf(stderr, "     -g  weight regulization             \n");
@@ -31,7 +32,7 @@ int parse_command_line(GBMP *p, int argc, char *argv[]){
     double r = 0.0;
     double w_reg = 0.0;
     double n_reg = 0.0;
-    int b = 0, n = 20, m = 10, d = 2;
+    int b = 0, n = 20, m = 10, d = 2, l = 0;
     char * f = NULL;
     char * t = NULL;
     char * o = "./";
@@ -54,6 +55,9 @@ int parse_command_line(GBMP *p, int argc, char *argv[]){
         }
         else if (0 == strcmp(arg,"-d")){
             d = atoi(argv[++i]);
+        }
+        else if (0 == strcmp(arg,"-l")){
+            l = atoi(argv[++i]);
         }
         else if (0 == strcmp(arg,"-a")){
             n_reg = atof(argv[++i]);
@@ -87,6 +91,7 @@ int parse_command_line(GBMP *p, int argc, char *argv[]){
     p->max_leaf_nodes = m;
     p->binary         = b;
     p->max_depth      = d;
+    p->min_node_ins   = l;
     p->nod_reg        = n_reg;
     p->wei_reg        = w_reg;
     p->rate           = r;

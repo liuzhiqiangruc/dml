@@ -12,7 +12,7 @@ INSTDIR  = .
 
 INC = -I../$(UTILDIR) -I../$(REPDIR) -I../$(REGRDIR)
 
-CC = gcc -std=c99 -g -O0
+CC = gcc -std=c99 -g -O3
 LD = gcc -shared
 CFBASE = -Wall -pedantic -pipe -fPIC
 CFLAGS = $(CFBASE) -DNDEBUG -DNPRINT $(INC)

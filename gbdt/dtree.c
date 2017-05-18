@@ -98,6 +98,7 @@ static int tree_grow(DTD * ds
                 , double wr
                 , int l
                 , int n
+                , int s
                 , int d
                 , int m){
     int i, j, k, o, r, lc;
@@ -105,19 +106,22 @@ static int tree_grow(DTD * ds
     DTree * t = NULL;
     for (i = 0; i < l; i++){
         t = leaf_nodes[i];
-        if (1 == t->leaf && t->depth < d){
+        if (1 == t->leaf && t->depth < d && t->n >= (s << 1)){
             init_child(t);
             for (j = 0; j < ds->col; j++){
                 l_sg = l_sh = 0.0;
                 lv = DBL_MAX;
                 lc = 0;
                 o = ds->cl[j];
-                for (k = 0; k < ds->l[j]; k++){
+                for (k = 0; k < ds->l[j]; k++) {
+                    if (t->n - lc < s){
+                        break;
+                    }
                     r = ds->ids[o + k];
                     if (inst_nodes[r] == i){
                         if (0 == ds->bin){
                             v = ds->vals[o + k];
-                            if (v < lv && lv < DBL_MAX){
+                            if (v < lv && lv < DBL_MAX && lc >= s){
                                 update_child(t, j, lc, l_sg, l_sh, nr, wr, v, lv);
                             }
                             lv = v;
@@ -127,7 +131,7 @@ static int tree_grow(DTD * ds
                         l_sh += h[r];
                     }
                 }
-                if (lc < t->n && lc > 0){
+                if (lc < t->n && lc >= s && t->n - lc >=s){
                     update_child(t, j, lc, l_sg, l_sh, nr, wr, v, 1 == ds->bin ? 1.0 : lv);
                 }
             }
@@ -171,6 +175,7 @@ DTree * generate_dtree(DTD * ds      /* dataset for build tree */
                      , double nr     /* node regulizatin       */
                      , double wr     /* weight regulization    */
                      , int n         /* number of instances    */
+                     , int s         /* min instance each node */
                      , int d         /* max depth of tree      */
                      , int m){       /* max leaf nodes         */
     int i, k, o, l;
@@ -187,7 +192,7 @@ DTree * generate_dtree(DTD * ds      /* dataset for build tree */
     }
     leaf_nodes[l++] = t;
     while (l < m){
-        if(-1 == (k = tree_grow(ds, leaf_nodes, inst_nodes, g, h, nr, wr, l, n, d, m))){
+        if(-1 == (k = tree_grow(ds, leaf_nodes, inst_nodes, g, h, nr, wr, l, n, s, d, m))){
             break;
         }
         DTree * tmp = leaf_nodes[k];

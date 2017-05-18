@@ -91,7 +91,7 @@ static void eval_test(GBDT * gbdt){
 }
 
 int    gbdt_train(GBDT * gbdt){
-    int i, j, n = gbdt->train_ds->row;
+    int i, j, m, n = gbdt->train_ds->row;
     double * f = (double*)malloc(sizeof(double) * n);
     double * g = (double*)malloc(sizeof(double) * n);
     double * h = (double*)malloc(sizeof(double) * n);
@@ -99,10 +99,15 @@ int    gbdt_train(GBDT * gbdt){
     memset(g, 0, sizeof(double) * n);
     memset(h, 0, sizeof(double) * n);
     gbdt->tree_size = 0;
+    m = gbdt->p.min_node_ins;
+    if (m == 0){
+        m = (int)(0.5 * n / gbdt->p.max_leaf_nodes);
+    }
+
     for (i = 0; i < gbdt->p.max_trees; i++) {
         gbdt->g_fn(gbdt->f, gbdt->train_ds->y, g, n);
         gbdt->h_fn(gbdt->f, gbdt->train_ds->y, h, n);
-        DTree * tt = generate_dtree(gbdt->train_ds, f, g, h, gbdt->p.nod_reg, gbdt->p.wei_reg, n, gbdt->p.max_depth, gbdt->p.max_leaf_nodes);
+        DTree * tt = generate_dtree(gbdt->train_ds, f, g, h, gbdt->p.nod_reg, gbdt->p.wei_reg, n, m, gbdt->p.max_depth, gbdt->p.max_leaf_nodes);
         if (tt){
             gbdt->dts[i] = tt;
             gbdt->tree_size += 1;

@@ -107,7 +107,19 @@ int main(int argc, char *argv[]) {
         help();
         return -1;
     }
-    fprintf(stderr, "command line parse done\n");
+    fprintf(stderr, "command line paramenters parse done\n");
+    fprintf(stderr, "    tree capacity       : %d\n", p.max_trees      );
+    fprintf(stderr, "    max leaf nodes      : %d\n", p.max_leaf_nodes );
+    fprintf(stderr, "    max depth           : %d\n", p.max_depth      );
+    fprintf(stderr, "    min leaf node ins   : %d\n", p.min_node_ins   );
+    fprintf(stderr, "    binary or not       : %d\n", p.binary         );
+    fprintf(stderr, "    node regulization   : %f\n", p.nod_reg        );
+    fprintf(stderr, "    weit regulization   : %f\n", p.wei_reg        );
+    fprintf(stderr, "    learning rate       : %f\n", p.rate           );
+    fprintf(stderr, "    trainning data      : %s\n", p.train_input    );
+    fprintf(stderr, "    testing   data      : %s\n", p.test_input     );
+    fprintf(stderr, "    output dir          : %s\n", p.out_dir        );
+
     GBDT * gblr = gbdt_lr(p);
     if (!gblr){
         return -1;

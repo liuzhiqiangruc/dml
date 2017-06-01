@@ -14,7 +14,8 @@ INC = -I../$(UTILDIR) -I../$(REPDIR) -I../$(REGRDIR)
 
 CC = gcc -std=c99 -g -O3
 LD = gcc -shared
-CFBASE = -Wall -pedantic -pipe -fPIC
+WARN = -Wall -Wno-unused-but-set-variable
+CFBASE = $(WARN) -pedantic -pipe -fPIC 
 CFLAGS = $(CFBASE) -DNDEBUG -DNPRINT $(INC)
 
 export CC LD CFLAGS

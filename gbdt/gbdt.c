@@ -100,8 +100,11 @@ int    gbdt_train(GBDT * gbdt){
     memset(h, 0, sizeof(double) * n);
     gbdt->tree_size = 0;
     m = gbdt->p.min_node_ins;
-    if (m == 0){
+    if (m < 1){
         m = (int)(0.5 * n / gbdt->p.max_leaf_nodes);
+        if (m < 1){
+            m = 1;
+        }
     }
 
     for (i = 0; i < gbdt->p.max_trees; i++) {

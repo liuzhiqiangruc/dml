@@ -12,14 +12,12 @@
 #include <string.h>
 #include "dtree.h"
 
-#define  DBL_MAX 1.1e10
-
 struct _d_tree {
-    int n;                          /* instance num in this node  */
-    int leaf;                       /* 0:noleaf, 1:leaf, 2:calculating, 3:calculated */
-    int depth;                      /* depth of this node         */
-    int attr;                       /* if not leaf, split attr    */
-    double attr_val;                /* split val of this attr     */
+    int    n;                       /* instance num in this node  */
+    int    leaf;                    /* 0:noleaf, 1:leaf, 2:calculating, 3:calculated */
+    int    depth;                   /* depth of this node         */
+    int    attr;                    /* if not leaf, split attr    */
+    double aval;                    /* split val of this attr     */
     double sg;                      /* sum of 1-gradient          */
     double sh;                      /* sum of 2-gradient          */
     double wei;                     /* additive model value       */
@@ -36,7 +34,7 @@ static void scan_tree(DTD * ts, DTree * t, DTree ** inst_nodes, int n, int m){
         id = i + ts->cl[t->attr];
         rowid = ts->ids[id];
         if (inst_nodes[rowid] == t) {
-            if (ts->bin == 1 || (ts->bin == 0 && ts->vals[id] >= t->attr_val)){
+            if (ts->bin == 1 || (ts->bin == 0 && ts->vals[id] >= t->aval)){
                 l_c += 1;
                 r_c -= 1;
                 inst_nodes[rowid] = t->child[0];
@@ -57,14 +55,10 @@ static void scan_tree(DTD * ts, DTree * t, DTree ** inst_nodes, int n, int m){
 }
 
 static void init_child(DTree * t){
-    DTree * le = (DTree *)malloc(sizeof(DTree));
-    DTree * ri = (DTree *)malloc(sizeof(DTree));
-    memset(le, 0, sizeof(DTree));
-    memset(ri, 0, sizeof(DTree));
-    t->child[0]  = le;
-    t->child[1]  = ri;
-    le->leaf     = ri->leaf  = 2; // calculating status
-    le->depth    = ri->depth = t->depth + 1;
+    t->child[0]  = (DTree*)calloc(1, sizeof(DTree));
+    t->child[1]  = (DTree*)calloc(1, sizeof(DTree));
+    t->child[0]->leaf = t->child[1]->leaf = 2;
+    t->child[0]->depth = t->child[1]->depth = t->depth + 1;
 }
 
 static void update_child(DTree * t, int k, double nr, double wr, double v){
@@ -77,18 +71,13 @@ static void update_child(DTree * t, int k, double nr, double wr, double v){
         // update t
         t->gain = gain;
         t->attr = k;
-        t->attr_val = (v + le->attr_val) / 2.0;
-
-        // update left child, no need to do this
-        // le->loss = l_loss;
-        // le->wei  = -1.0 * le->sg / (le->sh + wr);
-
+        t->aval = (v + le->aval) / 2.0;
         // update right child
         rt->n    = t->n - le->n;
-        rt->loss = r_loss;
         rt->sg   = t->sg - le->sg;
         rt->sh   = t->sh - le->sh;
         rt->wei  = -1.0 * rt->sg / (rt->sh + wr);
+        rt->loss = r_loss;
     }
 }
 
@@ -96,20 +85,19 @@ static void fix_child(DTree * t, double nr, double wr){
     DTree *le, *rt;
     le = t->child[0];
     rt = t->child[1];
+    le->n    = t->n  - rt->n;
     le->sg   = t->sg - rt->sg;
     le->sh   = t->sh - rt->sh;
-    le->n    = t->n  - rt->n;
     le->wei  = -1.0 * le->sg / (le->sh + wr);
     le->loss = -0.5 * le->sg * le->sg / (le->sh + wr) + nr;
-    le->leaf = rt->leaf = 3;
+    le->leaf = rt->leaf = 3; // calculated
 }
 
-static int tree_grow(DTD * ds
-                , DTree ** leaf_nodes
-                , int    * inst_nodes
-                , double * g, double *h
-                , double nr , double wr
-                , int l, int s, int d) {
+static int tree_grow(DTD    * ds, DTree ** leaf_nodes
+                   , int    * inst_nodes
+                   , double * g, double *h
+                   , double  nr, double wr
+                   , int      l, int s, int d) {
     // tree grow progress
     int i, j, o, r;
     double v = 0.0;
@@ -122,16 +110,17 @@ static int tree_grow(DTD * ds
             t  = leaf_nodes[inst_nodes[r]];
             if (NULL == t->child[0]){
                 init_child(t);
+                //le->aval = 1.0; // default binary feature
+                t->child[0]->aval = 1.0;
             }
             le = t->child[0];
-            if (t->depth < d && t->n >= (s << 1) && le->leaf == 2){
-                le->attr_val = 1.0; // default binary feature
+            if (t->depth < d && t->n >= (s << 1) && le->leaf == 2 && t->n - le->n >= s){
                 if (0 == ds->bin) {
                     v = ds->vals[o + j];
-                    if (v < le->attr_val && le->attr_val < DBL_MAX && le->n >= s){
+                    if (v < le->aval && le->n >= s) {
                         update_child(t, i, nr, wr, v);
                     }
-                    le->attr_val = v;
+                    le->aval = v;
                 }
                 le->n  += 1;
                 le->sg += g[r];
@@ -139,42 +128,44 @@ static int tree_grow(DTD * ds
             }
         }
         for (j = 0; j < l; j++){
-            t = leaf_nodes[j];
-            if (t->child[0]->leaf == 2){
-                update_child(t, i, nr, wr, 0.0);
-                // reset left child status
-                t->child[0]->n = 0;
-                t->child[0]->sg = t->child[0]->sh = 0.0;
+            t  = leaf_nodes[j];
+            le = t->child[0];
+            if (t && le && le->leaf == 2) { 
+                if (le->n >= s && t->n - le->n >= s){
+                    update_child(t, i, nr, wr, 0.0);
+                }
+                // reset left child status for next column scan
+                le->n = 0;
+                le->sg = le->sh = 0.0;
             }
         }
     }
-
     // select best split
     i = -1;
     v = 0.0;
     for (j = 0; j < l; j++){
         t = leaf_nodes[j];
-        if (t->child[0]->leaf == 2){
+        if (t && t->child[0] && t->child[0]->leaf == 2){
             fix_child(t, nr, wr);
         }
-        if (t->gain > v){
+        if (t && t->gain > v){
             v = t->gain;
             i = j;
         }
     }
-    leaf_nodes[i]->leaf = 0;
-    leaf_nodes[i]->child[0]->leaf = leaf_nodes[i]->child[1]->leaf = 1;
+    if (i > -1){
+        leaf_nodes[i]->leaf = 0;
+        leaf_nodes[i]->child[0]->leaf = leaf_nodes[i]->child[1]->leaf = 1;
+    }
     return i;
 }
 
-
 static DTree * init_root(double * g, double * h, int n, double nr, double wr){
     int i;
-    DTree * t = (DTree *)malloc(sizeof(DTree));
-    memset(t, 0, sizeof(DTree));
-    t->n = n;
+    DTree * t = (DTree *)calloc(1, sizeof(DTree));
+    t->n     = n;
+    t->leaf  = 1;
     t->depth = 0;
-    t->leaf = 1;
     for (i = 0; i < n; i++){
         t->sg += g[i];
         t->sh += h[i];
@@ -193,15 +184,13 @@ DTree * generate_dtree(DTD * ds      /* dataset for build tree */
                      , int n         /* number of instances    */
                      , int s         /* min instance each node */
                      , int d         /* max depth of tree      */
-                     , int m){       /* max leaf nodes         */
+                     , int m) {      /* max leaf nodes         */
     int i, k, o, l;
     if (m < 2)
         return NULL;
-    DTree ** leaf_nodes = (DTree**)malloc(sizeof(DTree*) * m);
-    memset(leaf_nodes, 0, sizeof(DTree*) * m);
-    int * inst_nodes = (int*)malloc(sizeof(int) * n);
-    memset(inst_nodes, 0, sizeof(int) * n);
-    DTree * t = init_root(g, h, n, nr, wr);
+    DTree ** leaf_nodes = (DTree**)calloc(m, sizeof(DTree*));
+    int   *  inst_nodes = (int*)calloc(n, sizeof(int));
+    DTree *  t = init_root(g, h, n, nr, wr);
     l = 0;
     for (i = 0; i < n; i++){
         inst_nodes[i] = l;
@@ -215,13 +204,18 @@ DTree * generate_dtree(DTD * ds      /* dataset for build tree */
         o = ds->cl[tmp->attr];
         for (i = 0; i < ds->l[tmp->attr]; i++){
             if (inst_nodes[ds->ids[o + i]] == k){
-                if ((1 == ds->bin) || (0 == ds->bin && ds->vals[o + i] >= tmp->attr_val)){
+                if ((1 == ds->bin) || (0 == ds->bin && ds->vals[o + i] >= tmp->aval)){
                     inst_nodes[ds->ids[o + i]] = l;
                 }
             }
         }
         leaf_nodes[l++] = tmp->child[0];
-        leaf_nodes[k] = tmp->child[1];
+        leaf_nodes[k]   = tmp->child[1];
+    }
+    for (i = 0; i < l; i++) if (leaf_nodes[i]->child[0]) {
+        free(leaf_nodes[i]->child[0]);
+        free(leaf_nodes[i]->child[1]);
+        leaf_nodes[i]->child[0] = leaf_nodes[i]->child[1] = NULL;
     }
     if (t->leaf == 0){
         for (i = 0; i < n; i++){
@@ -229,7 +223,7 @@ DTree * generate_dtree(DTD * ds      /* dataset for build tree */
         }
     }
     else{
-        free(t); t = NULL;
+        free_dtree(t); t = NULL;
     }
     free(leaf_nodes);    leaf_nodes = NULL;
     free(inst_nodes);    inst_nodes = NULL;
@@ -282,7 +276,7 @@ void save_dtree(DTree * t, char * out_file, char (*id_map)[FKL]){
     int i, l, c1, c2;
     i = l = 0;
     ts[l++] = t;
-    fprintf(fp, "n\tleaf\tAttr\tAttr_val\tNode_wei\tNode_loss\tleft\tright\n");
+    fprintf(fp, "n\tleaf\tAttr\taval\tNode_wei\tNode_loss\tleft\tright\n");
     do {
         DTree * ct = ts[i];
         c1 = c2 = 0;
@@ -291,7 +285,7 @@ void save_dtree(DTree * t, char * out_file, char (*id_map)[FKL]){
             c1 = l; ts[l++] = ct->child[0];
             c2 = l; ts[l++] = ct->child[1];
             fprintf(fp, "%d\t%d\t%s\t%.3f\t%.3f\t%.3f\t%d\t%d\n"          \
-                      , ct->n,   ct->leaf, id_map[ct->attr], ct->attr_val \
+                      , ct->n,   ct->leaf, id_map[ct->attr], ct->aval \
                       , ct->wei, ct->loss, c1, c2);
         }
         else{

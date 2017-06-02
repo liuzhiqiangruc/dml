@@ -93,24 +93,24 @@ static void fix_child(DTree * t, double nr, double wr){
     le->leaf = rt->leaf = 3; // calculated
 }
 
-static int tree_grow(DTD    * ds, DTree ** leaf_nodes
+static int tree_grow(DTD    * ds, DTree ** leaf_nodes // tree grow progress
                    , int    * inst_nodes
                    , double * g, double *h
                    , double  nr, double wr
                    , int      l, int s, int d) {
-    // tree grow progress
     int i, j, o, r;
     double v = 0.0;
     DTree *t = NULL, *le = NULL;
-    // scan ds via column
-    for (i = 0; i < ds->col; i++) {
+    for (i = 0; i < l; i++) if (leaf_nodes[i]->depth < d && leaf_nodes[i]->child[0] == NULL) goto scan_split;
+    goto select_best_split;
+scan_split:
+    for (i = 0; i < ds->col; i++) { // scan ds via column whatever
         o = ds->cl[i];
         for (j = 0; j < ds->l[i]; j++){
             r  = ds->ids[o + j];
             t  = leaf_nodes[inst_nodes[r]];
             if (NULL == t->child[0]){
                 init_child(t);
-                //le->aval = 1.0; // default binary feature
                 t->child[0]->aval = 1.0;
             }
             le = t->child[0];
@@ -140,7 +140,7 @@ static int tree_grow(DTD    * ds, DTree ** leaf_nodes
             }
         }
     }
-    // select best split
+select_best_split:
     i = -1;
     v = 0.0;
     for (j = 0; j < l; j++){

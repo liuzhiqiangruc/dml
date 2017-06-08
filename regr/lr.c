@@ -203,7 +203,7 @@ int lr_repo(double *x0, double *x1, void *_ds) {
     REG * lr = (REG *)_ds;
     double val1 = lr_eval(x0, _ds);
     double val2 = lr_eval(x1, _ds);
-    if (fabs(val2 - val1) < lr->p.ftoler){
+    if (fabs(val2 - val1) <= lr->p.ftoler){
         fprintf(stderr, "conv done exit\n");
         return 1;
     }

@@ -275,8 +275,7 @@ int learn_model(REG * reg){
     else{
         return -1;
     }
-    newton(reg->eval_fn, reg->grad_fn, reg->repo_fn, method, reg, 5, reg->p.niters, reg->c, reg->x);
-    return 0;
+    return newton(reg->eval_fn, reg->grad_fn, reg->repo_fn, method, reg, 5, reg->p.niters, reg->c, reg->x);
 }
 
 void save_model(REG * reg, int n){

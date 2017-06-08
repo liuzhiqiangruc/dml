@@ -116,7 +116,9 @@ int main(int argc, char *argv[]) {
     if (lr->test_ds){
         fprintf(stderr, " test: %d\n", lr->test_ds->r);
     }
-    learn_model(lr);
+    if (learn_model(lr) == -1){
+        fprintf(stderr, " newton method exit for step too small !\n");
+    }
     save_model(lr, lr->p.niters);
     free_model(lr);
     lr = NULL;

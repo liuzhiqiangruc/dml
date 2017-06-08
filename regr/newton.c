@@ -196,7 +196,7 @@ static double backtrack(void *data, EVAL_FN eval_fn, int n, double *x, double *g
     }
     gtd *= r;
     f0 = eval_fn(x, data);
-    for (int i = 0; i < 20; i++){
+    for (int i = 0; i < 30; i++){
         for (int j = 0; j < n; j++){
             newx[j] = x[j] + step * dir[j];
             if (method == OWLQN){
@@ -279,7 +279,7 @@ int newton(EVAL_FN eval_fn, GRAD_FN grad_fn, REPO_FN repo_fn, NT_METHOD method, 
     double *hg  = (double *) malloc(sizeof(double) * n);
     double *t   = NULL;
     double hgini = 0.0, yty = 0.0, lambda = 0.0;
-    int i = 0, j = 0, offs = 0, pos = 0, block = m * n;
+    int i = 0, j = 0, offs = 0, pos = 0, block = m * n, ret = 0;
     // init 
     memset(x0, 0, sizeof(double) * n);
     grad_fn(x0, data, g0, sg);
@@ -302,6 +302,7 @@ int newton(EVAL_FN eval_fn, GRAD_FN grad_fn, REPO_FN repo_fn, NT_METHOD method, 
             yty   += y[j] * y[j];
         }
         if (yty < EPS && yty > -EPS){
+            ret = -1;
             break;
         }
         hgini /= yty;
@@ -323,5 +324,5 @@ int newton(EVAL_FN eval_fn, GRAD_FN grad_fn, REPO_FN repo_fn, NT_METHOD method, 
     free(sm);
     free(ym);
     free(hg);
-    return 0;
+    return ret;
 }

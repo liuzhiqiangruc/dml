@@ -24,6 +24,29 @@ struct _gbdt {
     R r_fn;
 };
 
+static void load_init(GBDT * gbdt){
+    int i;
+    FILE * fp = NULL;
+    if (gbdt->train_ds && gbdt->p.train_init){
+        if (NULL == (fp = fopen(gbdt->p.train_init, "r"))){
+            return;
+        }
+        for (i = 0; i < gbdt->train_ds->row; i++){
+            fscanf(fp, "%lf", gbdt->f + i);
+        }
+        fclose(fp);
+    }
+    if (gbdt->test_ds && gbdt->p.test_init){
+        if (NULL == (fp = fopen(gbdt->p.test_init, "r"))){
+            return;
+        }
+        for (i = 0; i < gbdt->test_ds->row; i++){
+            fscanf(fp, "%lf", gbdt->t + i);
+        }
+        fclose(fp);
+    }
+}
+
 GBDT * gbdt_create(G g_fn, H h_fn, R r_fn, GBMP p){
     GBDT * gbdt = (GBDT*)malloc(sizeof(GBDT));
     if (!gbdt){
@@ -59,6 +82,7 @@ GBDT * gbdt_create(G g_fn, H h_fn, R r_fn, GBMP p){
     }
     memset(gbdt->t, 0, sizeof(double) * gbdt->test_ds->row);
 ret_no_test:
+    load_init(gbdt);
     return gbdt;
 test_y_failed:
     free_data(gbdt->test_ds);
@@ -139,6 +163,25 @@ void   gbdt_save (GBDT * gbdt){
     for (i = 0; i < gbdt->tree_size; i++){
         snprintf(outfile, 200, "%s/%d.dat", gbdt->p.out_dir, i);
         save_dtree(gbdt->dts[i], outfile, gbdt->train_ds->id_map);
+    }
+    FILE * fp = NULL;
+    snprintf(outfile, 200, "%s/train_score.scr", gbdt->p.out_dir);
+    if(NULL == (fp = fopen(outfile, "w"))){
+        return;
+    }
+    for (i = 0; i < gbdt->train_ds->row; i++){
+        fprintf(fp, "%.10f\n", gbdt->f[i]);
+    }
+    fclose(fp);
+    if (gbdt->test_ds){
+        snprintf(outfile, 200, "%s/test_score.scr", gbdt->p.out_dir);
+        if (NULL == (fp = fopen(outfile, "w"))){
+            return;
+        }
+        for (i = 0; i < gbdt->test_ds->row; i++){
+            fprintf(fp, "%.10f\n", gbdt->t[i]);
+        }
+        fclose(fp);
     }
 }
 

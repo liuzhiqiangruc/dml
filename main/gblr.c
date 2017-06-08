@@ -14,7 +14,7 @@
 
 void help() {
     fprintf(stderr, "\ngblr usage:        \n");
-    fprintf(stderr, "\n./gblr -n <int> -m <int> -d <int> -l <int> -b <int> -a <double> -g <double> -r <double> -f <string> -t <string> -o <string>\n");
+    fprintf(stderr, "\n./gblr -n <int> -m <int> -d <int> -l <int> -b <int> -a <double> -g <double> -r <double> -f <string> -s <string> -t <string> -y <string> -o <string>\n");
     fprintf(stderr, "     -n  tree capicity                   \n");
     fprintf(stderr, "     -m  max leaf node in per tree       \n");
     fprintf(stderr, "     -d  max depth of trees              \n");
@@ -24,7 +24,9 @@ void help() {
     fprintf(stderr, "     -g  weight regulization             \n");
     fprintf(stderr, "     -r  learning rate                   \n");
     fprintf(stderr, "     -f  train input file                \n");
+    fprintf(stderr, "     -s  train init  file                \n");
     fprintf(stderr, "     -t  test  input file                \n");
+    fprintf(stderr, "     -y  test  init  file                \n");
     fprintf(stderr, "     -o  otuput dir                      \n");
 }
 
@@ -35,6 +37,8 @@ int parse_command_line(GBMP *p, int argc, char *argv[]){
     int b = 0, n = 20, m = 10, d = 2, l = 0;
     char * f = NULL;
     char * t = NULL;
+    char * s = NULL;
+    char * y = NULL;
     char * o = "./";
     int i = 0;
     char * arg = NULL;
@@ -71,8 +75,14 @@ int parse_command_line(GBMP *p, int argc, char *argv[]){
         else if (0 == strcmp(arg,"-f")){
             f = argv[++i];
         }
+        else if (0 == strcmp(arg,"-s")){
+            s = argv[++i];
+        }
         else if (0 == strcmp(arg,"-t")){
             t = argv[++i];
+        }
+        else if (0 == strcmp(arg,"-y")){
+            y = argv[++i];
         }
         else if (0 == strcmp(arg,"-o")){
             o = argv[++i];
@@ -96,7 +106,9 @@ int parse_command_line(GBMP *p, int argc, char *argv[]){
     p->wei_reg        = w_reg;
     p->rate           = r;
     p->train_input    = f;
+    p->train_init     = s;
     p->test_input     = t;
+    p->test_init      = y;
     p->out_dir        = o;
     return 0;
 }
@@ -118,6 +130,8 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "    learning rate       : %f\n", p.rate           );
     fprintf(stderr, "    trainning data      : %s\n", p.train_input    );
     fprintf(stderr, "    testing   data      : %s\n", p.test_input     );
+    fprintf(stderr, "    trainning init      : %s\n", p.train_init     );
+    fprintf(stderr, "    testing   init      : %s\n", p.test_init      );
     fprintf(stderr, "    output dir          : %s\n", p.out_dir        );
 
     GBDT * gblr = gbdt_lr(p);

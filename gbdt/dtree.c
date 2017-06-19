@@ -254,6 +254,46 @@ double * eval_tree(DTD * ts, DTree * t, double * F, int n){
     return F;
 }
 
+DTree * serialize_dtree (DTree * t, int * nl){
+    if (!t){
+        return NULL;
+    }
+    DTree * rt = (DTree *)calloc(1000, sizeof(DTree));
+    int i, l, c1, c2;
+    memmove(rt, t, sizeof(t));
+    i = 0;
+    l = 1;
+    do{
+        DTree * ts = rt + i;
+        c1 = c2 = 0;
+        if (ts->leaf == 0){
+            memmove(rt + l++, ts->child[0], sizeof(DTree));
+            memmove(rt + l++, ts->child[1], sizeof(DTree));
+        }
+        i += 1;
+    } while(i < l && l < 1998);
+    *nl = l;
+    return rt;
+}
+
+DTree * unserialize_dtree(DTree * dt, int n){
+    int i, l;
+    i = 0;
+    l = 1;
+    do {
+        if (dt[i].leaf == 0){
+            dt[i].child[0] = dt + l++;
+            dt[i].child[1] = dt + l++;
+        }
+        else {
+            dt[i].child[0] = dt[i].child[1] = NULL;
+        }
+        i += 1;
+    }while( i < l && l < n);
+
+    return dt;
+}
+
 void save_dtree(DTree * t, char * out_file, char (*id_map)[FKL]){
     if (!t){
         return;

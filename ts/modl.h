@@ -31,7 +31,7 @@ double * initLogD(int L);
  * return   : the split rule array
  *            need to free after using
  * ---------------------------------------------- */
-double * modl(double v[], int a[], double * LogD, int n, int* nd);
+int * modl(double v[], int a[], double * LogD, int n, int* nd);
 
 #endif //MODL_H
 

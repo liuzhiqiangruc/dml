@@ -376,10 +376,10 @@ double * initLogD(int L){
  * int *nd  : the length of split rule point 
  * return   : the split point array
  * ---------------------------------------------- */
-double * modl(double v[], int a[], double * LogD, int n, int * nd){
+int * modl(double v[], int a[], double * LogD, int n, int* nd) {
     int m = 0, l = 0, c = 0, i = 0;
 
-    double * rule = NULL;
+    int * rule = NULL;
 
     // greedInit Interval first
     Interval * I = greedInit(v, a, n, &m);
@@ -397,10 +397,10 @@ double * modl(double v[], int a[], double * LogD, int n, int * nd){
     }
 
     // generate the partition rule array
-    rule = (double*)malloc(sizeof(double) * (l - 1));
+    rule = (int*)malloc(sizeof(double) * (l - 1));
     *nd = l - 1;
     for(i = 0; i < l-1; i++){
-        rule[i] = (v[M[i][1]] + v[M[i+1][0]]) / 2;
+        rule[i] = M[i][1];
     }
 
 ret:

@@ -16,7 +16,6 @@
 /* ----------------------------------------------
  * brief    : init the LogD for modl
  * int L    : the length of LogD
- *            should be twice of length of input
  * return   : the LogD dict
  * ---------------------------------------------- */
 double * initLogD(int L);
@@ -31,7 +30,7 @@ double * initLogD(int L);
  * return   : the split rule array
  *            need to free after using
  * ---------------------------------------------- */
-double * modl(double v[], int a[], double * LogD, int n, int* nd);
+int * modl(double v[], int a[], double * LogD, int n, int* nd);
 
 #endif //MODL_H
 

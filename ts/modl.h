@@ -16,6 +16,7 @@
 /* ----------------------------------------------
  * brief    : init the LogD for modl
  * int L    : the length of LogD
+ *            should be twice of length of input
  * return   : the LogD dict
  * ---------------------------------------------- */
 double * initLogD(int L);

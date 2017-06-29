@@ -44,4 +44,10 @@ double * eval_tree(DTD * ts, DTree * t, double * F, int n);
  * ------------------------------------ */
 void save_dtree(DTree * t, char * out_file, char (*id_map)[FKL]);
 
+DTree * unserialize_dtree(DTree * dt, int n);
+
+int serialize_dtree (DTree * t, DTree * rt);
+
+size_t size_dtree(DTree * t);
+
 #endif //DTREE_H

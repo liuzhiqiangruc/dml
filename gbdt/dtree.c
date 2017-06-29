@@ -286,8 +286,11 @@ DTree * unserialize_dtree(DTree * dt, int n){
         }
         i += 1;
     }while( i < l && l < n);
-
     return dt;
+}
+
+size_t size_dtree(DTree * t){
+    return sizeof(DTree);
 }
 
 void save_dtree(DTree * t, char * out_file, char (*id_map)[FKL]){

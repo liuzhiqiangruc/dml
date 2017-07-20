@@ -35,7 +35,7 @@ int parse_command_line(GBMP *p, int argc, char *argv[]){
     double r = 0.0;
     double w_reg = 0.0;
     double n_reg = 0.0;
-    int b = 0, n = 20, m = 10, d = 2, l = 0;
+    int b = 0, n = 1, m = 2, d = 1, l = 0;
     char * f = NULL;
     char * t = NULL;
     char * s = NULL;

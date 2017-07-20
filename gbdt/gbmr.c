@@ -29,7 +29,7 @@ void mlr_grad(double *f, double *y, double *e, int n, int k){
         offs = i * n;
         for (j = 0; j < n; j++){
             e[offs + j] /= t[j];
-            if (y[j] == k){
+            if (y[j] == i){
                 e[offs + j] = 1.0 - e[offs + j];
             }
             else{

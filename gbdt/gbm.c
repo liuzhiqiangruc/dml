@@ -38,14 +38,6 @@ static void init_k(GBM * gbm){
     gbm->k = k + 1;
 }
 
-static void exp_init(double * e, int k, int n){
-    int i;
-    double s = (double) (1.0 / k);
-    for (i = 0; i < n; i++){
-        e[i] = s;
-    }
-}
-
 static void eval_test(GBM * gbm){
     int i, k, offs, l = gbm->test_ds->row;
     double *t = (double *)calloc(l, sizeof(double));
@@ -138,9 +130,9 @@ int    gbm_train(GBM * gbm){
             m = 1;
         }
     }
-    exp_init(e, gbm->k, gbm->k * n);
     for (i = 0; i < gbm->p.max_trees; i++) {
         t = 0;
+        gbm->g_fn(gbm->f, gbm->train_ds->y, e, n, gbm->k);
         for (k = 0; k < gbm->k; k++){
             offs  = k * n;
             toffs = k * gbm->p.max_trees;
@@ -170,7 +162,6 @@ int    gbm_train(GBM * gbm){
         else{
             break;
         }
-        gbm->g_fn(gbm->f, gbm->train_ds->y, e, n, k);
     }
     free(f);  f = NULL;
     free(e);  e = NULL;

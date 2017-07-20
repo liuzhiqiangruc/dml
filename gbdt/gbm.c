@@ -7,6 +7,7 @@
  *   info     : 
  * ======================================================== */
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,6 +17,7 @@ struct _gbm {
     DTD * train_ds;      // train dataset
     DTD * test_ds;       // test dataset
     int      k;          // class count of dataset
+    int      currentsl;  // current max tree length
     int    * tree_size;  // tree size for model k
     double * f;          // pred value for train
     double * t;          // pred value for test
@@ -26,7 +28,6 @@ struct _gbm {
     R r_fn;              // report function
 };
 
-// init class count via train dataset
 static void init_k(GBM * gbm){
     DTD * ds = gbm->train_ds;
     int k, i;
@@ -36,30 +37,14 @@ static void init_k(GBM * gbm){
     }
     gbm->k = k + 1;
 }
-/*
-static void load_init(GBM * gbm){
+
+static void exp_init(double * e, int k, int n){
     int i;
-    FILE * fp = NULL;
-    if (gbm->train_ds && gbm->p.train_init){
-        if (NULL == (fp = fopen(gbm->p.train_init, "r"))){
-            return;
-        }
-        for (i = 0; i < gbm->train_ds->row; i++){
-            fscanf(fp, "%lf", gbm->f + i);
-        }
-        fclose(fp);
-    }
-    if (gbm->test_ds && gbm->p.test_init){
-        if (NULL == (fp = fopen(gbm->p.test_init, "r"))){
-            return;
-        }
-        for (i = 0; i < gbm->test_ds->row; i++){
-            fscanf(fp, "%lf", gbm->t + i);
-        }
-        fclose(fp);
+    double s = (double) (1.0 / k);
+    for (i = 0; i < n; i++){
+        e[i] = s;
     }
 }
-*/
 
 static void eval_test(GBM * gbm){
     int i, k, offs, l = gbm->test_ds->row;
@@ -76,37 +61,11 @@ static void eval_test(GBM * gbm){
     t = NULL;
 }
 
-/*
-static void gbm_save_score (GBM * gbm){
-    int i;
-    FILE * fp = NULL;
-    char outfile[200] = {0};
-    snprintf(outfile, 200, "%s/train_score.scr", gbm->p.out_dir);
-    if(NULL == (fp = fopen(outfile, "w"))){
-        return;
-    }
-    for (i = 0; i < gbm->train_ds->row; i++){
-        fprintf(fp, "%.10f\n", gbm->f[i]);
-    }
-    fclose(fp);
-    if (gbm->test_ds){
-        snprintf(outfile, 200, "%s/test_score.scr", gbm->p.out_dir);
-        if (NULL == (fp = fopen(outfile, "w"))){
-            return;
-        }
-        for (i = 0; i < gbm->test_ds->row; i++){
-            fprintf(fp, "%.10f\n", gbm->t[i]);
-        }
-        fclose(fp);
-    }
-}
-*/
 GBM * gbm_create(G g_fn, H h_fn, R r_fn, GBMP p){
-    GBM * gbm = (GBM*)malloc(sizeof(GBM));
+    GBM * gbm = (GBM*)calloc(1, sizeof(GBM));
     if (!gbm){
         goto gb_failed;
     }
-    memset(gbm, 0, sizeof(GBM));
     gbm->g_fn = g_fn;
     gbm->h_fn = h_fn;
     gbm->r_fn = r_fn;
@@ -160,71 +119,66 @@ gb_failed:
 }
 
 int    gbm_train(GBM * gbm){
-    int i, j, k, m, n, offs, toffs;
-    double *f, *g, *h;
+    int i, j, k, m, n, offs, toffs, t;
+    double *f, *g, *h, *e;
+    DTree * tt = NULL;
     m = gbm->p.min_node_ins;
     n = gbm->train_ds->row;
     f = (double*)calloc(n, sizeof(double));
-    g = (double*)calloc(n, sizeof(double));
     h = (double*)calloc(n, sizeof(double));
+    e = (double*)calloc(n * gbm->k, sizeof(double));
+    // constant hessian vector
+    for (i = 0; i < n; i++){
+        h[i] = 1;
+    }
+    // min count for each node
     if (m < 1){
         m = (int)(0.5 * n / gbm->p.max_leaf_nodes);
         if (m < 1){
             m = 1;
         }
     }
-    for (i = 0; i < gbm->p.max_trees; i++) for (k = 0; k < gbm->k; k++){
-        offs  = k * n;
-        toffs = k * gbm->p.max_trees;
-        gbm->g_fn(gbm->f + offs, gbm->train_ds->y, g, n);
-        gbm->h_fn(gbm->f + offs, gbm->train_ds->y, h, n);
-        DTree * tt = generate_dtree(gbm->train_ds, f, g, h,      \
-                                    gbm->p.nod_reg,              \
-                                    gbm->p.wei_reg, n, m,        \
-                                    gbm->p.max_depth,            \
-                                    gbm->p.max_leaf_nodes);
-        if (tt){
-            gbm->dts[toffs + gbm->tree_size[k]] = tt;
-            gbm->tree_size[k] += 1;
-            for (j = 0; j < n; j++){
-                gbm->f[offs + j] = f[j] * gbm->p.rate;
+    exp_init(e, gbm->k, gbm->k * n);
+    for (i = 0; i < gbm->p.max_trees; i++) {
+        t = 0;
+        for (k = 0; k < gbm->k; k++){
+            offs  = k * n;
+            toffs = k * gbm->p.max_trees;
+            g     = e + offs;
+            tt    = generate_dtree(gbm->train_ds, f, g, h,      \
+                                   gbm->p.nod_reg,              \
+                                   gbm->p.wei_reg, n, m,        \
+                                   gbm->p.max_depth,            \
+                                   gbm->p.max_leaf_nodes);
+            if (tt){
+                t = 1;
+                gbm->dts[toffs + gbm->tree_size[k]] = tt;
+                gbm->tree_size[k] += 1;
+                for (j = 0; j < n; j++){
+                    gbm->f[offs + j] = f[j] * gbm->p.rate;
+                }
+                memset(f, 0, sizeof(double) * n);
+                if (gbm->test_ds){
+                    eval_test(gbm);
+                }
+                gbm->r_fn(gbm);
             }
-            memset(f, 0, sizeof(double) * n);
-            if (gbm->test_ds){
-                eval_test(gbm);
-            }
-            gbm->r_fn(gbm);
         }
+        if (t == 1){
+            gbm->currentsl += 1;
+        }
+        else{
+            break;
+        }
+        gbm->g_fn(gbm->f, gbm->train_ds->y, e, n, k);
     }
     free(f);  f = NULL;
-    free(g);  g = NULL;
+    free(e);  e = NULL;
     free(h);  h = NULL;
     return 0;
 }
 
 void gbm_save(GBM * gbm){
-    /*
-    int i, n, s = size_dtree(gbm->dts[0]);
-    char outfile[200] = {0};
-    FILE  * fp = NULL;
-    DTree * st = NULL;
-    snprintf(outfile, 200, "%s/gbmree.mdl", gbm->p.out_dir);
-    if (NULL == (fp = fopen(outfile, "wb"))){
-        return ;
-    }
-    fwrite(&gbm->train_ds->col, sizeof(int), 1, fp);
-    fwrite(gbm->train_ds->id_map, sizeof(char[FKL]), gbm->train_ds->col, fp);
-    st = (DTree*)calloc(2000, s);
-    for (i = 0; i < gbm->tree_size; i++){
-        n = serialize_dtree(gbm->dts[i], st);
-        fwrite(&n, sizeof(int), 1, fp);
-        fwrite(st, s, n, fp);
-    }
-    fclose(fp);
-    free(st); st = NULL;
-    gbm_save_score(gbm);
-    */
-    return;
 }
 
 void   gbm_free (GBM * gbm){
@@ -287,7 +241,7 @@ double * t_label(GBM * gbm){
 }
 
 int t_size(GBM * gbm){
-    return 0;
+    return gbm->currentsl;
 }
 
 int has_test(GBM * gbm){

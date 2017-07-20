@@ -12,12 +12,22 @@
 
 #include "dtree.h"
 #include "tdata.h"
-#include "fn_types.h"
 #include "gbcfg.h"
 
 
 //- type declare
 typedef struct _gbdt GBDT;
+
+/* --------------------------------------
+ * brief  : f', f" and report functions
+ * f      : current model value
+ * y      : target label
+ * g      : f' outer
+ * h      : f" outer
+ * n      : length of f,y,g,h
+ * -------------------------------------- */
+typedef void(*G)(double * f, double * y, double * g, int n);
+typedef void(*H)(double * f, double * y, double * h, int n);
 
 //- report function define
 typedef void(*R)(GBDT * m);

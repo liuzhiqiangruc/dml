@@ -45,7 +45,7 @@ static void eval_test(GBM * gbm){
         eval_tree(gbm->test_ds, gbm->dts[k * gbm->p.max_trees + gbm->tree_size[k] - 1], t, l);
         offs = k * l;
         for (i = 0; i < l; i++){
-            gbm->t[offs + i] += t[i] * gbm->p.rate;
+            gbm->t[offs + i] -= t[i] * gbm->p.rate;
         }
         memset(t, 0, sizeof(double) * l);
     }
@@ -119,10 +119,10 @@ int    gbm_train(GBM * gbm){
     f = (double*)calloc(n, sizeof(double));
     h = (double*)calloc(n, sizeof(double));
     e = (double*)calloc(n * gbm->k, sizeof(double));
-    // constant hessian vector
     for (i = 0; i < n; i++){
-        h[i] = 1;
+        h[i] = 1.0;
     }
+
     // min count for each node
     if (m < 1){
         m = (int)(0.5 * n / gbm->p.max_leaf_nodes);
@@ -147,16 +147,16 @@ int    gbm_train(GBM * gbm){
                 gbm->dts[toffs + gbm->tree_size[k]] = tt;
                 gbm->tree_size[k] += 1;
                 for (j = 0; j < n; j++){
-                    gbm->f[offs + j] = f[j] * gbm->p.rate;
+                    gbm->f[offs + j] -= f[j] * gbm->p.rate;
                 }
                 memset(f, 0, sizeof(double) * n);
                 if (gbm->test_ds){
                     eval_test(gbm);
                 }
-                gbm->r_fn(gbm);
             }
         }
         if (t == 1){
+            gbm->r_fn(gbm);
             gbm->currentsl += 1;
         }
         else{
@@ -205,6 +205,10 @@ void   gbm_free (GBM * gbm){
         free(gbm);
     }
     */
+}
+
+int k_count(GBM * gbm){
+    return gbm->k;
 }
 
 int y_rowns(GBM * gbm){

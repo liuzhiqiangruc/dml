@@ -33,6 +33,9 @@ typedef void(*H)(double * f, double * y, double * h, int n, int k);
 //- report function define
 typedef void(*R)(GBM * m);
 
+//- class count k
+int      k_count(GBM * gbm);
+
 //-   train rows, labels, and model
 int      y_rowns(GBM * gbm);
 double * y_label(GBM * gbm);

@@ -1,3 +1,4 @@
+MAKE     = make
 UTILDIR  = util
 REGRDIR  = regr
 GBDTDIR  = gbdt
@@ -14,11 +15,11 @@ INC = -I../$(UTILDIR) -I../$(REPDIR) -I../$(REGRDIR)
 
 CC = gcc -std=c99 -O3
 LD = gcc -shared
-WARN = -Wall #-Wno-unused-but-set-variable
+WARN = -Wall -Wno-unused-but-set-variable
 CFBASE = $(WARN) -pedantic -pipe -fPIC 
 CFLAGS = $(CFBASE) -DNDEBUG -DNPRINT $(INC)
 
-export CC LD CFLAGS
+export CC LD CFLAGS MAKE
 
 all: libs app
 

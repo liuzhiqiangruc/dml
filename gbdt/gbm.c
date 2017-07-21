@@ -1,16 +1,16 @@
 /* ========================================================
  *   Copyright (C) 2017 All rights reserved.
- *   
+ *
  *   filename : gbm.c
  *   author   : ***
  *   date     : 2017-07-19
- *   info     : 
+ *   info     :
  * ======================================================== */
-
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include "gbm.h"
 
 struct _gbm {
@@ -21,7 +21,7 @@ struct _gbm {
     int    * tree_size;  // tree size for model k
     double * f;          // pred value for train
     double * t;          // pred value for test
-    DTree ** dts;        // dtrees 
+    DTree ** dts;        // dtrees
     GBMP p;              // gbm config
     G g_fn;              // grad function
     H h_fn;              // hessian function
@@ -122,8 +122,6 @@ int    gbm_train(GBM * gbm){
     for (i = 0; i < n; i++){
         h[i] = 1.0;
     }
-
-    // min count for each node
     if (m < 1){
         m = (int)(0.5 * n / gbm->p.max_leaf_nodes);
         if (m < 1){
@@ -170,11 +168,73 @@ int    gbm_train(GBM * gbm){
 }
 
 void gbm_save(GBM * gbm){
+    int     i, j, k, s, n, offs;
+    char    subdir[256] = {0};
+    char    outfp[256]  = {0};
+    char  * outdir = gbm->p.out_dir;
+    FILE  * fp = NULL;
+    DTree * st = NULL;
+    k  = gbm->k;
+    s  = size_dtree(gbm->dts[0]);
+    st = (DTree*)calloc(2000, s);   // tree space
+    for (i = 0; i < k; i++){
+        // create subdir for k boosting trees
+        snprintf(subdir, 255, "%s/%d", outdir, i);
+        mkdir(subdir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+        // save dtree debug information
+        offs = i * gbm->p.max_trees;
+        for (j = 0; j < gbm->tree_size[i]; j++){
+            snprintf(outfp, 255, "%s/%d.dat", subdir, j);
+            save_dtree(gbm->dts[offs + j], outfp, gbm->train_ds->id_map);
+        }
+        // save binary format of dtrees for each boosting model
+        snprintf(outfp, 255, "%s/gbmdtree.%05d.mdl", gbm->p.out_dir, i);
+        if (NULL == (fp = fopen(outfp, "wb"))){
+            return ;
+        }
+        fwrite(&gbm->train_ds->col, sizeof(int), 1, fp);
+        fwrite(gbm->train_ds->id_map, sizeof(char[FKL]), gbm->train_ds->col, fp);
+        for (j = 0; j < gbm->tree_size[i]; j++){
+            n = serialize_dtree(gbm->dts[i], st);
+            fwrite(&n, sizeof(int), 1, fp);
+            fwrite(st, s, n, fp);
+        }
+        fclose(fp);
+    }
+    free(st); st = NULL;
+    // save model scores for train dataset
+    n = gbm->train_ds->row;
+    snprintf(outfp, 255, "%s/train_score.scr", gbm->p.out_dir);
+    if (NULL == (fp = fopen(outfp, "w"))){
+        return;
+    }
+    for (i = 0; i < n; i++){
+        for(j = 0; j < k; j++){
+            fprintf(fp, "\t%.5f", gbm->f[j * n + i]);
+        }
+        fprintf(fp, "\n");
+    }
+    fclose(fp);
+    if (gbm->test_ds){ //save scores for test dataset if need
+        n = gbm->test_ds->row;
+        snprintf(outfp, 255, "%s/test_score.scr", gbm->p.out_dir);
+        if (NULL == (fp = fopen(outfp, "w"))){
+            return;
+        }
+        for (i = 0; i < n; i++){
+            for(j = 0; j < k; j++){
+                fprintf(fp, "\t%.5f", gbm->t[j * n + i]);
+            }
+            fprintf(fp, "\n");
+        }
+        fclose(fp);
+    }
+    return;
 }
 
 void   gbm_free (GBM * gbm){
-    /*
-    int i;
+    int i, j, k, offs;
+    k = gbm->k;
     if (gbm){
         if (gbm->train_ds){
             free_data(gbm->train_ds);
@@ -193,18 +253,24 @@ void   gbm_free (GBM * gbm){
             gbm->t = NULL;
         }
         if (gbm->dts){
-            for (i = 0; i < gbm->tree_size; i++){
-                if (gbm->dts[i]){
-                    free_dtree(gbm->dts[i]);
-                    gbm->dts[i] = NULL;
+            for (i = 0; i < k; i++){
+                offs = i * gbm->p.max_trees;
+                for (j = 0; j < gbm->tree_size[i]; j++){
+                    if (gbm->dts[offs + j]){
+                        free_dtree(gbm->dts[offs + j]);
+                        gbm->dts[offs + j] = NULL;
+                    }
                 }
             }
             free(gbm->dts);
             gbm->dts = NULL;
         }
+        if (gbm->tree_size){
+            free(gbm->tree_size);
+            gbm->tree_size = NULL;
+        }
         free(gbm);
     }
-    */
 }
 
 int k_count(GBM * gbm){

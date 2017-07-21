@@ -142,7 +142,7 @@ int main(int argc, char *argv[]) {
     long t1 = time(NULL);
     gbm_train(gbmr);
     long t2 = time(NULL);
-    printf("time used for training: %ld seconds\n", t2 - t1);
+    fprintf(stderr, "time used for training: %ld seconds\n", t2 - t1);
     gbm_save(gbmr);
     gbm_free(gbmr);
     gbmr = NULL;

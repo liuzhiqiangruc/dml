@@ -16,12 +16,12 @@ INC = -I../$(UTILDIR) -I../$(REPDIR) -I../$(REGRDIR)
 CC = gcc -std=c99 -O3
 LD = gcc -shared
 WARN = -Wall -Wno-unused-but-set-variable
-CFBASE = $(WARN) -pedantic -pipe -fPIC 
-CFLAGS = $(CFBASE) -DNDEBUG -DNPRINT $(INC)
+CFBASE = $(WARN) -pedantic -pipe
+CFLAGS = $(CFBASE) -fPIC -DNDEBUG -DNPRINT $(INC)
 
 export CC LD CFLAGS MAKE
 
-all: libs app
+all: libs app clean
 
 libs:
 	cd $(UTILDIR); $(MAKE) clean; $(MAKE); $(MAKE) install

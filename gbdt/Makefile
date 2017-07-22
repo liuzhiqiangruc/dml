@@ -1,8 +1,8 @@
 ext_obj = ../util/hash.o ../util/str.o ../regr/auc.o
 
-objs    = gblr.o gbdt.o dtree.o tdata.o
-sos     = libgblr.so libgbdt.so libdtree.so libtdata.so
-statics = libgblrs.a libgbdts.a libdtrees.a libtdatas.a
+objs    = gblr.o gbdt.o dtree.o tdata.o     gbm.o gbmr.o
+sos     = libgblr.so libgbdt.so libdtree.so libtdata.so  libgbm.so libgbmr.so
+statics = libgblrs.a libgbdts.a libdtrees.a libtdatas.a  libgbms.a libgbmrs.a
 
 all : $(objs) $(statics) $(sos)
 
@@ -15,10 +15,18 @@ inc_install :
 	mkdir -p ../inc
 	cp *.h ../inc
 
+gbmr.o : gbmr.h
+gbm.o  : gbm.h
 gblr.o : gblr.h
 gbdt.o : gbdt.h
 dtree.o : dtree.h
 tdata.o : tdata.h
+
+libgbmr.so : gbmr.o gbm.o dtree.o tdata.o $(ext_obj)
+	$(LD) $^ -o $@
+
+libgbm.so : gbm.o dtree.o tdata.o $(ext_obj)
+	$(LD) $^ -o $@
 
 libgblr.so : gblr.o gbdt.o dtree.o tdata.o $(ext_obj)
 	$(LD) $^ -o $@
@@ -32,6 +40,14 @@ libdtree.so : dtree.o tdata.o $(ext_obj)
 libtdata.so : tdata.o $(ext_obj)
 	$(LD) $^ -o $@
 
+
+
+
+libgbmrs.a : gbmr.o gbm.o dtree.o tdata.o $(ext_obj)
+	ar cr $@ $^
+
+libgbms.a : gbm.o dtree.o tdata.o $(ext_obj) 
+	ar cr $@ $^
 
 libgblrs.a : gblr.o gbdt.o dtree.o tdata.o $(ext_obj)
 	ar cr $@ $^

@@ -12,27 +12,12 @@
 
 #include "dtree.h"
 #include "tdata.h"
+#include "gbcfg.h"
 
-/* --------------------------------------
- * GBDT configurations 
- * -------------------------------------- */
-typedef struct _gbdt_param {
-    double rate;                 /* learning rate      */
-    double nod_reg;              /* regular for node   */
-    double wei_reg;              /* regular for weight */
-    int    max_leaf_nodes;       /* max leaf nodes     */
-    int    max_trees;            /* tree capacity      */
-    int    max_depth;            /* max tree depth     */
-    int    min_node_ins;         /* min ins. for node  */
-    int    binary;               /* 1 for binary       */
-    char * train_init;           /* train init model   */
-    char * train_input;          /* train input file   */
-    char * test_init;            /* test  init model   */
-    char * test_input;           /* test  input file   */
-    char * out_dir;              /* output dir         */
-} GBMP;
 
+//- type declare
 typedef struct _gbdt GBDT;
+
 /* --------------------------------------
  * brief  : f', f" and report functions
  * f      : current model value
@@ -43,6 +28,8 @@ typedef struct _gbdt GBDT;
  * -------------------------------------- */
 typedef void(*G)(double * f, double * y, double * g, int n);
 typedef void(*H)(double * f, double * y, double * h, int n);
+
+//- report function define
 typedef void(*R)(GBDT * m);
 
 //-   train rows, labels, and model

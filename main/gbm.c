@@ -1,16 +1,17 @@
 /* ========================================================
- *   Copyright (C) 2016 All rights reserved.
+ *   Copyright (C) 2017 All rights reserved.
  *   
- *   filename : gblr.c
- *   author   : liuzhiqiangruc@126.com
- *   date     : 2016-03-28
+ *   filename : gbm.c
+ *   author   : ***
+ *   date     : 2017-07-20
  *   info     : 
  * ======================================================== */
+
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "gblr.h"
+#include "gbmr.h"
 
 void help() {
     fprintf(stderr, "\ngblr usage:        \n");
@@ -34,7 +35,7 @@ int parse_command_line(GBMP *p, int argc, char *argv[]){
     double r = 0.0;
     double w_reg = 0.0;
     double n_reg = 0.0;
-    int b = 0, n = 10, m = 2, d = 1, l = 0;
+    int b = 0, n = 1, m = 2, d = 1, l = 0;
     char * f = NULL;
     char * t = NULL;
     char * s = NULL;
@@ -134,16 +135,16 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "    testing   init      : %s\n", p.test_init      );
     fprintf(stderr, "    output dir          : %s\n", p.out_dir        );
 
-    GBDT * gblr = gbdt_lr(p);
-    if (!gblr){
+    GBM * gbmr = gbm_lr(p);
+    if (!gbmr){
         return -1;
     }
     long t1 = time(NULL);
-    gbdt_train(gblr);
+    gbm_train(gbmr);
     long t2 = time(NULL);
-    printf("time used for training: %ld seconds\n", t2 - t1);
-    gbdt_save(gblr);
-    gbdt_free(gblr);
-    gblr = NULL;
+    fprintf(stderr, "time used for training: %ld seconds\n", t2 - t1);
+    gbm_save(gbmr);
+    gbm_free(gbmr);
+    gbmr = NULL;
     return 0;
 }

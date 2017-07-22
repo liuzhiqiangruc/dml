@@ -3,17 +3,14 @@ LIB = ../lib
 INS = ../output
 
 
-CC = gcc -std=c99 -g
-CFBASE = -Wall -pedantic -pipe
-CFLAGS = $(CFBASE) -DNDEBUG -DNPRINT -O0 -I$(INC)
+CFLAGS = $(CFBASE) -DNDEBUG -DNPRINT -I$(INC)
 
-PRGS   = lr gblr k2d lda hlda xlda w2v d2v kmeans
+PRGS   = lr gblr k2d lda hlda xlda w2v d2v kmeans gbm
 
 all : $(PRGS)
 
 w2v.o : w2v.c
 	$(CC) $(CFLAGS) -c $^ -o $@
-
 
 d2v.o : d2v.c
 	$(CC) $(CFLAGS) -c $^ -o $@
@@ -28,6 +25,9 @@ lr.o : lr.c
 	$(CC) $(CFLAGS) -c $^ -o $@
 
 gblr.o : gblr.c
+	$(CC) $(CFLAGS) -c $^ -o $@
+
+gbm.o  : gbm.c
 	$(CC) $(CFLAGS) -c $^ -o $@
 
 k2d.o : k2d.c
@@ -63,6 +63,9 @@ lda_xy: lda.o
 gblr: gblr.o
 	$(CC) -L$(LIB) $^ -lgblrs -lm -o $@
 
+gbm : gbm.o
+	$(CC) -L$(LIB) $^ -lgbmrs -lm -o $@
+
 k2d : k2d.o
 	$(CC) -L$(LIB) $^ -lk2ds -lm -o $@
 
@@ -80,3 +83,4 @@ install:
 clean :
 	rm -rf $(PRGS)
 	rm -rf *.o
+	rm -rf *.dSYM

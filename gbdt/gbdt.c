@@ -47,6 +47,42 @@ static void load_init(GBDT * gbdt){
     }
 }
 
+static void eval_test(GBDT * gbdt){
+    int i, l = gbdt->test_ds->row;
+    double *t = (double *)malloc(sizeof(double) * l);
+    memset(t, 0, sizeof(double) * l);
+    eval_tree(gbdt->test_ds, gbdt->dts[gbdt->tree_size - 1], t, l);
+    for (i = 0; i < l; i++){
+        gbdt->t[i] += t[i] * gbdt->p.rate;
+    }
+    free(t);
+    t = NULL;
+}
+
+static void gbdt_save_score (GBDT * gbdt){
+    int i;
+    FILE * fp = NULL;
+    char outfile[200] = {0};
+    snprintf(outfile, 200, "%s/train_score.scr", gbdt->p.out_dir);
+    if(NULL == (fp = fopen(outfile, "w"))){
+        return;
+    }
+    for (i = 0; i < gbdt->train_ds->row; i++){
+        fprintf(fp, "%.10f\n", gbdt->f[i]);
+    }
+    fclose(fp);
+    if (gbdt->test_ds){
+        snprintf(outfile, 200, "%s/test_score.scr", gbdt->p.out_dir);
+        if (NULL == (fp = fopen(outfile, "w"))){
+            return;
+        }
+        for (i = 0; i < gbdt->test_ds->row; i++){
+            fprintf(fp, "%.10f\n", gbdt->t[i]);
+        }
+        fclose(fp);
+    }
+}
+
 GBDT * gbdt_create(G g_fn, H h_fn, R r_fn, GBMP p){
     GBDT * gbdt = (GBDT*)malloc(sizeof(GBDT));
     if (!gbdt){
@@ -102,18 +138,6 @@ gb_failed:
     return NULL;
 }
 
-static void eval_test(GBDT * gbdt){
-    int i, l = gbdt->test_ds->row;
-    double *t = (double *)malloc(sizeof(double) * l);
-    memset(t, 0, sizeof(double) * l);
-    eval_tree(gbdt->test_ds, gbdt->dts[gbdt->tree_size - 1], t, l);
-    for (i = 0; i < l; i++){
-        gbdt->t[i] += t[i] * gbdt->p.rate;
-    }
-    free(t);
-    t = NULL;
-}
-
 int    gbdt_train(GBDT * gbdt){
     int i, j, m, n = gbdt->train_ds->row;
     double * f = (double*)malloc(sizeof(double) * n);
@@ -130,12 +154,16 @@ int    gbdt_train(GBDT * gbdt){
             m = 1;
         }
     }
-
     for (i = 0; i < gbdt->p.max_trees; i++) {
         gbdt->g_fn(gbdt->f, gbdt->train_ds->y, g, n);
         gbdt->h_fn(gbdt->f, gbdt->train_ds->y, h, n);
         DTree * tt = generate_dtree(gbdt->train_ds, f, g, h, gbdt->p.nod_reg, gbdt->p.wei_reg, n, m, gbdt->p.max_depth, gbdt->p.max_leaf_nodes);
         if (tt){
+#ifdef DTREE_DEBUG
+            char outfile[200] = {0};
+            snprintf(outfile, 200, "%s/%d.dat", gbdt->p.out_dir, i);
+            save_dtree(gbdt->dts[i], outfile, gbdt->train_ds->id_map);
+#endif
             gbdt->dts[i] = tt;
             gbdt->tree_size += 1;
             for (j = 0; j < n; j++){
@@ -157,32 +185,27 @@ int    gbdt_train(GBDT * gbdt){
     return 0;
 }
 
-void   gbdt_save (GBDT * gbdt){
-    int i;
-    char outfile[200] = {'\0'};
+void gbdt_save(GBDT * gbdt){
+    int i, n, s = size_dtree(gbdt->dts[0]);
+    char outfile[200] = {0};
+    FILE  * fp = NULL;
+    DTree * st = NULL;
+    snprintf(outfile, 200, "%s/gbdtree.mdl", gbdt->p.out_dir);
+    if (NULL == (fp = fopen(outfile, "wb"))){
+        return ;
+    }
+    fwrite(&gbdt->train_ds->col, sizeof(int), 1, fp);
+    fwrite(gbdt->train_ds->id_map, sizeof(char[FKL]), gbdt->train_ds->col, fp);
+    st = (DTree*)calloc(2000, s);
     for (i = 0; i < gbdt->tree_size; i++){
-        snprintf(outfile, 200, "%s/%d.dat", gbdt->p.out_dir, i);
-        save_dtree(gbdt->dts[i], outfile, gbdt->train_ds->id_map);
-    }
-    FILE * fp = NULL;
-    snprintf(outfile, 200, "%s/train_score.scr", gbdt->p.out_dir);
-    if(NULL == (fp = fopen(outfile, "w"))){
-        return;
-    }
-    for (i = 0; i < gbdt->train_ds->row; i++){
-        fprintf(fp, "%.10f\n", gbdt->f[i]);
+        n = serialize_dtree(gbdt->dts[i], st);
+        fwrite(&n, sizeof(int), 1, fp);
+        fwrite(st, s, n, fp);
     }
     fclose(fp);
-    if (gbdt->test_ds){
-        snprintf(outfile, 200, "%s/test_score.scr", gbdt->p.out_dir);
-        if (NULL == (fp = fopen(outfile, "w"))){
-            return;
-        }
-        for (i = 0; i < gbdt->test_ds->row; i++){
-            fprintf(fp, "%.10f\n", gbdt->t[i]);
-        }
-        fclose(fp);
-    }
+    free(st); st = NULL;
+    gbdt_save_score(gbdt);
+    return;
 }
 
 void   gbdt_free (GBDT * gbdt){

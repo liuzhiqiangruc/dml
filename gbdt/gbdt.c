@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include "gbdt.h"
 
 struct _gbdt {
@@ -161,8 +162,10 @@ int    gbdt_train(GBDT * gbdt){
         if (tt){
 #ifdef DTREE_DEBUG
             char outfile[200] = {0};
-            snprintf(outfile, 200, "%s/%d.dat", gbdt->p.out_dir, i);
-            save_dtree(gbdt->dts[i], outfile, gbdt->train_ds->id_map);
+            snprintf(outfile, 200, "%s/dtrees", gbdt->p.out_dir);
+            mkdir(outfile, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+            snprintf(outfile, 200, "%s/%d.dat", outfile, i);
+            save_dtree(tt, outfile, gbdt->train_ds->id_map);
 #endif
             gbdt->dts[i] = tt;
             gbdt->tree_size += 1;

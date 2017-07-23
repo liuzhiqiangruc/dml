@@ -63,23 +63,6 @@ static double k_loss(double * e, double * y, int n, int k){
 }
 
 void mlr_repo(GBM *gbm){
-    // just print train score for debug
-    /*
-    int i, j, k, n, offs;
-    double *f = NULL;
-    n = y_rowns(gbm);
-    k = k_count(gbm);
-    f = y_model(gbm);
-    for (i = 0; i < n; i++){
-        for(j = 0; j < k; j++){
-            offs = j * n + i;
-            fprintf(stderr, "\t%.5f", f[offs]);
-        }
-        fprintf(stderr, "\n");
-    }
-    fprintf(stderr, "========\n");
-    */
-
     int k, n, c;
     double train_loss, test_loss;
     double *f, *e, *y;

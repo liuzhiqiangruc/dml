@@ -174,6 +174,7 @@ void gbm_save(GBM * gbm){
     k  = gbm->k;
     s  = size_dtree(gbm->dts[0]);
     st = (DTree*)calloc(2000, s);   // tree space
+    mkdir(outdir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
     for (i = 0; i < k; i++){
         // create subdir for k boosting trees
         snprintf(subdir, 255, "%s/%d", outdir, i);

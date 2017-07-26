@@ -161,10 +161,11 @@ int    gbdt_train(GBDT * gbdt){
         DTree * tt = generate_dtree(gbdt->train_ds, f, g, h, gbdt->p.nod_reg, gbdt->p.wei_reg, n, m, gbdt->p.max_depth, gbdt->p.max_leaf_nodes);
         if (tt){
 #ifdef DTREE_DEBUG
+            char subdir[200] = {0};
             char outfile[200] = {0};
-            snprintf(outfile, 200, "%s/dtrees", gbdt->p.out_dir);
-            mkdir(outfile, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-            snprintf(outfile, 200, "%s/%d.dat", outfile, i);
+            snprintf(subdir, 200, "%s/dtrees", gbdt->p.out_dir);
+            mkdir(subdir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+            snprintf(outfile, 200, "%s/%d.dat", subdir, i);
             save_dtree(tt, outfile, gbdt->train_ds->id_map);
 #endif
             gbdt->dts[i] = tt;

@@ -27,8 +27,7 @@ typedef struct _gbm GBM;
  * n      : length of f,y,g,h
  * k      : total class count 
  * -------------------------------------- */
-typedef void(*G)(double * f, double * y, double * g, int n, int k);
-typedef void(*H)(double * f, double * y, double * h, int n, int k);
+typedef void(*GH)(double * f, double * y, double * g, double * h, int n, int k);
 
 //- report function define
 typedef void(*R)(GBM * m);
@@ -53,7 +52,7 @@ int      t_size(GBM * gbm);
 int      has_test(GBM * gbm);
 
 //-   create, train, save, free gbm model
-GBM * gbm_create(G g_fn, H h_fn, R f_fn, GBMP p);
+GBM * gbm_create(GH g_fn, R r_fn, GBMP p);
 int   gbm_train(GBM * gbm);
 void  gbm_save (GBM * gbm);
 void  gbm_free (GBM * gbm);

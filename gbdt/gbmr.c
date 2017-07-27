@@ -32,18 +32,18 @@ static void exp_norm(double *f, double *e, int n, int k){
     return;
 }
 
-// default do nothing
-void mlr_hess(double *f, double *y, double *h, int n, int k){}
-
-void mlr_grad(double *f, double *y, double *e, int n, int k){
+void mlr_grad(double *f, double *y, double *e, double *h, int n, int k){
     int i, j, offs;
     double s;
     exp_norm(f, e, n, k);
+    for (i = 0; i < n * k; i++){
+        h[i] = e[i] * (1.0 - e[i]);
+    }
     for (i = 0; i < k; i++){
         offs = i * n;
         for (j = 0; j < n; j++){
             s = (y[j] == i ? 1.0 : 0.0);
-            e[offs + j] = s - e[offs + j];
+            e[offs + j] -= s;
         }
     }
     return;
@@ -91,5 +91,5 @@ void mlr_repo(GBM *gbm){
 }
 
 GBM * gbm_lr(GBMP p){
-    return gbm_create(mlr_grad, mlr_hess, mlr_repo, p);
+    return gbm_create(mlr_grad, mlr_repo, p);
 }

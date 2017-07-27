@@ -155,6 +155,7 @@ int    gbdt_train(GBDT * gbdt){
             m = 1;
         }
     }
+    mkdir(gbdt->p.out_dir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
     for (i = 0; i < gbdt->p.max_trees; i++) {
         gbdt->g_fn(gbdt->f, gbdt->train_ds->y, g, n);
         gbdt->h_fn(gbdt->f, gbdt->train_ds->y, h, n);

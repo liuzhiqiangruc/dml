@@ -23,9 +23,8 @@ struct _gbm {
     double * t;          // pred value for test
     DTree ** dts;        // dtrees
     GBMP p;              // gbm config
-    G g_fn;              // grad function
-    H h_fn;              // hessian function
-    R r_fn;              // report function
+    GH   g_fn;           // grad function
+    R    r_fn;           // report function
 };
 
 static void init_k(GBM * gbm){
@@ -44,19 +43,18 @@ static void eval_test(GBM * gbm, int k){
     eval_tree(gbm->test_ds, gbm->dts[k * gbm->p.max_trees + gbm->tree_size[k] - 1], t, l);
     offs = k * l;
     for (i = 0; i < l; i++){
-        gbm->t[offs + i] -= t[i] * gbm->p.rate;
+        gbm->t[offs + i] += t[i] * gbm->p.rate;
     }
     free(t);
     t = NULL;
 }
 
-GBM * gbm_create(G g_fn, H h_fn, R r_fn, GBMP p){
+GBM * gbm_create(GH g_fn, R r_fn, GBMP p){
     GBM * gbm = (GBM*)calloc(1, sizeof(GBM));
     if (!gbm){
         goto gb_failed;
     }
     gbm->g_fn = g_fn;
-    gbm->h_fn = h_fn;
     gbm->r_fn = r_fn;
     gbm->p = p;
     // load dataset
@@ -109,16 +107,13 @@ gb_failed:
 
 int    gbm_train(GBM * gbm){
     int i, j, k, m, n, offs, toffs, t;
-    double *f, *g, *h, *e;
+    double *f, *g, *h, *e, *u;
     DTree * tt = NULL;
     m = gbm->p.min_node_ins;
     n = gbm->train_ds->row;
     f = (double*)calloc(n, sizeof(double));
-    h = (double*)calloc(n, sizeof(double));
+    u = (double*)calloc(n * gbm->k, sizeof(double));
     e = (double*)calloc(n * gbm->k, sizeof(double));
-    for (i = 0; i < n; i++){
-        h[i] = 1.0;
-    }
     if (m < 1){
         m = (int)(0.5 * n / gbm->p.max_leaf_nodes);
         if (m < 1){
@@ -127,11 +122,12 @@ int    gbm_train(GBM * gbm){
     }
     for (i = 0; i < gbm->p.max_trees; i++) {
         t = 0;
-        gbm->g_fn(gbm->f, gbm->train_ds->y, e, n, gbm->k);
+        gbm->g_fn(gbm->f, gbm->train_ds->y, e, u, n, gbm->k);
         for (k = 0; k < gbm->k; k++){
             offs  = k * n;
             toffs = k * gbm->p.max_trees;
             g     = e + offs;
+            h     = u + offs;
             tt    = generate_dtree(gbm->train_ds, f, g, h,      \
                                    gbm->p.nod_reg,              \
                                    gbm->p.wei_reg, n, m,        \
@@ -142,7 +138,7 @@ int    gbm_train(GBM * gbm){
                 gbm->dts[toffs + gbm->tree_size[k]] = tt;
                 gbm->tree_size[k] += 1;
                 for (j = 0; j < n; j++){
-                    gbm->f[offs + j] -= f[j] * gbm->p.rate;
+                    gbm->f[offs + j] += f[j] * gbm->p.rate;
                 }
                 memset(f, 0, sizeof(double) * n);
                 if (gbm->test_ds){
@@ -160,7 +156,7 @@ int    gbm_train(GBM * gbm){
     }
     free(f);  f = NULL;
     free(e);  e = NULL;
-    free(h);  h = NULL;
+    free(u);  u = NULL;
     return 0;
 }
 

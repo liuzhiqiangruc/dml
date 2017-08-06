@@ -10,6 +10,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+#include <pthread.h>
 #include "dtree.h"
 
 #define DBL_MAX 10e11
@@ -27,6 +28,20 @@ struct _d_tree {
     double gain;                    /* gain of best split         */
     struct _d_tree * child[2];      /* splited children nodes     */
 };
+
+typedef struct _thread_d {
+    DTD   * ds;      /* data set for dtree split         */
+    DTree * t;       /* copy of current leaf node        */
+    int   * insn;    /* instance node info               */
+    int     tid;     /* id of current node               */
+    int     ids;     /* start id index of current thread */
+    int     ide;     /* end id index of current thread   */
+    int     s;       /* min instance count of each node  */
+    double  nr;      /* node regulization                */
+    double  wr;      /* weight regulization              */
+    double  *g;      /* grad                             */
+    double  *h;      /* hessian                          */
+} ThreadD;
 
 static DTree * init_root(double * g, double * h, int n, double nr, double wr){
     int i;
@@ -76,54 +91,100 @@ static void inline update_child(DTree * t, int k, int lc, double lsg, double lsh
     }
 }
 
-static int tree_grow(DTD * ds
-                , DTree ** leaf_nodes
-                , int    * inst_nodes
-                , double * g
-                , double * h
-                , double nr
-                , double wr
-                , int l
-                , int s
-                , int d) {
-    int i, j, k, o, r, lc;
-    double v = 0.0, lv = DBL_MAX, lsg = 0.0, lsh = 0.0;
-    DTree *t = NULL;
+static void * thread_call(void *arg){
+    int      i, j, o, lc, r, id, ids, ide, s;
+    double   lsg, lsh, lv, v, nr, wr;
+    int     *inst_nodes = NULL;
+    double  *g, *h;
+    ThreadD *thresD  = (ThreadD*)arg;
+    DTD     *ds      = thresD->ds;
+    DTree   *t       = thresD->t;
+    inst_nodes       = thresD->insn;
+    nr               = thresD->nr;
+    wr               = thresD->wr;
+    id               = thresD->tid;
+    ids              = thresD->ids;
+    ide              = thresD->ide;
+    s                = thresD->s;
+    g                = thresD->g;
+    h                = thresD->h;
+    // scan the columns of current thread
+    for (i = ids; i < ide; i++){
+        o   = ds->cl[i];
+        lsg = lsh = 0.0;
+        lc  = 0;
+        lv  = DBL_MAX;
+        v   = 0.0;
+        for (j = 0; j < ds->l[i]; j++){
+            if (t->n - lc < s) { break; }
+            r = ds->ids[o + j];
+            if (inst_nodes[r] == id){
+                if (0 == ds->bin){
+                    v = ds->vals[o + j];
+                    if (v < lv && lv < DBL_MAX && lc >= s){
+                        update_child(t, i, lc, lsg, lsh, nr, wr, v, lv);
+                    }
+                    lv = v;
+                }
+                lc  += 1;
+                lsg += g[r];
+                lsh += h[r];
+            }
+        }
+        // for column which have missing value and missing cnt >= s
+        // and nonmissing cnt also >= s
+        if (lc >= s && t->n - lc >= s){
+            update_child(t, i, lc, lsg, lsh, nr, wr, v, 1 == ds->bin ? 1.0 : lv);
+        }
+    }
+    return NULL;
+}
+
+static int tree_grow(ThreadD * thresd       /* tree grow args configration      */
+                   , DTree  ** leaf_nodes   /* leaf node                        */
+                   , int p                  /* thread count                     */
+                   , int l                  /* current leaf nodes count         */
+                   , int s                  /* min count each node              */
+                   , int d) {               /* max depth of dtree               */
+    int i, j;
+    double v;
+    pthread_t *ids = (pthread_t*)calloc(p, sizeof(pthread_t));
+    DTree *t       = NULL;
     for (i = 0; i < l; i++){
         t = leaf_nodes[i];                  // current leaf node
         if (t->depth >= d)   { continue; }  // max depth, can not split anymore
         if (t->n < (s << 1)) { continue; }  // can not split, have no children
-        if (t->child[0] == NULL) { init_child(t); } // can split, generate new children
-        if (t->child[0]->leaf == 2) for (j = 0; j < ds->col; j++) { // have children and is new children
-            o   = ds->cl[j];
-            lsg = lsh = 0.0;
-            lc  = 0;
-            lv  = DBL_MAX;
-            for (k = 0; k < ds->l[j]; k++) {
-                if (t->n - lc < s) { break; }
-                r = ds->ids[o + k];
-                if (inst_nodes[r] == i){
-                    if (0 == ds->bin){
-                        v = ds->vals[o + k];
-                        if (v < lv && lv < DBL_MAX && lc >= s){
-                            update_child(t, j, lc, lsg, lsh, nr, wr, v, lv);
-                        }
-                        lv = v;
-                    }
-                    lc  += 1;
-                    lsg += g[r];
-                    lsh += h[r];
+        if (t->child[0] == NULL) { init_child(t); } // can split,generate new children
+        if (t->child[0]->leaf == 2) {
+            for (j = 0; j < p; j++){
+                thresd[j].tid = i;
+                memmove(thresd[j].t, t, sizeof(DTree) - 16); 
+                memset (thresd[j].t->child[0], 0, sizeof(DTree));
+                memset (thresd[j].t->child[1], 0, sizeof(DTree));
+                pthread_create(ids + j, NULL, thread_call, thresd + j);
+            }
+            // wait sub threads done
+            for (j = 0; j < p; j++){
+                pthread_join(ids[j], NULL);
+            }
+            // best gain between threads for current leaf node
+            v = 0.0;
+            i = -1;
+            for (j = 0; j < p; j++){
+                if (thresd[j].t->gain > v){
+                    v = thresd[j].t->gain;
+                    i = j;
                 }
             }
-            // for column which have missing value and missing cnt >= s
-            // and nonmissing cnt also >= s
-            if (lc >= s && t->n - lc >= s){
-                update_child(t, j, lc, lsg, lsh, nr, wr, v, 1 == ds->bin ? 1.0 : lv);
-            }
+            memmove(t, thresd[i].t, sizeof(DTree) - 16);
+            memmove(t->child[0], thresd[i].t->child[0], sizeof(DTree));
+            memmove(t->child[1], thresd[i].t->child[1], sizeof(DTree));
+            // this leaf node has been calculated, no need for any calculation any more
+            t->child[0]->leaf = t->child[1]->leaf = 3;
         }
-        // this leaf node has been calculated, no need for any calculation any more
-        t->child[0]->leaf = t->child[1]->leaf = 3;
     }
+    free(ids);   ids = NULL;
+    // best node for current grow process
     v = 0.0;
     i = -1;
     for (j = 0; j < l; j++){
@@ -175,6 +236,7 @@ DTree * generate_dtree(DTD * ds      /* dataset for build tree */
                      , double nr     /* node regulizatin       */
                      , double wr     /* weight regulization    */
                      , int n         /* number of instances    */
+                     , int p         /* mutil process count    */
                      , int s         /* min instance each node */
                      , int d         /* max depth of tree      */
                      , int m) {      /* max leaf nodes         */
@@ -184,13 +246,32 @@ DTree * generate_dtree(DTD * ds      /* dataset for build tree */
     DTree ** leaf_nodes = (DTree**)calloc(m, sizeof(DTree*));
     int   *  inst_nodes = (int*)calloc(n, sizeof(int));
     DTree *  t = init_root(g, h, n, nr, wr);
+    DTree * tt = (DTree *)calloc(p, sizeof(DTree));
     l = 0;
     for (i = 0; i < n; i++){
         inst_nodes[i] = l;
     }
     leaf_nodes[l++] = t;
+    ThreadD * thresd = (ThreadD*)calloc(p, sizeof(ThreadD));
+    for (i = 0; i < p; i++){
+        thresd[i].ds    = ds;
+        thresd[i].g     = g;
+        thresd[i].h     = h;
+        thresd[i].s     = s;
+        thresd[i].nr    = nr;
+        thresd[i].wr    = wr;
+        thresd[i].t     = tt + i;
+        init_child(tt + i);
+        thresd[i].insn  = inst_nodes;
+        thresd[i].ids   = i * ds->col / p;
+        thresd[i].ide   = thresd[i].ids + ds->col / p;
+        if (i == p - 1){
+            thresd[i].ide = ds->col;
+        }
+    }
+
     while (l < m){
-        if(-1 == (k = tree_grow(ds, leaf_nodes, inst_nodes, g, h, nr, wr, l, s, d))){
+        if(-1 == (k = tree_grow(thresd, leaf_nodes, p, s, l, d))){
             break;
         }
         DTree * tmp = leaf_nodes[k];
@@ -220,6 +301,12 @@ DTree * generate_dtree(DTD * ds      /* dataset for build tree */
     }
     free(leaf_nodes);    leaf_nodes = NULL;
     free(inst_nodes);    inst_nodes = NULL;
+    free(thresd);        thresd     = NULL;
+    for (i = 0; i < p; i++){
+        free(tt[i].child[0]); tt[i].child[0] = NULL;
+        free(tt[i].child[1]); tt[i].child[0] = NULL;
+    }
+    free(tt); tt = NULL;
     return t;
 }
 

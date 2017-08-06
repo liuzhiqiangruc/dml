@@ -130,7 +130,8 @@ int    gbm_train(GBM * gbm){
             h     = u + offs;
             tt    = generate_dtree(gbm->train_ds, f, g, h,      \
                                    gbm->p.nod_reg,              \
-                                   gbm->p.wei_reg, n, m,        \
+                                   gbm->p.wei_reg, n,           \
+                                   gbm->p.pnc, m,               \
                                    gbm->p.max_depth,            \
                                    gbm->p.max_leaf_nodes);
             if (tt){

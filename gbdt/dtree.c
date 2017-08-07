@@ -159,8 +159,8 @@ static int tree_grow(ThreadD * thresd       /* tree grow args configration      
             for (j = 0; j < p; j++){
                 thresd[j].tid = i;
                 memmove(thresd[j].t, t, sizeof(DTree) - 16); 
-                memset (thresd[j].t->child[0], 0, sizeof(DTree));
-                memset (thresd[j].t->child[1], 0, sizeof(DTree));
+                memmove(thresd[j].t->child[0], t->child[0], sizeof(DTree));
+                memmove(thresd[j].t->child[1], t->child[1], sizeof(DTree));
                 pthread_create(ids + j, NULL, thread_call, thresd + j);
             }
             // wait sub threads done
@@ -269,9 +269,8 @@ DTree * generate_dtree(DTD * ds      /* dataset for build tree */
             thresd[i].ide = ds->col;
         }
     }
-
     while (l < m){
-        if(-1 == (k = tree_grow(thresd, leaf_nodes, p, s, l, d))){
+        if(-1 == (k = tree_grow(thresd, leaf_nodes, p, l, s, d))){
             break;
         }
         DTree * tmp = leaf_nodes[k];

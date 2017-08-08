@@ -13,7 +13,7 @@ INSTDIR  = .
 
 INC = -I../$(UTILDIR) -I../$(REPDIR) -I../$(REGRDIR)
 
-CC = gcc -std=c99 -O0 -g
+CC = gcc -std=c99 -O3
 LD = gcc -shared
 WARN = -Wall -Wno-unused-but-set-variable
 CFBASE = $(WARN) -pedantic -pipe
@@ -21,7 +21,7 @@ CFLAGS = $(CFBASE) -fPIC -DNDEBUG -DNPRINT -DDTREE_DEBUG $(INC)
 
 export CC LD CFLAGS MAKE
 
-all: libs app
+all: libs app clean
 
 libs:
 	cd $(UTILDIR); $(MAKE) clean; $(MAKE); $(MAKE) install

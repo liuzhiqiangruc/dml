@@ -176,9 +176,11 @@ static int tree_grow(ThreadD * thresd       /* tree grow args configration      
                     i = j;
                 }
             }
-            memmove(t, thresd[i].t, sizeof(DTree) - 16);
-            memmove(t->child[0], thresd[i].t->child[0], sizeof(DTree));
-            memmove(t->child[1], thresd[i].t->child[1], sizeof(DTree));
+            if (i > -1){
+                memmove(t, thresd[i].t, sizeof(DTree) - 16);
+                memmove(t->child[0], thresd[i].t->child[0], sizeof(DTree));
+                memmove(t->child[1], thresd[i].t->child[1], sizeof(DTree));
+            }
             // this leaf node has been calculated, no need for any calculation any more
             t->child[0]->leaf = t->child[1]->leaf = 3;
         }

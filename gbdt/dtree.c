@@ -231,6 +231,17 @@ static void scan_tree(DTD * ts, DTree * t, DTree ** inst_nodes, int n, int m){
     }
 }
 
+static void range(int id, int p, int n, int *s, int *e){
+    int m = n % p;
+    int r = n / p;
+    *s = 0;
+    if (id > 0){
+        *s = id * r + (id < m ? id : m);
+    }
+    id += 1;
+    *e = id * r + (id < m ? id : m);
+}
+
 DTree * generate_dtree(DTD * ds      /* dataset for build tree */
                      , double * F    /* current f vector       */
                      , double * g    /* current gradient vec   */
@@ -265,11 +276,14 @@ DTree * generate_dtree(DTD * ds      /* dataset for build tree */
         thresd[i].t     = tt + i;
         init_child(tt + i);
         thresd[i].insn  = inst_nodes;
+        range(i, p, ds->col, &thresd[i].ids, &thresd[i].ide);
+        /*
         thresd[i].ids   = i * ds->col / p;
         thresd[i].ide   = thresd[i].ids + ds->col / p;
         if (i == p - 1){
             thresd[i].ide = ds->col;
         }
+        */
     }
     while (l < m){
         if(-1 == (k = tree_grow(thresd, leaf_nodes, p, l, s, d))){

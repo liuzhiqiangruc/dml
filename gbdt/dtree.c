@@ -277,13 +277,6 @@ DTree * generate_dtree(DTD * ds      /* dataset for build tree */
         init_child(tt + i);
         thresd[i].insn  = inst_nodes;
         range(i, p, ds->col, &thresd[i].ids, &thresd[i].ide);
-        /*
-        thresd[i].ids   = i * ds->col / p;
-        thresd[i].ide   = thresd[i].ids + ds->col / p;
-        if (i == p - 1){
-            thresd[i].ide = ds->col;
-        }
-        */
     }
     while (l < m){
         if(-1 == (k = tree_grow(thresd, leaf_nodes, p, l, s, d))){

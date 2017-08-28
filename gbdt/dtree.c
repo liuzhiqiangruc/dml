@@ -8,6 +8,7 @@
  * ======================================================== */
 #include <stdio.h>
 #include <math.h>
+#include <time.h>
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
@@ -33,6 +34,7 @@ typedef struct _thread_d {
     DTD   * ds;      /* data set for dtree split         */
     DTree * t;       /* copy of current leaf node        */
     int   * insn;    /* instance node info               */
+    int   * idxc;    /* column id index shuffled         */
     int     tid;     /* id of current node               */
     int     ids;     /* start id index of current thread */
     int     ide;     /* end id index of current thread   */
@@ -92,14 +94,16 @@ static void inline update_child(DTree * t, int k, int lc, double lsg, double lsh
 }
 
 static void * thread_call(void *arg){
-    int      i, j, o, lc, r, id, ids, ide, s;
+    int      i, j, o, lc, r, id, ids, ide, s, ci;
     double   lsg, lsh, lv, v, nr, wr;
     int     *inst_nodes = NULL;
+    int     *idxc       = NULL;
     double  *g, *h;
     ThreadD *thresD  = (ThreadD*)arg;
     DTD     *ds      = thresD->ds;
     DTree   *t       = thresD->t;
     inst_nodes       = thresD->insn;
+    idxc             = thresD->idxc;
     nr               = thresD->nr;
     wr               = thresD->wr;
     id               = thresD->tid;
@@ -109,7 +113,9 @@ static void * thread_call(void *arg){
     g                = thresD->g;
     h                = thresD->h;
     // scan the columns of current thread
-    for (i = ids; i < ide; i++){
+    // for (i = ids; i < ide; i++){
+    for (ci = ids; ci < ide; ci++){
+        i = idxc[ci];
         o   = ds->cl[i];
         lsg = lsh = 0.0;
         lc  = 0;
@@ -242,6 +248,23 @@ static void range(int id, int p, int n, int *s, int *e){
     *e = id * r + (id < m ? id : m);
 }
 
+static void shuffle(int * s, int n){
+    int i, r, t;
+    for (i = 0; i < n; i++){
+        s[i] = i;
+    }
+    srand(time(NULL));
+    while (n > 1){
+        r = (rand() + 0.1) / (RAND_MAX + 1.0) * n;
+        if (r < n - 1){
+            t        = s[r];
+            s[r]     = s[n - 1];
+            s[n - 1] = t;
+        }
+        n -= 1;
+    }
+}
+
 DTree * generate_dtree(DTD * ds      /* dataset for build tree */
                      , double * F    /* current f vector       */
                      , double * g    /* current gradient vec   */
@@ -257,7 +280,8 @@ DTree * generate_dtree(DTD * ds      /* dataset for build tree */
     if (m < 2)
         return NULL;
     DTree ** leaf_nodes = (DTree**)calloc(m, sizeof(DTree*));
-    int   *  inst_nodes = (int*)calloc(n, sizeof(int));
+    int   *  inst_nodes = (int*)calloc(n,       sizeof(int));
+    int   *  idxc       = (int*)calloc(ds->col, sizeof(int));
     DTree *  t = init_root(g, h, n, nr, wr);
     DTree * tt = (DTree *)calloc(p, sizeof(DTree));
     l = 0;
@@ -266,6 +290,7 @@ DTree * generate_dtree(DTD * ds      /* dataset for build tree */
     }
     leaf_nodes[l++] = t;
     ThreadD * thresd = (ThreadD*)calloc(p, sizeof(ThreadD));
+    shuffle(idxc, ds->col);
     for (i = 0; i < p; i++){
         thresd[i].ds    = ds;
         thresd[i].g     = g;
@@ -276,6 +301,7 @@ DTree * generate_dtree(DTD * ds      /* dataset for build tree */
         thresd[i].t     = tt + i;
         init_child(tt + i);
         thresd[i].insn  = inst_nodes;
+        thresd[i].idxc  = idxc;
         range(i, p, ds->col, &thresd[i].ids, &thresd[i].ide);
     }
     while (l < m){

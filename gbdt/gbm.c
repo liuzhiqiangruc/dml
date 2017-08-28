@@ -276,8 +276,16 @@ int y_rowns(GBM * gbm){
     return gbm->train_ds->row;
 }
 
+int y_colns(GBM * gbm){
+    return gbm->train_ds->col;
+}
+
 int t_rowns(GBM * gbm){
     return gbm->test_ds->row;
+}
+
+int t_colns(GBM * gbm){
+    return gbm->test_ds->col;
 }
 
 double * y_model(GBM * gbm){

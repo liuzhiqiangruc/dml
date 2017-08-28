@@ -143,6 +143,10 @@ int main(int argc, char *argv[]) {
     if (!gblr){
         return -1;
     }
+    fprintf(stderr, "train dataset rows : %d, columns : %d\n", y_rowns(gblr), y_colns(gblr));
+    if (1 == has_test(gblr)){
+        fprintf(stderr, "test dataset rows : %d, columns : %d\n", t_rowns(gblr), t_colns(gblr));
+    }
     long t1 = time(NULL);
     gbdt_train(gblr);
     long t2 = time(NULL);

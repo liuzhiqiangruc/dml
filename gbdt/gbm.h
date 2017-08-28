@@ -37,11 +37,13 @@ int      k_count(GBM * gbm);
 
 //-   train rows, labels, and model
 int      y_rowns(GBM * gbm);
+int      y_colns(GBM * gbm);
 double * y_label(GBM * gbm);
 double * y_model(GBM * gbm);
 
 //-   test  rows, labels, and model
 int      t_rowns(GBM * gbm);
+int      t_colns(GBM * gbm);
 double * t_label(GBM * gbm);
 double * t_model(GBM * gbm);
 

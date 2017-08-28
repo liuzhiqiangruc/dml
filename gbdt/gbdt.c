@@ -254,6 +254,14 @@ int t_rowns(GBDT * gbdt){
     return gbdt->test_ds->row;
 }
 
+int y_colns(GBDT * gbdt){
+    return gbdt->train_ds->col;
+}
+
+int t_colns(GBDT * gbdt){
+    return gbdt->test_ds->col;
+}
+
 double * y_model(GBDT * gbdt){
     return gbdt->f;
 }

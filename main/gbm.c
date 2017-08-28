@@ -144,6 +144,10 @@ int main(int argc, char *argv[]) {
     if (!gbmr){
         return -1;
     }
+    fprintf(stderr, "train dataset rows : %d, columns : %d\n", y_rowns(gbmr), y_colns(gbmr));
+    if (1 == has_test(gbmr)){
+        fprintf(stderr, "test dataset rows : %d, columns : %d\n", t_rowns(gbmr), t_colns(gbmr));
+    }
     long t1 = time(NULL);
     gbm_train(gbmr);
     long t2 = time(NULL);

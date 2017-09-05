@@ -34,11 +34,13 @@ typedef void(*R)(GBDT * m);
 
 //-   train rows, labels, and model
 int      y_rowns(GBDT * gbdt);
+int      y_colns(GBDT * gbdt);
 double * y_label(GBDT * gbdt);
 double * y_model(GBDT * gbdt);
 
 //-   test  rows, labels, and model
 int      t_rowns(GBDT * gbdt);
+int      t_colns(GBDT * gbdt);
 double * t_label(GBDT * gbdt);
 double * t_model(GBDT * gbdt);
 

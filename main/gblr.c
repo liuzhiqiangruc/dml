@@ -14,8 +14,9 @@
 
 void help() {
     fprintf(stderr, "\ngblr usage:        \n");
-    fprintf(stderr, "\n./gblr -n <int> -m <int> -d <int> -l <int> -b <int> -a <double> -g <double> -r <double> -f <string> -s <string> -t <string> -y <string> -o <string>\n");
+    fprintf(stderr, "\n./gblr -n <int> -p <int> -m <int> -d <int> -l <int> -b <int> -a <double> -g <double> -r <double> -f <string> -s <string> -t <string> -y <string> -o <string>\n");
     fprintf(stderr, "     -n  tree capicity                   \n");
+    fprintf(stderr, "     -p  mutil process count             \n");
     fprintf(stderr, "     -m  max leaf node in per tree       \n");
     fprintf(stderr, "     -d  max depth of trees              \n");
     fprintf(stderr, "     -l  min instance num for each node  \n");
@@ -34,7 +35,7 @@ int parse_command_line(GBMP *p, int argc, char *argv[]){
     double r = 0.0;
     double w_reg = 0.0;
     double n_reg = 0.0;
-    int b = 0, n = 10, m = 2, d = 1, l = 0;
+    int b = 0, n = 10, m = 2, d = 1, l = 0, pnc = 1;
     char * f = NULL;
     char * t = NULL;
     char * s = NULL;
@@ -50,6 +51,9 @@ int parse_command_line(GBMP *p, int argc, char *argv[]){
         arg = argv[i];
         if (0 == strcmp(arg,"-n")){
             n = atoi(argv[++i]);
+        }
+        if (0 == strcmp(arg,"-p")){
+            pnc = atoi(argv[++i]);
         }
         else if (0 == strcmp(arg,"-m")){
             m = atoi(argv[++i]);
@@ -98,6 +102,7 @@ int parse_command_line(GBMP *p, int argc, char *argv[]){
         return -1;
     }
     p->max_trees      = n;
+    p->pnc            = pnc;
     p->max_leaf_nodes = m;
     p->binary         = b;
     p->max_depth      = d;
@@ -137,6 +142,10 @@ int main(int argc, char *argv[]) {
     GBDT * gblr = gbdt_lr(p);
     if (!gblr){
         return -1;
+    }
+    fprintf(stderr, "train dataset rows : %d, columns : %d\n", y_rowns(gblr), y_colns(gblr));
+    if (1 == has_test(gblr)){
+        fprintf(stderr, "test dataset rows : %d, columns : %d\n", t_rowns(gblr), t_colns(gblr));
     }
     long t1 = time(NULL);
     gbdt_train(gblr);

@@ -61,10 +61,10 @@ lda_xy: lda.o
 	$(CC) -L$(LIB) $^ -llda_xys -lm -o $@
 
 gblr: gblr.o
-	$(CC) -L$(LIB) $^ -lgblrs -lm -o $@
+	$(CC) -L$(LIB) $^ -lgblrs -lm  -lpthread -o $@
 
 gbm : gbm.o
-	$(CC) -L$(LIB) $^ -lgbmrs -lm -o $@
+	$(CC) -L$(LIB) $^ -lgbmrs -lm  -lpthread -o $@
 
 k2d : k2d.o
 	$(CC) -L$(LIB) $^ -lk2ds -lm -o $@

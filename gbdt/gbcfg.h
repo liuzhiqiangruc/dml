@@ -21,6 +21,7 @@ typedef struct _gbdt_param {
     int    max_depth;            /* max tree depth     */
     int    min_node_ins;         /* min ins. for node  */
     int    binary;               /* 1 for binary       */
+    int    pnc;                  /* pthread count      */
     char * train_init;           /* train init model   */
     char * train_input;          /* train input file   */
     char * test_init;            /* test  init model   */

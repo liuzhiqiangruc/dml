@@ -12,7 +12,7 @@
 #include "gblr.h"
 
 
-void lr_grad(double *f, double *y, double *g, int n){
+void lr_grad(double *f, double *y, double *g, int n, GBMP * p){
     int i;
     double sig;
     for (i = 0; i < n; i++){
@@ -29,7 +29,7 @@ void lr_grad(double *f, double *y, double *g, int n){
     }
 }
 
-void lr_hess(double *f, double *y, double *h, int n){
+void lr_hess(double *f, double *y, double *h, int n, GBMP * p){
     int i;
     double sig;
     for (i = 0; i < n; i++){

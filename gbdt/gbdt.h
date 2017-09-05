@@ -26,8 +26,8 @@ typedef struct _gbdt GBDT;
  * h      : f" outer
  * n      : length of f,y,g,h
  * -------------------------------------- */
-typedef void(*G)(double * f, double * y, double * g, int n);
-typedef void(*H)(double * f, double * y, double * h, int n);
+typedef void(*G)(double * f, double * y, double * g, int n, GBMP * p);
+typedef void(*H)(double * f, double * y, double * h, int n, GBMP * p);
 
 //- report function define
 typedef void(*R)(GBDT * m);

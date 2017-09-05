@@ -157,8 +157,8 @@ int    gbdt_train(GBDT * gbdt){
     }
     mkdir(gbdt->p.out_dir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
     for (i = 0; i < gbdt->p.max_trees; i++) {
-        gbdt->g_fn(gbdt->f, gbdt->train_ds->y, g, n);
-        gbdt->h_fn(gbdt->f, gbdt->train_ds->y, h, n);
+        gbdt->g_fn(gbdt->f, gbdt->train_ds->y, g, n, &gbdt->p);
+        gbdt->h_fn(gbdt->f, gbdt->train_ds->y, h, n, &gbdt->p);
         DTree * tt = generate_dtree(gbdt->train_ds, f, g, h, gbdt->p.nod_reg, gbdt->p.wei_reg, n, gbdt->p.pnc, m, gbdt->p.max_depth, gbdt->p.max_leaf_nodes);
         if (tt){
 #ifdef DTREE_DEBUG

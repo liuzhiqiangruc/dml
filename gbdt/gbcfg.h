@@ -16,6 +16,7 @@ typedef struct _gbdt_param {
     double rate;                 /* learning rate      */
     double nod_reg;              /* regular for node   */
     double wei_reg;              /* regular for weight */
+    double max_margin;           /* max margin for rank using hinge loss*/
     int    max_leaf_nodes;       /* max leaf nodes     */
     int    max_trees;            /* tree capacity      */
     int    max_depth;            /* max tree depth     */

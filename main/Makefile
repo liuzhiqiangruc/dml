@@ -5,7 +5,7 @@ INS = ../output
 
 CFLAGS = $(CFBASE) -DNDEBUG -DNPRINT -I$(INC)
 
-PRGS   = lr gblr k2d lda hlda xlda w2v d2v kmeans gbm
+PRGS   = lr gblr k2d lda hlda xlda w2v d2v kmeans gbm gbrank
 
 all : $(PRGS)
 
@@ -25,6 +25,9 @@ lr.o : lr.c
 	$(CC) $(CFLAGS) -c $^ -o $@
 
 gblr.o : gblr.c
+	$(CC) $(CFLAGS) -c $^ -o $@
+
+gbrank.o : gbrank.c
 	$(CC) $(CFLAGS) -c $^ -o $@
 
 gbm.o  : gbm.c
@@ -62,6 +65,9 @@ lda_xy: lda.o
 
 gblr: gblr.o
 	$(CC) -L$(LIB) $^ -lgblrs -lm  -lpthread -o $@
+
+gbrank: gbrank.o
+	$(CC) -L$(LIB) $^ -lgbranks -lm  -lpthread -o $@
 
 gbm : gbm.o
 	$(CC) -L$(LIB) $^ -lgbmrs -lm  -lpthread -o $@

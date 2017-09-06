@@ -21,7 +21,7 @@ CFLAGS = $(CFBASE) -fPIC -DNDEBUG -DNPRINT -DDTREE_DEBUG $(INC)
 
 export CC LD CFLAGS MAKE
 
-all: libs app clean
+love: libs app clean
 
 libs:
 	cd $(UTILDIR); $(MAKE) clean; $(MAKE); $(MAKE) install

@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <math.h>
 #include "auc.h"
 #include "gbrank.h"
@@ -23,12 +24,14 @@ int rand_range(int s, int e){
 void rank_grad(double *f, double *y, double *g, int n, GBMP * gbmp){
     int i, j, k, p, s, t;
     int *idx = (int*)calloc(n, sizeof(int));
+    double *sig = (double*)calloc(n, sizeof(double));
     double M = gbmp->max_margin;
     p = 0;
     j = 0;
     k = n - 1;
     s = 5;
     for (i = 0; i < n; i++){
+        sig[i] = 1.0 / (1 + exp(-f[i]));
         if (1.0 == y[i]){
             p += 1;
             idx[j++] = i;
@@ -37,19 +40,20 @@ void rank_grad(double *f, double *y, double *g, int n, GBMP * gbmp){
             idx[k--] = i;
         }
     }
+    srand(time(NULL));
     memset(g, 0, sizeof(double) * n);
     for (i = 0; i < n; i++){
         j = idx[i];
         if (1.0 == y[j]){
             k = rand_range(p, n - s + 1);
-            for (t = k; t < k + s; t++) if (f[j] - f[idx[t]] < M){
-                g[j] += -M + f[j] - f[idx[t]];
+            for (t = k; t < k + s; t++) if (sig[j] - sig[idx[t]] < M){
+                g[j] += (-M + sig[j] - sig[idx[t]]) * sig[j] * (1 - sig[j]);
             }
         }
         else{
             k = rand_range(0, p - s + 1);
-            for (t = k; t < k + s; t++) if (f[idx[t]] - f[j] < M){
-                g[j] += M + f[j] - f[idx[t]];
+            for (t = k; t < k + s; t++) if (sig[idx[t]] - sig[j] < M){
+                g[j] += (M + sig[j] - sig[idx[t]]) * sig[j] * (1 - sig[j]);
             }
         }
     }

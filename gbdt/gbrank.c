@@ -55,9 +55,6 @@ void rank_grad(double *f, double *y, double *g, int n, GBMP * gbmp){
             }
         }
     }
-    for (i = 0; i < n; i++){
-        g[i] /= s;
-    }
     free(idx); idx = NULL;
 }
 

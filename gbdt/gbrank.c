@@ -127,11 +127,13 @@ void rank_grad_m(double *f, double *y, double *g, int n, GBMP * gbmp){
                 if (c < (int) y[j]){
                     if (f[j] - f[idx[t]] < M){
                         g[j] += -M + f[j] - f[idx[t]];
+                        g[idx[t]] +=  M + f[idx[t]] - f[j];
                     }
                 }
                 else if (c > (int)y[j]){
                     if (f[idx[t]] - f[j] < M){
                         g[j] += M + f[j] - f[idx[t]];
+                        g[idx[t]] += -M + f[idx[t]] - f[j];
                     }
                 }
             }

@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
 #include "hash.h"
 #include "str.h"
 #include "tdata.h"
@@ -46,6 +47,7 @@ static DTD * load_ds(char * input, Hash * hs, int f, int bin){
         fprintf(stderr , "can not open file \"%s\"\n", input);
         return NULL;
     }
+    long t1 = time(NULL);
     // Dataset Data Struct pointer
     DTD * ds = (DTD*)malloc(sizeof(DTD));
     memset(ds, 0, sizeof(DTD));
@@ -89,6 +91,9 @@ static DTD * load_ds(char * input, Hash * hs, int f, int bin){
         }
         row += 1;
     }
+    long t2 = time(NULL);
+    fprintf(stderr, "first scan for feature set using : %ld seconds\n", t2 - t1);
+
     // malloc space for store data
     ds->col = hash_cnt(hs);
     ds->row = row;
@@ -138,6 +143,10 @@ static DTD * load_ds(char * input, Hash * hs, int f, int bin){
         row += 1;
     }
     fclose(fp);
+    t1 = time(NULL);
+    fprintf(stderr, "second scan load data using : %ld seconds\n", t1 - t2);
+
+    // malloc space for store data
     if (bin == 0){
         DTD_FEA_VAL * f = (DTD_FEA_VAL*)malloc(sizeof(DTD_FEA_VAL) * row);
         for (i = 0; i < ds->col; i++){
@@ -156,6 +165,9 @@ fea_sort:
         }
         free(f); f = NULL;
     }
+    t2 = time(NULL);
+    fprintf(stderr, "sort features using : %ld seconds\n", t2 - t1);
+
     ds->bin = bin;
     return ds;
 }

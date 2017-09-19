@@ -56,7 +56,7 @@ class DTree (object):
         for dtree in self.model:
             (score, index) = self.__get_score(instance, dtree)
             ret_score += self.learning_rate * score
-            ret_path.append(index)
+            ret_path.append((index, score))
         return (ret_score, ret_path)
 
 # test by instance

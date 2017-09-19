@@ -20,6 +20,7 @@ class DTree (object):
 
     def __load_model(self):
         dtrees = os.listdir(self.model_path)
+        dtrees = sorted(dtrees, lambda x , y: cmp(int(x.split(".")[0]),int(y.split(".")[0])))
         for dtreef in dtrees:
             model = []
             model_file = "%s/%s" %(self.model_path, dtreef)

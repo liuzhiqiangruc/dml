@@ -48,10 +48,10 @@ void lr_hess(double *f, double *y, double *h, int n, GBMP * p){
 
 void lr_repo(GBDT * g){
     double train_auc = auc(y_rowns(g), y_model(g), y_label(g));
-    fprintf(stderr, "current tree size : %4d, train_auc : %.3f", t_size(g), train_auc);
+    fprintf(stderr, "current tree size : %4d, train_auc : %.8f", t_size(g), train_auc);
     if (has_test(g) == 1){
         double test_auc  = auc(t_rowns(g), t_model(g), t_label(g));
-        fprintf(stderr, " test_auc : %.3f", test_auc);
+        fprintf(stderr, " test_auc : %.8f", test_auc);
     }
     fprintf(stderr, "\n");
 }

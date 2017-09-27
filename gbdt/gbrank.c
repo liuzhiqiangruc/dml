@@ -136,6 +136,10 @@ void rank_grad_m(double *f, double *y, double *g, int n, GBMP * gbmp){
                         g[idx[t]] += -M + f[idx[t]] - f[j];
                     }
                 }
+                else{
+                    g[j] += f[j] - f[idx[t]];
+                    g[idx[t]] += f[idx[t]] - f[j];
+                }
             }
         }
     }

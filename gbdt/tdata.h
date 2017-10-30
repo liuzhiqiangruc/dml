@@ -15,11 +15,11 @@
 typedef struct {
     int bin;                        /* binary data or not        */
     int row;                        /* num of instances          */
-    double * y;                     /* labels of data            */
     int col;                        /* feature count of data     */
-    int * l;                        /* row cnt of per feautre    */
-    int * cl;                       /* cumulative row cnt ..     */
-    int * ids;                      /* row ids of feature        */
+    double * y;                     /* labels of data            */
+    unsigned int * l;               /* row cnt of per feautre    */
+    unsigned int * cl;              /* cumulative row cnt ..     */
+    unsigned int * ids;             /* row ids of feature        */
     double * vals;                  /* row feature value         */
     char (*id_map)[FKL];            /* feature id name mapping   */
 }DTD;

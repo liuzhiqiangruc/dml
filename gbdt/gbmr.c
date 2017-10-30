@@ -64,7 +64,7 @@ static double k_loss(double * e, double * y, int n, int k){
 
 void mlr_repo(GBM *gbm){
     int k, n, c;
-    double train_loss, test_loss;
+    double train_loss, test_loss, train_auc, test_auc;
     double *f, *e, *y;
     c = t_size(gbm);
     n = y_rowns(gbm);
@@ -74,7 +74,8 @@ void mlr_repo(GBM *gbm){
     e = (double*)calloc(n * k, sizeof(double));
     exp_norm(f, e, n, k);
     train_loss = k_loss(e, y, n , k);
-    fprintf(stderr, "current tree size: %4d, train loss: %10.5f", c, train_loss);
+    train_auc  = 1.0 - auc(n, e, y);
+    fprintf(stderr, "current tree size: %4d, train loss: %10.5f, train auc : %.8f", c, train_loss, train_auc);
     if (1 == has_test(gbm)){
         n = t_rowns(gbm);
         f = t_model(gbm);
@@ -83,7 +84,8 @@ void mlr_repo(GBM *gbm){
         e = (double*)calloc(n * k, sizeof(double));
         exp_norm(f, e, n , k);
         test_loss = k_loss(e, y, n, k);
-        fprintf(stderr, ", test loss: %10.5f", test_loss);
+        test_auc  = 1.0 - auc(n, e, y);
+        fprintf(stderr, ", test loss: %10.5f, test auc: %.8f", test_loss, test_auc);
     }
     free(e); e = NULL;
     fprintf(stderr, "\n");

@@ -94,7 +94,7 @@ static void inline update_child(DTree * t, int k, int lc, double lsg, double lsh
 }
 
 static void * thread_call(void *arg){
-    int      i, j, o, lc, r, id, ids, ide, s, ci;
+    unsigned int i, j, o, lc, r, id, ids, ide, s, ci;
     double   lsg, lsh, lv, v, nr, wr;
     int     *inst_nodes = NULL;
     int     *idxc       = NULL;
@@ -210,7 +210,7 @@ static int tree_grow(ThreadD * thresd       /* tree grow args configration      
 }
 
 static void scan_tree(DTD * ts, DTree * t, DTree ** inst_nodes, int n, int m){
-    int i, id, rowid, l_c, r_c;
+    unsigned int i, id, rowid, l_c, r_c;
     l_c = 0;
     r_c = m;
     for (i = 0; i < ts->l[t->attr]; i++){
@@ -276,7 +276,7 @@ DTree * generate_dtree(DTD * ds      /* dataset for build tree */
                      , int s         /* min instance each node */
                      , int d         /* max depth of tree      */
                      , int m) {      /* max leaf nodes         */
-    int i, k, o, l;
+    unsigned int i, k, o, l;
     if (m < 2)
         return NULL;
     DTree ** leaf_nodes = (DTree**)calloc(m, sizeof(DTree*));
@@ -437,7 +437,7 @@ void save_dtree(DTree * t, char * out_file, char (*id_map)[FKL]){
         if (ct->leaf == 0){
             c1 = l; ts[l++] = ct->child[0];
             c2 = l; ts[l++] = ct->child[1];
-            fprintf(fp, "%d\t%d\t%s\t%.3f\t%.3f\t%.3f\t%d\t%d\n"          \
+            fprintf(fp, "%d\t%d\t%s\t%.3f\t%.6f\t%.3f\t%d\t%d\n"          \
                       , ct->n,   ct->leaf, id_map[ct->attr], ct->aval \
                       , ct->wei, ct->loss, c1, c2);
         }

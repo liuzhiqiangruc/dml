@@ -17,7 +17,7 @@
 #define DT_LINE_LEN 0x100000
 
 typedef struct {
-    int id;
+    unsigned int id;
     double val;
 } DTD_FEA_VAL;
 
@@ -28,7 +28,7 @@ static int tdt_fea_cmp(const void * a1, const void * a2){
     return t > 0.0 ? -1 : (t < 0.0 ? 1 : 0);
 }
 
-static void fea_rows_sort(int * ids, double * vals, DTD_FEA_VAL * f, int n){
+static void fea_rows_sort(unsigned int * ids, double * vals, DTD_FEA_VAL * f, int n){
     int i;
     for (i = 0; i < n; i++){
         f[i].id = ids[i];
@@ -54,7 +54,7 @@ static DTD * load_ds(char * input, Hash * hs, int f, int bin){
     // vals for read data
     char buffer[DT_LINE_LEN] = {'\0'};
     char *token, *string = buffer;
-    int i, row, tok, offs, id, hsize;
+    unsigned int i, row, tok, offs, id, hsize;
     int *tmp_cnt, *fea_cnt = (int*)malloc(sizeof(int) * hash_size(hs));
     memset(fea_cnt, 0, sizeof(int) * hash_size(hs));
     hsize = hash_size(hs);
@@ -98,8 +98,8 @@ static DTD * load_ds(char * input, Hash * hs, int f, int bin){
     ds->col = hash_cnt(hs);
     ds->row = row;
     ds->y   = (double*)malloc(sizeof(double) * row);
-    ds->l   = (int*)malloc(sizeof(int) * ds->col);
-    ds->cl  = (int*)malloc(sizeof(int) * ds->col);
+    ds->l   = (unsigned int*)malloc(sizeof(int) * ds->col);
+    ds->cl  = (unsigned int*)malloc(sizeof(int) * ds->col);
     memset(ds->y,  0, sizeof(double) * row);
     memset(ds->l,  0, sizeof(int) * ds->col);
     memset(ds->cl, 0, sizeof(int) * ds->col);
@@ -107,7 +107,7 @@ static DTD * load_ds(char * input, Hash * hs, int f, int bin){
         ds->cl[i] = fea_cnt[i - 1] + ds->cl[i - 1];
     }
     free(fea_cnt); fea_cnt = NULL;
-    ds->ids  = (int*)malloc(sizeof(int) * tok);
+    ds->ids  = (unsigned int*)malloc(sizeof(int) * tok);
     memset(ds->ids, 0, sizeof(int) * tok);
     if (bin == 0){
         ds->vals = (double*)malloc(sizeof(double) * tok);

@@ -103,7 +103,7 @@ void rank_grad_m(double *f, double *y, double *g, int n, GBMP * gbmp){
     int i, j, k, c, s, t, r;
     int *idx = (int*)calloc(n, sizeof(int));
     double M = gbmp->max_margin;
-    s = 4;   // other class instance sample count
+    s = 10;   // other class instance sample count
     for (i = 0; i < n; i++){
         j = (int)y[i];
         if (j < 1000) nc[j + 1] += 1;

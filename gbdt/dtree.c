@@ -442,7 +442,7 @@ void save_dtree(DTree * t, char * out_file, char (*id_map)[FKL]){
                       , ct->wei, ct->loss, c1, c2);
         }
         else{
-            fprintf(fp, "%d\t%d\tNone\tNone\t%.3f\t%.3f\t%d\t%d\n"    \
+            fprintf(fp, "%d\t%d\tNone\tNone\t%.6f\t%.3f\t%d\t%d\n"    \
                       , ct->n, ct->leaf, ct->wei, ct->loss, c1, c2);
         }
         i += 1;

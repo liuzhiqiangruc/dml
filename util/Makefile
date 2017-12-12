@@ -1,6 +1,6 @@
-objs    = hash.o     rbtree.o    str.o       median.o
-sos     = libhs.so   librbt.so   libstr.so   libmed.so
-statics = libhss.a   librbts.a   libstrs.a   libmeds.a
+objs    = hash.o     rbtree.o    str.o       median.o   data.o
+sos     = libhs.so   librbt.so   libstr.so   libmed.so  libdata.so
+statics = libhss.a   librbts.a   libstrs.a   libmeds.a  libdatas.a
 
 all : $(objs) $(statics) $(sos)
 
@@ -17,6 +17,7 @@ inc_install :
 hash.o : hash.h
 rbtree.o  : rbtree.h
 str.o    : str.h
+data.o   : data.h
 
 libhs.so : hash.o
 	$(LD) $^ -o $@
@@ -26,6 +27,8 @@ libstr.so : str.o
 	$(LD) $^ -o $@
 libmed.so : median.o rbtree.o
 	$(LD) $^ -o $@
+libdata.so : hash.o str.o data.o
+	$(LD) $^ -o $@
 
 libhss.a : hash.o
 	ar cr $@ $^
@@ -34,6 +37,8 @@ librbts.a : rbtree.o
 libstrs.a : str.o
 	ar cr $@ $^
 libmeds.a : median.o rbtree.o
+	ar cr $@ $^
+libdatas.a : hash.o str.o data.o
 	ar cr $@ $^
 
 

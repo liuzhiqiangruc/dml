@@ -1,6 +1,6 @@
-objs    = auc.o lr.o regress.o newton.o
-sos     = libauc.so liblr.so libnewton.so
-statics = libaucs.a liblrs.a libnewtons.a
+objs    = auc.o lr.o regr.o regcfg.o deeplr.o
+sos     = libauc.so liblr.so  libregcfg.so  libdeeplr.so
+statics = libaucs.a liblrs.a  libregcfgs.a  libdeeplrs.a
 
 all : $(objs) $(statics) $(sos)
 
@@ -15,24 +15,36 @@ inc_install :
 
 
 auc.o     : auc.h
-newton.o  : newton.h
-regress.o : regress.h
+regr.o    : regr.h
+regcfg.o  : regcfg.h
+deeplr.o  : deeplr.h
 lr.o      : lr.h
 
 libauc.so : auc.o
 	$(LD) $^ -o $@
-libnewton.so : newton.o
+
+libregcfg.so : regcfg.o
 	$(LD) $^ -o $@
-liblr.so  : lr.o regress.o newton.o auc.o ../util/hash.o ../util/str.o
+
+liblr.so  : lr.o regr.o auc.o regcfg.o ../util/hash.o ../util/str.o ../util/data.o
+	$(LD) $^ -o $@
+
+libdeeplr.so  : deeplr.o regr.o auc.o regcfg.o ../util/hash.o ../util/str.o ../util/data.o
 	$(LD) $^ -o $@
 
 
 libaucs.a : auc.o
 	ar cr $@ $^
-libnewtons.a : newton.o
+
+liblrs.a  : lr.o regr.o auc.o regcfg.o ../util/hash.o ../util/str.o ../util/data.o
 	ar cr $@ $^
-liblrs.a  : lr.o regress.o newton.o auc.o ../util/hash.o ../util/str.o
+
+libdeeplrs.a : deeplr.o regr.o auc.o regcfg.o ../util/hash.o ../util/str.o ../util/data.o
 	ar cr $@ $^
+
+libregcfgs.a : regcfg.o
+	ar cr $@ $^
+
 
 
 install :

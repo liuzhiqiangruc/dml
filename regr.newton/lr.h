@@ -11,9 +11,9 @@
 #ifndef _LR_H
 #define _LR_H
 
-#include "regr.h"
+#include "regress.h"
 
-REGR * create_lr_model();
+REG * create_lr_model();
 
 
 #endif //LR_H

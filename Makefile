@@ -23,7 +23,7 @@ export CC LD CFLAGS MAKE
 
 all:
 
-love: libs app
+love: libs app clean
 
 libs:
 	cd $(UTILDIR); $(MAKE) clean; $(MAKE); $(MAKE) install

@@ -1,6 +1,6 @@
 objs    = auc.o lr.o regr.o regcfg.o deeplr.o
-sos     = libauc.so liblr.so  libregcfg.so  libdeeplr.so
-statics = libaucs.a liblrs.a  libregcfgs.a  libdeeplrs.a
+sos     = libauc.so liblr.so  libdeeplr.so
+statics = libaucs.a liblrs.a  libdeeplrs.a
 
 all : $(objs) $(statics) $(sos)
 

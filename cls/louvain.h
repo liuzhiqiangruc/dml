@@ -10,23 +10,11 @@
 #ifndef _LOUVAIN_H
 #define _LOUVAIN_H
 
+typedef struct _louvain Louvain;
 
-typedef struct _node {
-    unsigned int count;     // node number of current cluster
-    unsigned int clsid;     // the upper cluster id
-    unsigned int sibling;   // the next node which belong to the same upper cluster 
-    double kin;       // current node in weight
-    double kout;      // current node out weight
-    double clstot;    // nodes which belong to the same cluster have the same clstot;
-} Node;
-
-typedef struct _edge {
-    unsigned int left;
-    unsigned int right;
-    unsigned int next;
-    double weight;
-} Edge;
-
-
+Louvain * create_louvain(const char * input);
+int learn_louvain(Louvain * lv);
+void save_louvain(Louvain * lv);
+void free_louvain(Louvain * lv);
 
 #endif //LOUVAIN_H

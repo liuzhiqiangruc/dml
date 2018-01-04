@@ -23,9 +23,6 @@ lr.o      : lr.h
 libauc.so : auc.o
 	$(LD) $^ -o $@
 
-libregcfg.so : regcfg.o
-	$(LD) $^ -o $@
-
 liblr.so  : lr.o regr.o auc.o regcfg.o ../util/hash.o ../util/str.o ../util/data.o
 	$(LD) $^ -o $@
 
@@ -41,11 +38,6 @@ liblrs.a  : lr.o regr.o auc.o regcfg.o ../util/hash.o ../util/str.o ../util/data
 
 libdeeplrs.a : deeplr.o regr.o auc.o regcfg.o ../util/hash.o ../util/str.o ../util/data.o
 	ar cr $@ $^
-
-libregcfgs.a : regcfg.o
-	ar cr $@ $^
-
-
 
 install :
 	$(MAKE) lib_install

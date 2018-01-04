@@ -75,7 +75,7 @@ static int deeplr_learn (REGR * regr){
     c = regr->feature_len;
     tmp = sqrt(k);
     for(i = 0; i < (c + 1) * k; i++){
-        x[i] = random_f() / tmp;
+        x[i] = (random_f() - 0.5) / tmp;
     }
     e = (double *)calloc(k, sizeof(double));
     loss = lr_repo(regr);

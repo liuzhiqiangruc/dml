@@ -86,6 +86,15 @@ int parse_command_line(REGP *p, int argc, char *argv[]){
     p->train_input = f;
     p->test_input  = t;
     p->out_dir     = o;
+    fprintf(stderr, "\nParamenters\n");
+    fprintf(stderr, "    learning_rate : %.6f\n", a);
+    fprintf(stderr, "    norm weight   : %.6f\n", g);
+    fprintf(stderr, "    binary        : %d\n"  , b);
+    fprintf(stderr, "    norm type     : %d\n"  , r);
+    fprintf(stderr, "    latent nodes  : %d\n"  , k);
+    fprintf(stderr, "    train         : %s\n"  , f);
+    fprintf(stderr, "    test          : %s\n"  , t);
+    fprintf(stderr, "    out dir       : %s\n\n", o);
 
     return 0;
 }

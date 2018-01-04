@@ -162,7 +162,7 @@ int kmeans(double * m, int n, int f, int k, int * c){
             }
         }
         
-        if (update <= n>>7){
+        if (update <= n>>10){
             break;
         }
         niter += 1;

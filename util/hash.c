@@ -152,6 +152,17 @@ static void resize_hash(Hash * hs){
     hs->mask = nmask;
 }
 
+void hash_clean(Hash * hs){
+    hs->count = 0;
+    memset(hs->head, -1, sizeof(int) * hs->size);
+    memset(hs->next, -1, sizeof(int) * hs->space);
+    for (int i = 0; i < hs->space - 1; i++){
+        hs->vals[i].next = hs->vals + i + 1;
+    }
+    hs->vals[hs->space - 1].next = NULL;
+    hs->p = hs->vals;
+}
+
 // create and init the hash struct
 Hash * hash_create(int n, HashType type){
     Hash * hs = (Hash*)malloc(sizeof(Hash));

@@ -33,6 +33,9 @@ int  hash_add (Hash * hs, ...);
 // and return the old index of v
 int  hash_del (Hash * hs, ...);
 
+// clean the hash for new using
+void hash_clean(Hash * hs);
+
 // number of elements
 int  hash_cnt (Hash * hs);
 

@@ -5,9 +5,12 @@ INS = ../output
 
 CFLAGS = $(CFBASE) -DNDEBUG -DNPRINT -I$(INC)
 
-PRGS   = lr deeplr gblr k2d lda hlda xlda w2v d2v kmeans gbm gbrank
+PRGS   = lr deeplr gblr k2d lda hlda xlda w2v d2v kmeans gbm gbrank lv
 
 all : $(PRGS)
+
+lv.o : louvain.c
+	$(CC) $(CFLAGS) -c $^ -o $@
 
 w2v.o : w2v.c
 	$(CC) $(CFLAGS) -c $^ -o $@
@@ -83,6 +86,10 @@ k2d : k2d.o
 
 kmeans : kmeans.o
 	$(CC) -L$(LIB) $^ -lkmeanss -lm -o $@
+
+lv : lv.o
+	$(CC) -L$(LIB) $^ -llouvains  -o $@
+
 
 bin_install:
 	cp $(PRGS)  $(INS)/bin

@@ -8,6 +8,7 @@
  * ======================================================== */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "louvain.h"
 #include "hash.h"
 #include "str.h"
@@ -15,34 +16,34 @@
 #define PLEN 128
 
 typedef struct _node {
-    unsigned int count;     // node number of current cluster
-    unsigned int clsid;     // the upper cluster id
-    unsigned int sibling;   // the next node which belong to the same upper cluster 
-    unsigned int eindex;    // first neighbor index 
+    int    count;        // node number of current cluster int    clsid;        // the upper cluster id
+    int    clsid;        // the upper cluster id
+    int    sibling;      // the next node which belong to the same upper cluster 
+    int    eindex;       // first neighbor index 
     double kin;       // current node in weight
     double kout;      // current node out weight
     double clstot;    // nodes which belong to the same cluster have the same clstot;
 } Node;
 
 typedef struct _edge {
-    unsigned int left;    // left <------ right
-    unsigned int right;   
-    unsigned int next;    // next neighbor index for node left
-    double weight;        // edge weight from right to left
+    int    left;    // left <------ right
+    int    right;   
+    int    next;    // next neighbor index for node left
+    double weight;  // edge weight from right to left
 } Edge;
 
 struct _louvain {
-    unsigned int clen;
-    unsigned int elen;
-    unsigned int * cindex;
+    int  clen;
+    int  elen;
+    int  * cindex;
     Node * nodes;
     Edge * edges;
 };
 
 static void malloc_louvain(Louvain * lv){
     int i;
-    lv->cindex = (unsigned int *)calloc(lv->clen, sizeof(unsigned int));
-    memset(lv->cindex, -1, lv->clen * sizeof(unsigned int));
+    lv->cindex = (int *)calloc(lv->clen, sizeof(int));
+    memset(lv->cindex, -1, lv->clen * sizeof(int));
     lv->nodes  = (Node*)calloc(lv->clen, sizeof(Node));
     lv->edges  = (Edge*)calloc(lv->elen, sizeof(Edge));
     for (i = 0; i < lv->clen; i++){
@@ -50,6 +51,20 @@ static void malloc_louvain(Louvain * lv){
     }
 }
 
+static void INIT_NODE(Louvain * lv, int I){
+    if (lv->cindex[I] == -1){         
+        lv->cindex[I] = I;            
+        lv->nodes[I].count = 1;       
+        lv->nodes[I].kin = 0;         
+        lv->nodes[I].sibling = I;     
+        lv->nodes[I].clsid = I;       
+    }                                 
+    lv->nodes[I].kout   += 1;         
+    lv->nodes[I].clstot += 1;         
+
+}
+
+/*
 #define INIT_NODE(I) do{              \
     if (lv->cindex[I] == -1){         \
         lv->cindex[I] = I;            \
@@ -61,7 +76,18 @@ static void malloc_louvain(Louvain * lv){
     lv->nodes[I].kout   += 1;         \
     lv->nodes[I].clstot += 1;         \
 }while(0);
+*/
 
+static void LINKEDGE(Louvain * lv, int l, int r, int ei){
+    lv->edges[ei].left = l;                         
+    lv->edges[ei].right = r;                        
+    lv->edges[ei].weight = 1.0;                     
+    lv->edges[ei].next = lv->nodes[l].eindex;       
+    lv->nodes[l].eindex = ei;                       
+    ei += 1;                                        
+}
+
+/*
 #define LINKEDGE(l,r,ei) do{                        \
     lv->edges[ei].left = l;                         \
     lv->edges[ei].right = r;                        \
@@ -70,6 +96,7 @@ static void malloc_louvain(Louvain * lv){
     lv->nodes[l].eindex = ei;                       \
     ei += 1;                                        \
 }while(0);
+*/
 
 Louvain * create_louvain(const char * input){
     FILE * fp = NULL;
@@ -80,12 +107,12 @@ Louvain * create_louvain(const char * input){
     Hash * hs = hash_create(1 << 23, STRING);
     Louvain * lv = (Louvain*)calloc(1, sizeof(Louvain));
     char buffer[PLEN] = {0};
-    char *string = buffer, *token;
+    char *string = buffer;
     int l = 0, ei = 0, r = 0;
     while (NULL != fgets(buffer, PLEN, fp)){
         string = trim(buffer, 3);
-        hash_add(strsep(&string, "\t"));
-        hash_add(strsep(&string, "\t"));
+        hash_add(hs, strsep(&string, "\t"));
+        hash_add(hs, strsep(&string, "\t"));
         l += 1;
     }
     lv->clen = hash_cnt(hs);
@@ -95,55 +122,58 @@ Louvain * create_louvain(const char * input){
     while (NULL != fgets(buffer, PLEN, fp)){
         string = trim(buffer, 3);
         l = hash_find(hs, strsep(&string, "\t"));
-        INIT_NODE(l)
+        INIT_NODE(lv, l);
         r = hash_find(hs, strsep(&string, "\t"));
-        INIT_NODE(r)
-        LINKEDGE(l,r,ei)
-        LINKEDGE(r,l,ei)
+        INIT_NODE(lv, r);
+        LINKEDGE(lv, l,r,ei);
+        ei += 1;
+        LINKEDGE(lv, r,l,ei);
+        ei += 1;
     }
     fclose(fp);
     return lv;
 }
 
-static void hold_nei_comm(int ** nei_comm_id, double ** nei_comm_weight, Hash * in, int len){
+static void hold_nei_comm(int ** nei_comm_id, double ** nei_comm_weight, Hash * in, int hsize){
     if (*nei_comm_id == NULL){
         *nei_comm_id = (int*)calloc(hsize, sizeof(int));
         *nei_comm_weight = (double*)calloc(hsize, sizeof(double));
     }
     else{
         int * tmp = (int*)calloc(hash_size(in), sizeof(int));
-        memmove(tmp, *nei_comm_id, len * sizeof(int));
+        memmove(tmp, *nei_comm_id, hsize * sizeof(int));
         free(*nei_comm_id);
         *nei_comm_id = tmp;
         double * tmp1 = (double*)calloc(hash_size(in), sizeof(double));
-        memmove(tmp1, *nei_comm_weight, len * sizeof(double));
+        memmove(tmp1, *nei_comm_weight, hsize * sizeof(double));
         free(*nei_comm_weight);
         *nei_comm_weight = tmp1;
     }
 }
 
 static int first_stage(Louvain * lv){
-    int i, j, ci, cci, ei, wi, wci, hsize, cp = 0;
-    int nei_comm_cnt = 0;
-    int id, maxId;
+    int i, j, ci, cid, ei, wi, wci, hsize;
+    int id, maxId = -1;
     int keepgoing = 0;
-    // this needs init before using
+    int need_stage_two = 0;
     int * nei_comm_id = NULL;
-    double kv, wei, tot;
+    double kv, wei;
     double deltaQ, maxDeltaQ;
     double * nei_comm_weight = NULL;
     Hash * in = hash_create(1 << 16, INT);
     hsize = hash_size(in);
     hold_nei_comm(&nei_comm_id, &nei_comm_weight, NULL, hsize);
     while (1){
+        keepgoing = 0;
         for (i = 0; i < lv->clen; i++){
             ci  = lv->cindex[i];
             kv  = lv->nodes[ci].kin + lv->nodes[ci].kout;
-            cci = lv->nodes[ci].clsid;
+            cid = lv->nodes[ci].clsid;
             ei  = lv->nodes[ci].eindex;
             hash_clean(in);
-            memest(nei_comm_id, 0, sizeof(int) * hsize);
+            memset(nei_comm_id, 0, sizeof(int) * hsize);
             memset(nei_comm_weight, 0, sizeof(double) * hsize);
+            id = -1;
             while(-1 != ei){
                 wi  = lv->edges[ei].right;
                 wei = lv->edges[ei].weight;
@@ -158,29 +188,38 @@ static int first_stage(Louvain * lv){
                 ei  = lv->edges[ei].next;
             }
             maxDeltaQ = 0.0;
-            for (j = 0; j < id; j++){
-                deltaQ = nei_comm_weight[j] - kv * lv->nodes[nei_comm_id[j]].clstot / lv->elen;
+            for (j = 0; j <= id; j++){
+                if (cid == nei_comm_id[j]){
+                    deltaQ = nei_comm_weight[j] - kv * (lv->nodes[nei_comm_id[j]].clstot - kv) / lv->elen;
+                }
+                else{
+                    deltaQ = nei_comm_weight[j] - kv * lv->nodes[nei_comm_id[j]].clstot / lv->elen;
+                }
                 if (deltaQ > maxDeltaQ){
                     maxDeltaQ = deltaQ;
-                    maxId = nei_comm_id[j];
+                    maxId = j;
                 }
             }
-            // change the comm for current node
-            if (maxDeltaQ > 0.0 and maxId != cci){
-                // add current node to commu maxId
-                lv->nodes[ci].clsid = maxId;
-                lv->nodes[ci].sibling = lv->nodes[maxId].sibling;
-                lv->nodes[maxId].sibling = ci;
-                lv->nodes[ci].clsid = maxId;
-                lv->nodes[maxId].count += lv->nodes[ci].count;
+            if (maxDeltaQ > 0.0 && nei_comm_id[maxId] != cid){
+                lv->nodes[ci].clsid      = nei_comm_id[maxId];
+                lv->nodes[ci].sibling    = lv->nodes[nei_comm_id[maxId]].sibling;
+                lv->nodes[nei_comm_id[maxId]].sibling = ci;
+                lv->nodes[nei_comm_id[maxId]].count  += lv->nodes[ci].count;
+                lv->nodes[nei_comm_id[maxId]].clstot += lv->nodes[ci].clstot;
                 keepgoing = 1;
-            }
-            else{
-                break;
+                need_stage_two = 1;
             }
         }
+        if (keepgoing == 0){
+            break;
+        }
     }
-    return keepgoing;
+    hash_free(in);
+    in = NULL;
+    free(nei_comm_id);
+    free(nei_comm_weight);
+    nei_comm_id = nei_comm_weight = NULL;
+    return need_stage_two;
 }
 
 static void second_stage(Louvain * lv){

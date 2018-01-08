@@ -1,6 +1,6 @@
-objs    = kmeans.o       k2d.o
-sos     = libkmeans.so   libk2d.so
-statics = libkmeanss.a   libk2ds.a
+objs    = kmeans.o       k2d.o          louvain.o
+sos     = libkmeans.so   libk2d.so      liblouvain.so
+statics = libkmeanss.a   libk2ds.a      liblouvains.a
 
 all : $(objs) $(statics) $(sos)
 
@@ -24,6 +24,14 @@ libkmeans.so : kmeans.o
 
 libkmeanss.a : kmeans.o
 	ar cr $@ $^
+
+
+liblouvain.so : louvain.o ../util/hash.o ../util/str.o
+	$(LD) $^ -o $@
+
+liblouvains.a : louvain.o ../util/hash.o ../util/str.o
+	ar cr $@ $^
+
 
 install :
 	$(MAKE) lib_install

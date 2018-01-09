@@ -185,7 +185,7 @@ static int first_stage(Louvain * lv){
     int keepgoing = 0;
     int need_stage_two = 0;
     int * nei_comm_id = NULL;
-    double kv, wei;
+    double kv, wei, cwei;
     double deltaQ, maxDeltaQ;
     double * nei_comm_weight = NULL;
     Hash * in = hash_create(1 << 16, INT);
@@ -220,6 +220,7 @@ static int first_stage(Louvain * lv){
             for (j = 0; j < id; j++){
                 if (cid == nei_comm_id[j]){
                     deltaQ = nei_comm_weight[j] - kv * (lv->nodes[nei_comm_id[j]].clstot - kv) / lv->elen;
+                    cwei   = nei_comm_weight[j];
                 }
                 else{
                     deltaQ = nei_comm_weight[j] - kv * lv->nodes[nei_comm_id[j]].clstot / lv->elen;
@@ -230,7 +231,7 @@ static int first_stage(Louvain * lv){
                 }
             }
             if (maxDeltaQ > 0.0 && nei_comm_id[maxId] != cid){
-                remove_node_from_comm(lv, ci, nei_comm_weight[maxId]);
+                remove_node_from_comm(lv, ci, cwei);
                 add_node_to_comm(lv, ci, nei_comm_id[maxId], nei_comm_weight[maxId]);
                 keepgoing = 1;
                 need_stage_two = 1;
@@ -255,7 +256,7 @@ static void second_stage(Louvain * lv){
 
 int learn_louvain(Louvain * lv){
     while (first_stage(lv)){
-        for (int i = 0; i < 10; i++){
+        for (int i = 0; i < lv->clen; i++){
             printf("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%f\t%f\t%f\t%f\n", lv->nodes[i].count
                      , lv->nodes[i].clscount
                      , lv->nodes[i].clsid

@@ -17,7 +17,6 @@
 
 typedef struct _node {
     int    count;        // node number of current cluster int    clsid;
-    int    clscount;     // cls totle count 
     int    clsid;        // the upper cluster id
     int    next;         // the next node which belong to the same upper cluster 
     int    prev;         // the prev node which belong to the same upper cluster
@@ -59,7 +58,6 @@ static void INIT_NODE(Louvain * lv, int I){
     if (lv->cindex[I] == -1){         
         lv->cindex[I]         = I;            
         lv->nodes[I].count    = 1;       
-        lv->nodes[I].clscount = 1;
         lv->nodes[I].kin      = 0;         
         lv->nodes[I].clskin   = 0;
         lv->nodes[I].clsid    = I;       
@@ -216,6 +214,7 @@ static int first_stage(Louvain * lv){
                 ei  = lv->edges[ei].next;
             }
             maxDeltaQ = 0.0;
+            cwei = 0.0;
             id = hash_cnt(in);
             for (j = 0; j < id; j++){
                 if (cid == nei_comm_id[j]){
@@ -257,8 +256,7 @@ static void second_stage(Louvain * lv){
 int learn_louvain(Louvain * lv){
     while (first_stage(lv)){
         for (int i = 0; i < lv->clen; i++){
-            printf("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%f\t%f\t%f\t%f\n", lv->nodes[i].count
-                     , lv->nodes[i].clscount
+            printf("%d\t%d\t%d\t%d\t%d\t%d\t%f\t%f\t%f\t%f\n", lv->nodes[i].count
                      , lv->nodes[i].clsid
                      , lv->nodes[i].next
                      , lv->nodes[i].prev

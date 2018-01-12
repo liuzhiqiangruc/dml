@@ -1,27 +1,28 @@
 /* ========================================================
  *   Copyright (C) 2018 All rights reserved.
- *   
+ *
  *   filename : louvain.c
  *   author   : liuzhiqiangruc@126.com
  *   date     : 2018-01-04
- *   info     : 
- * ======================================================== */
+ *   info     :
+ *   ====================================================== */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "louvain.h"
 #include "hash.h"
 #include "str.h"
+#include <sys/timeb.h>
 
 #define PLEN 128
 
 typedef struct _node {
     int    count;        // node number of current cluster int    clsid;
     int    clsid;        // the upper cluster id
-    int    next;         // the next node which belong to the same upper cluster 
+    int    next;         // the next node which belong to the same upper cluster
     int    prev;         // the prev node which belong to the same upper cluster
     int    first;        // the first child of current community
-    int    eindex;       // first neighbor index 
+    int    eindex;       // first neighbor index
     double kin;          // current node in weight
     double kout;         // current node out weight
     double clskin;       // the kin value for new community
@@ -30,7 +31,7 @@ typedef struct _node {
 
 typedef struct _edge {
     int    left;    // left <------ right
-    int    right;   
+    int    right;
     int    next;    // next neighbor index for node left
     double weight;  // edge weight from right to left
 } Edge;
@@ -49,36 +50,37 @@ struct _louvain {
 static void malloc_louvain(Louvain * lv){
     int i;
     lv->cindex = (int *)calloc(lv->clen, sizeof(int));
-    memset(lv->cindex, -1, lv->clen * sizeof(int));
     lv->nodes  = (Node*)calloc(lv->clen, sizeof(Node));
     lv->edges  = (Edge*)calloc(lv->elen, sizeof(Edge));
     for (i = 0; i < lv->clen; i++){
         lv->nodes[i].eindex = -1;
     }
+    memset(lv->cindex, -1, lv->clen * sizeof(int));
 }
 
-static void INIT_NODE(Louvain * lv, int I, double weight){
-    if (lv->cindex[I] == -1){         
-        lv->cindex[I]         = I;            
-        lv->nodes[I].count    = 1;       
-        lv->nodes[I].kin      = 0;         
-        lv->nodes[I].clskin   = 0;
-        lv->nodes[I].clsid    = I;       
-        lv->nodes[I].first    = -1;
-        lv->nodes[I].prev     = -1;
-        lv->nodes[I].next     = -1;
-    }                                 
-    lv->nodes[I].kout   += weight;
-    lv->nodes[I].clstot += weight;
-}
+#define INIT_NODE(lv,I,weight) do {       \
+    if (lv->cindex[I] == -1){             \
+        lv->cindex[I]         = I;        \
+        lv->nodes[I].count    = 1;        \
+        lv->nodes[I].kin      = 0;        \
+        lv->nodes[I].clskin   = 0;        \
+        lv->nodes[I].clsid    = I;        \
+        lv->nodes[I].first    = -1;       \
+        lv->nodes[I].prev     = -1;       \
+        lv->nodes[I].next     = -1;       \
+    }                                     \
+    lv->nodes[I].kout   += weight;        \
+    lv->nodes[I].clstot += weight;        \
+} while (0)
 
-static void LINKEDGE(Louvain * lv, int l, int r, int ei, double weight){
-    lv->edges[ei].left = l;                         
-    lv->edges[ei].right = r;                        
-    lv->edges[ei].weight = weight;                     
-    lv->edges[ei].next = lv->nodes[l].eindex;       
-    lv->nodes[l].eindex = ei;                       
-}
+#define LINKEDGE(lv,l,r,ei,weight) do{               \
+    lv->edges[ei].left = l;                          \
+    lv->edges[ei].right = r;                         \
+    lv->edges[ei].weight = weight;                   \
+    lv->edges[ei].next = lv->nodes[l].eindex;        \
+    lv->nodes[l].eindex = ei;                        \
+    ei += 1;                                         \
+}while(0)
 
 Louvain * create_louvain(const char * input){
     FILE * fp = NULL;
@@ -112,8 +114,8 @@ Louvain * create_louvain(const char * input){
         lv->sumw += weight;   // left ---- > right ===== right ------> left
         INIT_NODE(lv, l, weight);
         INIT_NODE(lv, r, weight);
-        LINKEDGE(lv, l, r, ei++, weight);
-        LINKEDGE(lv, r, l, ei++, weight);
+        LINKEDGE(lv, l, r, ei, weight);
+        LINKEDGE(lv, r, l, ei, weight);
     }
     fclose(fp);
     return lv;
@@ -148,7 +150,7 @@ static void remove_node_from_comm(Louvain * lv, int id, double weight){
     }
     else{
         next = lv->nodes[id].next; // the new center of the community
-        cid = next;                // cid , new center 
+        cid = next;                // cid , new center
         if (-1 != next){
             lv->nodes[next].prev = -1;
             lv->nodes[next].clsid = next;
@@ -157,7 +159,7 @@ static void remove_node_from_comm(Louvain * lv, int id, double weight){
                 lv->nodes[next].clsid = cid;
             }
             lv->nodes[cid].clstot = lv->nodes[id].clstot - lv->nodes[id].kin - lv->nodes[id].kout;
-            lv->nodes[cid].clskin = lv->nodes[id].clskin - lv->nodes[id].kin - 2 * weight;   
+            lv->nodes[cid].clskin = lv->nodes[id].clskin - lv->nodes[id].kin - 2 * weight;
             lv->nodes[id].count  -= lv->nodes[cid].count;
             lv->nodes[id].clskin  = lv->nodes[id].kin;
             lv->nodes[id].clstot -= lv->nodes[cid].clstot;
@@ -165,98 +167,67 @@ static void remove_node_from_comm(Louvain * lv, int id, double weight){
     }
 }
 
-
-static void hold_nei_comm(int ** nei_comm_id, double ** nei_comm_weight, Hash * in, int hsize){
-    if (*nei_comm_id == NULL){
-        *nei_comm_id = (int*)calloc(hsize, sizeof(int));
-        *nei_comm_weight = (double*)calloc(hsize, sizeof(double));
-    }
-    else{
-        int * tmp = (int*)calloc(hash_size(in), sizeof(int));
-        memmove(tmp, *nei_comm_id, hsize * sizeof(int));
-        free(*nei_comm_id);
-        *nei_comm_id = tmp;
-        double * tmp1 = (double*)calloc(hash_size(in), sizeof(double));
-        memmove(tmp1, *nei_comm_weight, hsize * sizeof(double));
-        free(*nei_comm_weight);
-        *nei_comm_weight = tmp1;
-    }
-}
-
 static int first_stage(Louvain * lv){
-    int i, j, ci, cid, ei, wi, wci, hsize;
-    int id, maxId = -1;
-    int keepgoing = 0;
-    int need_stage_two = 0;
-    int * nei_comm_id = NULL;
-    double kv, wei, cwei;
-    double deltaQ, maxDeltaQ;
-    double * nei_comm_weight = NULL;
-    Hash * in = hash_create(1 << 16, INT);
-    hsize = hash_size(in);
-    hold_nei_comm(&nei_comm_id, &nei_comm_weight, NULL, hsize);
+    int i, j, ci, cid, ei, wi, wci, cct, idc, maxId, stage_two;
+    int *ids = NULL;
+    double kv, wei, cwei, maxInWei, deltaQ, maxDeltaQ;
+    double * weight = NULL;
+    ids    = (int*)   malloc(lv->clen * sizeof(int));
+    weight = (double*)calloc(lv->nlen, sizeof(double));
+    memset(ids, -1, lv->clen * sizeof(int));
+    stage_two = 0;
     while (1){
-        keepgoing = 0;
-        fprintf(stderr, "-----------------------\n");
+        cct = 0;
         for (i = 0; i < lv->clen; i++){
             ci  = lv->cindex[i];
             kv  = lv->nodes[ci].kin + lv->nodes[ci].kout;
             cid = lv->nodes[ci].clsid;
             ei  = lv->nodes[ci].eindex;
-            hash_clean(in);
-            memset(nei_comm_id, 0, sizeof(int) * hsize);
-            memset(nei_comm_weight, 0, sizeof(double) * hsize);
-            id = -1;
+            idc = 0;
             while(-1 != ei){
                 wi  = lv->edges[ei].right;
                 wei = lv->edges[ei].weight;
                 wci = lv->nodes[wi].clsid;
-                id = hash_add(in, wci);
-                if (id >= hsize){
-                    hold_nei_comm(&nei_comm_id, &nei_comm_weight, in, hsize);
-                    hsize = hash_size(in);
-                }
-                nei_comm_id[id] = wci;
-                nei_comm_weight[id] += wei;
+                weight[wci] += wei;
+                ids[idc++]   = wci;
                 ei  = lv->edges[ei].next;
             }
-            maxDeltaQ = 0.0;
-            cwei = 0.0;
-            id = hash_cnt(in);
-            for (j = 0; j < id; j++){
-                if (cid == nei_comm_id[j]){
-                    deltaQ = nei_comm_weight[j] - kv * (lv->nodes[nei_comm_id[j]].clstot - kv) / lv->sumw;
-                    cwei   = nei_comm_weight[j];
+            maxInWei = cwei = maxDeltaQ = 0.0;
+            maxId = -1;
+            for (j = 0; j < idc; j++) if (weight[ids[j]] > 0.0) {
+                if (cid == ids[j]){
+                    deltaQ = weight[ids[j]] - kv * (lv->nodes[ids[j]].clstot - kv) / lv->sumw;
+                    cwei   = weight[ids[j]];
                 }
                 else{
-                    deltaQ = nei_comm_weight[j] - kv * lv->nodes[nei_comm_id[j]].clstot / lv->sumw;
+                    deltaQ = weight[ids[j]] - kv * lv->nodes[ids[j]].clstot / lv->sumw;
                 }
                 if (deltaQ > maxDeltaQ){
                     maxDeltaQ = deltaQ;
-                    maxId = j;
+                    maxId = ids[j];
+                    maxInWei = weight[ids[j]];
                 }
+                weight[ids[j]] = 0.0;
             }
-            if (maxDeltaQ > 0.0 && nei_comm_id[maxId] != cid){
-                fprintf(stderr, "change happen, with maxDeltaQ: %.6f\n", maxDeltaQ);
-                fprintf(stderr, "    remove %d from cls: %d\n", ci, lv->nodes[ci].clsid);
+            if (maxDeltaQ > 0.0 && maxId != cid){
+                if (maxId == -1){
+                    fprintf(stderr, "this can not be, something must be wrong\n");
+                    return 0;
+                }
                 remove_node_from_comm(lv, ci, cwei);
-                fprintf(stderr, "    add    %d to   cls: %d\n", ci, nei_comm_id[maxId]);
-                add_node_to_comm(lv, ci, nei_comm_id[maxId], nei_comm_weight[maxId]);
-                keepgoing = 1;
-                need_stage_two = 1;
+                add_node_to_comm(lv, ci, maxId, maxInWei);
+                cct += 1;
+                stage_two = 1;
             }
         }
-        if (keepgoing == 0){
+        fprintf(stderr, "    one iteration inner first stage, changed nodes : %d\n", cct);
+        if (cct == 0){
             break;
         }
     }
-    hash_free(in);
-    in = NULL;
-    free(nei_comm_id);
-    free(nei_comm_weight);
-    nei_comm_id = NULL;
-    nei_comm_weight = NULL;
-    return need_stage_two;
+    free(ids);       ids = NULL;
+    free(weight);    weight = NULL;
+    return stage_two;
 }
 
 static void second_stage(Louvain * lv){
@@ -311,35 +282,8 @@ static void second_stage(Louvain * lv){
 
 int learn_louvain(Louvain * lv){
     while (first_stage(lv)){
-        for (int i = 0; i < lv->clen; i++){
-            fprintf(stderr, "%d\t%d\t%d\t%d\t%d\t%d\t%f\t%f\t%f\t%f\n", lv->nodes[i].count
-                     , lv->nodes[i].clsid
-                     , lv->nodes[i].next
-                     , lv->nodes[i].prev
-                     , lv->nodes[i].first
-                     , lv->nodes[i].eindex
-                     , lv->nodes[i].kin
-                     , lv->nodes[i].kout
-                     , lv->nodes[i].clskin
-                     , lv->nodes[i].clstot);
-        }
         second_stage(lv);
-        fprintf(stderr, "--------\n");
-        for (int i = 0; i < lv->clen; i++){
-            int j = lv->cindex[i];
-            fprintf(stderr, "%d\t%d\t%d\t%d\t%d\t%d\t%f\t%f\t%f\t%f\n"
-                     , lv->nodes[j].count
-                     , lv->nodes[j].clsid
-                     , lv->nodes[j].next
-                     , lv->nodes[j].prev
-                     , lv->nodes[j].first
-                     , lv->nodes[j].eindex
-                     , lv->nodes[j].kin
-                     , lv->nodes[j].kout
-                     , lv->nodes[j].clskin
-                     , lv->nodes[j].clstot);
-        }
-        fprintf(stderr,"===================\n");
+        fprintf(stderr, "community count: %d after one pass\n", lv->clen);
     }
     return 0;
 }

@@ -292,5 +292,20 @@ void save_louvain(Louvain * lv){
 }
 
 void free_louvain(Louvain * lv){
+    if (lv){
+        if (lv->cindex){
+            free(lv->cindex);
+            lv->cindex = NULL;
+        }
+        if (lv->nodes){
+            free(lv->nodes);
+            lv->nodes = NULL;
+        }
+        if (lv->edges){
+            free(lv->edges);
+            lv->edges = NULL;
+        }
+        free(lv);
+    }
 }
 

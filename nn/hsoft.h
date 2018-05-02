@@ -26,7 +26,7 @@ void hsoft_build(HSoft ** hsf, int (*wc)[2], int v, int k);
 // out   : gradient vector
 // tid   : target word id
 // alpha : learning rate
-void hsoft_learn(HSoft * hsf, double *in, double *out, int tid, double alpha);
+double hsoft_learn(HSoft * hsf, double *in, double *out, int tid, double alpha);
 
 // free
 void hsoft_free (HSoft * hsf);

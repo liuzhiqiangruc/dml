@@ -11,6 +11,6 @@
 #define _REPO_H
 
 #include <stdio.h>
-void progress(FILE * fp, double s, double b);
+void progress(FILE * fp, double s, double b, double loss, double alpha);
 
 #endif //REPO_H

@@ -146,21 +146,22 @@ int w2v_init(W2V * w2v){
 void w2v_learn (W2V * w2v){
     int t, k, n, w, d, id, ds, de, l, r;
     double *st, *sg;
-    double alpha;
+    double alpha, loss, tloss = 0.0, alpha_step = 0.0;
 
     w     = w2v->wc->get_w(w2v->wc);
     n     = w2v->wc->get_n(w2v->wc);
     k     = w2v->wc->get_k(w2v->wc);
     t     = w2v->wc->get_t(w2v->wc);
     alpha = w2v->wc->get_alpha(w2v->wc);
+    alpha_step = alpha / (w2v->ds->t * n);
 
     st = (double *)calloc(k, sizeof(double));
     sg = (double *)calloc(k, sizeof(double));
 
-    while (n-- > 0) for (d = 0; d < w2v->ds->d; d++){
+    while (n-- > 0) {for (d = 0; d < w2v->ds->d; d++){
+        loss = 0.0;
         ds = w2v->ds->doffs[d];
         de = w2v->ds->doffs[d + 1];
-
         if (de - ds > 1) for (id = ds; id < de; id ++){
             l = id - w / 2;
             l = l < ds ? ds : l;
@@ -172,14 +173,18 @@ void w2v_learn (W2V * w2v){
 
             w2v_st(w2v, st, id, k, l, r);
             if (t == 2){ // h fix
-                hsoft_learn(w2v->hsf, st, sg, w2v->ds->tokens[id], 0.0);
+                loss += hsoft_learn(w2v->hsf, st, sg, w2v->ds->tokens[id], 0.0);
             }
             else {
-                hsoft_learn(w2v->hsf, st, sg, w2v->ds->tokens[id], alpha);
+                loss += hsoft_learn(w2v->hsf, st, sg, w2v->ds->tokens[id], alpha);
             }
             w2v_ut(w2v, sg, id, k, l, r, alpha);
+            alpha -= alpha_step;
         }
-        progress(stderr, w2v->ds->d, d + 1);
+        tloss += loss / (de - ds);
+        progress(stderr, w2v->ds->d, d + 1, tloss, alpha);
+    }
+    tloss = 0.0;
     }
 
     free(st); st = NULL;

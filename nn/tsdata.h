@@ -12,7 +12,7 @@
 
 #include "hash.h"
 
-#define KEY_SIZE 128
+#define KEY_SIZE 1024
 
 // transaction type define
 typedef struct _tdata {

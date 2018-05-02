@@ -79,9 +79,9 @@ void hsoft_build(HSoft ** ahsf, int (*wc)[2], int v, int k){
     hsoft_build_tree(hsf->hbt, wc, v);
 }
 
-void hsoft_learn(HSoft * hsf, double *in, double *out, int tid, double alpha){
+double hsoft_learn(HSoft * hsf, double *in, double *out, int tid, double alpha){
     int s = 0, t = 0, k = hsf->k, st[MXDEPT], sb[MXDEPT];
-    double loss = 0.0;
+    double loss = 0.0, o = 0.0;
 
     memset(st, -1, sizeof(int) * MXDEPT);
     memset(sb, -1, sizeof(int) * MXDEPT);
@@ -97,18 +97,22 @@ void hsoft_learn(HSoft * hsf, double *in, double *out, int tid, double alpha){
     }
 
     while (-1 != st[s]){
-        loss = 0.0;
+        o = 0.0;
         for (t = 0; t < k; t++){
-            loss += in[t] * hsf->tree[st[s] * k + t];
+            o += in[t] * hsf->tree[st[s] * k + t];
         }
-        loss = (sb[s] - 1.0 / (1.0 + exp(-loss)));
-        if (fabs(loss)  > 1e-9) for (t = 0; t < k; t++){
-            out[t] += loss * hsf->tree[st[s] * k + t];
-            hsf->tree[st[s] * k + t] += alpha * loss * in[t];
+        o = 1.0 / (1.0 + exp(-o));
+        if (sb[s] == 1) loss -= log(o);
+        else loss -= log(1.0 - o);
+        o = sb[s] - o;
+        if (fabs(o)  > 1e-9) for (t = 0; t < k; t++){
+            out[t] += o * hsf->tree[st[s] * k + t];
+            hsf->tree[st[s] * k + t] += alpha * o * in[t];
         }
         s -= 1;
         s = s < 0 ? (s + MXDEPT) : s;
     }
+    return loss;
 }
 
 void hsoft_free(HSoft * hsf){

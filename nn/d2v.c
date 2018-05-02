@@ -153,7 +153,7 @@ void d2v_learn(D2V * d2v){
                 cw[m] += alpha * eu[m];
             }
         }
-        progress(stderr, d2v->ds->d, d + 1);
+        progress(stderr, d2v->ds->d, d + 1, 0.0,0.0);
     }
     free(eu); eu = NULL;
 }

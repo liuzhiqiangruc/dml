@@ -10,8 +10,8 @@
 #ifndef _GBM_H
 #define _GBM_H
 
-#include "data.h"
 #include "dtree.h"
+#include "tdata.h"
 #include "gbcfg.h"
 
 
@@ -27,10 +27,10 @@ typedef struct _gbm GBM;
  * n      : length of f,y,g,h
  * k      : total class count 
  * -------------------------------------- */
-typedef void(*FN_GH)(double * f, double * y, double * g, double * h, int n, int k);
+typedef void(*GH)(double * f, double * y, double * g, double * h, int n, int k);
 
 //- report function define
-typedef void(*FN_R)(GBM * m);
+typedef void(*R)(GBM * m);
 
 //- class count k
 int      k_count(GBM * gbm);
@@ -54,7 +54,7 @@ int      t_size(GBM * gbm);
 int      has_test(GBM * gbm);
 
 //-   create, train, save, free gbm model
-GBM * gbm_create(FN_GH g_fn, FN_R r_fn, GBMP p);
+GBM * gbm_create(GH g_fn, R r_fn, GBMP p);
 int   gbm_train(GBM * gbm);
 void  gbm_save (GBM * gbm);
 void  gbm_free (GBM * gbm);

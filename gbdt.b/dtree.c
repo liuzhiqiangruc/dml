@@ -31,7 +31,7 @@ struct _d_tree {
 };
 
 typedef struct _thread_d {
-    DATA  * ds;      /* data set for dtree split         */
+    DTD   * ds;      /* data set for dtree split         */
     DTree * t;       /* copy of current leaf node        */
     int   * insn;    /* instance node info               */
     int   * idxc;    /* column id index shuffled         */
@@ -100,7 +100,7 @@ static void * thread_call(void *arg){
     int     *idxc       = NULL;
     double  *g, *h;
     ThreadD *thresD  = (ThreadD*)arg;
-    DATA     *ds     = thresD->ds;
+    DTD     *ds      = thresD->ds;
     DTree   *t       = thresD->t;
     inst_nodes       = thresD->insn;
     idxc             = thresD->idxc;
@@ -116,16 +116,16 @@ static void * thread_call(void *arg){
     // for (i = ids; i < ide; i++){
     for (ci = ids; ci < ide; ci++){
         i = idxc[ci];
-        o   = ds->clen[i];
+        o   = ds->cl[i];
         lsg = lsh = 0.0;
         lc  = 0;
         lv  = DBL_MAX;
         v   = 0.0;
-        for (j = 0; j < ds->len[i]; j++){
+        for (j = 0; j < ds->l[i]; j++){
             if (t->n - lc < s) { break; }
             r = ds->ids[o + j];
             if (inst_nodes[r] == id){
-                if (ds->fea_type == NOBINARY){
+                if (0 == ds->bin){
                     v = ds->vals[o + j];
                     if (v < lv && lv < DBL_MAX && lc >= s){
                         update_child(t, i, lc, lsg, lsh, nr, wr, v, lv);
@@ -140,7 +140,7 @@ static void * thread_call(void *arg){
         // for column which have missing value and missing cnt >= s
         // and nonmissing cnt also >= s
         if (lc >= s && t->n - lc >= s){
-            update_child(t, i, lc, lsg, lsh, nr, wr, v, BINARY == ds->fea_type ? 1.0 : lv);
+            update_child(t, i, lc, lsg, lsh, nr, wr, v, 1 == ds->bin ? 1.0 : lv);
         }
     }
     return NULL;
@@ -209,15 +209,15 @@ static int tree_grow(ThreadD * thresd       /* tree grow args configration      
     return i;
 }
 
-static void scan_tree(DATA * ts, DTree * t, DTree ** inst_nodes, int n, int m){
+static void scan_tree(DTD * ts, DTree * t, DTree ** inst_nodes, int n, int m){
     unsigned int i, id, rowid, l_c, r_c;
     l_c = 0;
     r_c = m;
-    for (i = 0; i < ts->len[t->attr]; i++){
-        id = i + ts->clen[t->attr];
+    for (i = 0; i < ts->l[t->attr]; i++){
+        id = i + ts->cl[t->attr];
         rowid = ts->ids[id];
         if (inst_nodes[rowid] == t) {
-            if (ts->fea_type == BINARY || (ts->fea_type == NOBINARY && ts->vals[id] >= t->aval)){
+            if (ts->bin == 1 || (ts->bin == 0 && ts->vals[id] >= t->aval)){
                 l_c += 1;
                 r_c -= 1;
                 inst_nodes[rowid] = t->child[0];
@@ -265,7 +265,7 @@ static void shuffle(int * s, int n){
     }
 }
 
-DTree * generate_dtree(DATA * ds     /* dataset for build tree */
+DTree * generate_dtree(DTD * ds      /* dataset for build tree */
                      , double * F    /* current f vector       */
                      , double * g    /* current gradient vec   */
                      , double * h    /* current hessian  vec   */
@@ -309,10 +309,10 @@ DTree * generate_dtree(DATA * ds     /* dataset for build tree */
             break;
         }
         DTree * tmp = leaf_nodes[k];
-        o = ds->clen[tmp->attr];
-        for (i = 0; i < ds->len[tmp->attr]; i++){
+        o = ds->cl[tmp->attr];
+        for (i = 0; i < ds->l[tmp->attr]; i++){
             if (inst_nodes[ds->ids[o + i]] == k){
-                if ((BINARY == ds->fea_type) || (NOBINARY == ds->fea_type && ds->vals[o + i] >= tmp->aval)){
+                if ((1 == ds->bin) || (0 == ds->bin && ds->vals[o + i] >= tmp->aval)){
                     inst_nodes[ds->ids[o + i]] = l;
                 }
             }
@@ -358,7 +358,7 @@ void free_dtree(DTree * t){
     }
 }
 
-double * eval_tree(DATA * ts, DTree * t, double * F, int n){
+double * eval_tree(DTD * ts, DTree * t, double * F, int n){
     int i;
     DTree ** inst_nodes = NULL;
     if (ts && F && t && t->leaf == 0 && n > 0) {

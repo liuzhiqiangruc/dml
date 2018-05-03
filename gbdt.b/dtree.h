@@ -11,7 +11,7 @@
 #ifndef _DTREE_H
 #define _DTREE_H
 
-#include "data.h"
+#include "tdata.h"
 
 typedef struct _d_tree DTree;
 
@@ -27,7 +27,7 @@ typedef struct _d_tree DTree;
  * d       : max depth of trees
  * m       : max leaf node in the tree
  * ----------------------------------------- */
-DTree * generate_dtree(DATA * ds, double * F, double * g, double * h, double nr, double wr, int n, int p, int s, int d, int m);
+DTree * generate_dtree(DTD * ds, double * F, double * g, double * h, double nr, double wr, int n, int p, int s, int d, int m);
 
 /* -------------------------
  * brief   : free tree space
@@ -38,7 +38,7 @@ void free_dtree(DTree * t);
  * brief   : predict ts with tree t
  * return  : predict value(score)
  * ------------------------------------ */
-double * eval_tree(DATA * ts, DTree * t, double * F, int n);
+double * eval_tree(DTD * ts, DTree * t, double * F, int n);
 
 /* ------------------------------------
  * brief   : save decision tree to file

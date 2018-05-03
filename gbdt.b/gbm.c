@@ -14,21 +14,21 @@
 #include "gbm.h"
 
 struct _gbm {
-    DATA   * train_ds;
-    DATA   * test_ds;
+    DTD * train_ds;      // train dataset
+    DTD * test_ds;       // test dataset
     int      k;          // class count of dataset
     int      currentsl;  // current max tree length
     int    * tree_size;  // tree size for model k
     double * f;          // pred value for train
     double * t;          // pred value for test
     DTree ** dts;        // dtrees
-    FN_GH    g_fn;       // grad function
-    FN_R     r_fn;       // report function
-    GBMP     p;          // gbm config
+    GBMP p;              // gbm config
+    GH   g_fn;           // grad function
+    R    r_fn;           // report function
 };
 
 static void init_k(GBM * gbm){
-    DATA * ds = gbm->train_ds;
+    DTD * ds = gbm->train_ds;
     int k, i;
     k = 0;
     for (i = 0; i < ds->row; i++) if (ds->y[i] > k) {
@@ -49,22 +49,60 @@ static void eval_test(GBM * gbm, int k){
     t = NULL;
 }
 
-GBM * gbm_create(FN_GH g_fn, FN_R r_fn, GBMP p){
+GBM * gbm_create(GH g_fn, R r_fn, GBMP p){
     GBM * gbm = (GBM*)calloc(1, sizeof(GBM));
+    if (!gbm){
+        goto gb_failed;
+    }
     gbm->g_fn = g_fn;
     gbm->r_fn = r_fn;
-    gbm->p    = p;
-    Hash * hs = hash_create(1 << 20, STRING);
-    gbm->train_ds = data_load(p.train_input, COL, p.binary == 1 ? BINARY : NOBINARY, NO_INITED, hs);
-    gbm->test_ds  = data_load(p.test_input,  COL, p.binary == 1 ? BINARY : NOBINARY, INITED,    hs);
-    hash_free(hs); hs = NULL;
+    gbm->p = p;
+    // load dataset
+    DTD *(*tds)[2] = load_data(p.train_input, p.test_input, p.binary);
+    if (!tds){
+        goto ds_failed;
+    }
+    gbm->train_ds = (*tds)[0];
+    gbm->test_ds  = (*tds)[1];
     init_k(gbm);
+    // tree spaces
     gbm->tree_size = (int*)calloc(gbm->k, sizeof(int));
     gbm->dts = (DTree **)calloc(p.max_trees * gbm->k, sizeof(void *));
+    if (!gbm->dts){
+        goto dts_failed;
+    }
     gbm->f = (double*)calloc(gbm->train_ds->row * gbm->k, sizeof(double));
-    if (gbm->test_ds)
-        gbm->t = (double*)calloc(gbm->test_ds->row * gbm->k, sizeof(double));
+    if (!gbm->f){
+        goto train_y_failed;
+    }
+    if (!gbm->test_ds){
+        goto ret_no_test;
+    }
+    gbm->t = (double*)calloc(gbm->test_ds->row * gbm->k, sizeof(double));
+    if (!gbm->t){
+        goto test_y_failed;
+    }
+ret_no_test:
+    /*
+    load_init(gbm);
+    */
     return gbm;
+test_y_failed:
+    free(gbm->f);
+    gbm->f = NULL;
+train_y_failed:
+    free(gbm->dts);
+    gbm->dts = NULL;
+dts_failed:
+    if (gbm->train_ds) free_data(gbm->train_ds);
+    if (gbm->test_ds)  free_data(gbm->test_ds);
+    free(tds);
+    tds = NULL;
+ds_failed:
+    free(gbm);
+    gbm = NULL;
+gb_failed:
+    return NULL;
 }
 
 int    gbm_train(GBM * gbm){
@@ -194,11 +232,11 @@ void   gbm_free (GBM * gbm){
     k = gbm->k;
     if (gbm){
         if (gbm->train_ds){
-            data_free(gbm->train_ds);
+            free_data(gbm->train_ds);
             gbm->train_ds = NULL;
         }
         if (gbm->test_ds){
-            data_free(gbm->test_ds);
+            free(gbm->test_ds);
             gbm->test_ds = NULL;
         }
         if (gbm->f){

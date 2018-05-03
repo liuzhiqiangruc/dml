@@ -5,7 +5,8 @@ INS = ../output
 
 CFLAGS = $(CFBASE) -DNDEBUG -DNPRINT -I$(INC)
 
-PRGS   = lr deeplr gblr k2d lda hlda xlda w2v d2v kmeans gbm gbrank lv
+#PRGS   = lr deeplr gblr k2d lda hlda xlda w2v d2v kmeans gbm gbrank lv
+PRGS   = lr deeplr  k2d lda hlda xlda w2v d2v kmeans gbm lv
 
 all : $(PRGS)
 

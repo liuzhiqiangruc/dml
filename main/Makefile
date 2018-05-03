@@ -46,7 +46,7 @@ kmeans.o : kmeans.c
 	$(CC) $(CFLAGS) -c $^ -o $@
 
 w2v : w2v.o
-	$(CC) -L$(LIB) $^ -lw2vs -lm -o $@
+	$(CC) -L$(LIB) $^ -lw2vs -lm -lpthread -o $@
 
 d2v : d2v.o
 	$(CC) -L$(LIB) $^ -ld2vs -lm -o $@

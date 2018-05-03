@@ -17,6 +17,7 @@ typedef double (*GET_ALPHA)    (void * wc);
 typedef int    (*GET_K)        (void * wc);
 typedef int    (*GET_T)        (void * wc);
 typedef int    (*GET_N)        (void * wc);
+typedef int    (*GET_M)        (void * wc);
 typedef int    (*GET_W)        (void * wc);
 typedef char * (*GET_D)        (void * wc);
 typedef char * (*GET_O)        (void * wc);
@@ -27,6 +28,7 @@ typedef struct _w2vconfig {
     int    k;
     int    t;
     int    n;
+    int    m;
     int    w;
     char * d;
     char * o;
@@ -34,6 +36,7 @@ typedef struct _w2vconfig {
     GET_K      get_k;
     GET_T      get_t;
     GET_N      get_n;
+    GET_M      get_m;
     GET_W      get_w;
     GET_D      get_d;
     GET_O      get_o;

@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <pthread.h>
 #include "hash.h"
 #include "str.h"
 #include "repo.h"
@@ -143,6 +144,108 @@ int w2v_init(W2V * w2v){
     return 0;
 }
 
+
+typedef struct _thread_arg{
+    W2V * w2v;     // w2v struct
+    int * dindex;  // doc index range
+    int id;        // thread index from 0 ~ m - 1
+    int *runCount; // global scan count, thread safe
+    double *loss;  // loss, thread safe
+} ThreadArg;
+
+
+static void * thread_call_learn(void * arg){
+    ThreadArg * thresD = (ThreadArg*)arg;
+    W2V * w2v     = thresD->w2v;
+    int * dindex  = thresD->dindex;
+    int * rCnt    = thresD->runCount;
+    double* tloss = thresD->loss;
+    int w, n, k, t, d, id, iid, l, r, ds, de, totle;
+    double *st, *sg;
+    double alpha, loss, lr, prog;
+    w     = w2v->wc->get_w(w2v->wc);
+    n     = w2v->wc->get_n(w2v->wc);
+    k     = w2v->wc->get_k(w2v->wc);
+    t     = w2v->wc->get_t(w2v->wc);
+    iid   = thresD->id;
+    lr    = w2v->wc->get_alpha(w2v->wc);
+    alpha = lr;
+    totle = n * w2v->ds->t;
+    st = (double *)calloc(k, sizeof(double));
+    sg = (double *)calloc(k, sizeof(double));
+    // scan data for train
+    while(n-- > 0) for (d = dindex[iid]; d < dindex[iid + 1]; d++){
+        loss = 0.0;
+        ds = w2v->ds->doffs[d];
+        de = w2v->ds->doffs[d + 1];
+        l = ds; r = l + w;
+        if (r > de) r = de;
+        if (de - ds > 1) for (id = ds; id < de; id++){
+            memset(st, 0, sizeof(double) * k);
+            memset(sg, 0, sizeof(double) * k);
+            w2v_st(w2v, st, id, k, l, r);
+            if (t == 2){ // hidden layer fixed
+                loss += hsoft_learn(w2v->hsf, st, sg, w2v->ds->tokens[id], 0.0);
+            }
+            else {
+                loss += hsoft_learn(w2v->hsf, st, sg, w2v->ds->tokens[id], alpha);
+            }
+            w2v_ut(w2v, sg, id, k, l, r, alpha);
+            if (id >= ds + (w>>1) && id < de - 1 - (w>>1)){
+                l += 1;
+                r += 1;
+            }
+        }
+        *tloss += loss;
+        *rCnt += de - ds;
+        prog  = 1.0 - 1.0 * (*rCnt) / totle;
+        alpha = lr * prog;
+        if (iid == 0){
+            progress(stderr, totle, *rCnt, *tloss, alpha);
+        }
+    }
+    free(st); st = NULL;
+    free(sg); sg = NULL;
+    return NULL;
+}
+
+void w2v_learn(W2V * w2v){
+    int i, d, l, m, rCnt = 0;
+    double loss = 0.0;
+    int dindex[100] = {0}; // max 99 threads
+    ThreadArg args[100] = {{0}}; // thread args
+    pthread_t thid[100] = {0}; // thread ids
+    m = w2v->wc->get_m(w2v->wc);
+    d = w2v->ds->d;
+    l = d / m;
+    for (i = 1; i < m + 1; i++){
+        dindex[i] = l;
+    }
+    l = d % m;
+    for (i = 1; i <= l; i++){
+        dindex[i] += 1;
+    }
+    for (i = 1; i < m + 1; i++){
+        dindex[i] += dindex[i - 1];
+    }
+    for (i = 0; i < m; i++){
+        args[i].w2v = w2v;
+        args[i].dindex = dindex;
+        args[i].id = i;
+        args[i].runCount = &rCnt;
+        args[i].loss = &loss;
+    }
+    // call sub threads for train
+    for (i = 0; i < m; i++){
+        pthread_create(thid + i, NULL, thread_call_learn, args + i);
+    }
+    // wait all threads done
+    for (i = 0; i < m; i++){
+        pthread_join(thid[i], NULL);
+    }
+}
+
+/*
 void w2v_learn (W2V * w2v){
     int t, k, n, w, d, id, ds, de, l, r;
     double *st, *sg;
@@ -158,38 +261,43 @@ void w2v_learn (W2V * w2v){
     st = (double *)calloc(k, sizeof(double));
     sg = (double *)calloc(k, sizeof(double));
 
-    while (n-- > 0) {for (d = 0; d < w2v->ds->d; d++){
-        loss = 0.0;
-        ds = w2v->ds->doffs[d];
-        de = w2v->ds->doffs[d + 1];
-        if (de - ds > 1) for (id = ds; id < de; id ++){
-            l = id - w / 2;
-            l = l < ds ? ds : l;
-            r = l + w;
-            r = r > de ? de : r;
+    while (n-- > 0) {
+        for (d = 0; d < w2v->ds->d; d++){
+            loss = 0.0;
+            ds = w2v->ds->doffs[d];
+            de = w2v->ds->doffs[d + 1];
+            if (de - ds > 1) {
+                l = ds; r = l + w;
+                if (r > de) r = de;
+                for (id = ds; id < de; id ++){
+                    memset(st, 0, sizeof(double) * k);
+                    memset(sg, 0, sizeof(double) * k);
 
-            memset(st, 0, sizeof(double) * k);
-            memset(sg, 0, sizeof(double) * k);
-
-            w2v_st(w2v, st, id, k, l, r);
-            if (t == 2){ // h fix
-                loss += hsoft_learn(w2v->hsf, st, sg, w2v->ds->tokens[id], 0.0);
+                    w2v_st(w2v, st, id, k, l, r);
+                    if (t == 2){ // h fix
+                        loss += hsoft_learn(w2v->hsf, st, sg, w2v->ds->tokens[id], 0.0);
+                    }
+                    else {
+                        loss += hsoft_learn(w2v->hsf, st, sg, w2v->ds->tokens[id], alpha);
+                    }
+                    w2v_ut(w2v, sg, id, k, l, r, alpha);
+                    alpha -= alpha_step;
+                    if (id >= ds + (w>>1) && id < de - 1 - (w>>1)){
+                        l += 1;
+                        r += 1;
+                    }
+                }
+                tloss += loss / (de - ds);
+                progress(stderr, w2v->ds->d, d + 1, tloss, alpha);
             }
-            else {
-                loss += hsoft_learn(w2v->hsf, st, sg, w2v->ds->tokens[id], alpha);
-            }
-            w2v_ut(w2v, sg, id, k, l, r, alpha);
-            alpha -= alpha_step;
         }
-        tloss += loss / (de - ds);
-        progress(stderr, w2v->ds->d, d + 1, tloss, alpha);
-    }
-    tloss = 0.0;
+        tloss = 0.0;
     }
 
     free(st); st = NULL;
     free(sg); sg = NULL;
 }
+*/
 
 void w2v_save(W2V * w2v){
     char * outdir = w2v->wc->get_o(w2v->wc);

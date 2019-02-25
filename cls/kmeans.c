@@ -87,7 +87,8 @@ static int init_cents(double * m, int n, int f, int k, double * cents, double * 
     for (int c = 1; c < k; c++){
         memset(d,0,sizeof(double) * n);
         for (int i = 0; i < n; i++){
-            nearest(m + i * f, cents, c, f, d + i);
+            if (randf(1.0) > 0.99)
+                nearest(m + i * f, cents, c, f, d + i);
             if (i > 0) d[i] += d[i-1];
         }
         double s = randf(d[n - 1]);
@@ -162,7 +163,7 @@ int kmeans(double * m, int n, int f, int k, int * c){
             }
         }
         
-        if (update <= n>>10){
+        if (update <= n>>8){
             break;
         }
         niter += 1;

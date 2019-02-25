@@ -14,7 +14,7 @@
 
 #include "hash.h"
 
-#define FKL 32
+#define FKL 128
 
 typedef enum {ROW    = 1, COL}       DT_STYLE;
 typedef enum {BINARY = 1, NOBINARY}  FEA_TYPE;

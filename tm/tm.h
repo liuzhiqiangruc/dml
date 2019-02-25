@@ -10,7 +10,7 @@
 #ifndef _TM_H
 #define _TM_H
 
-#define KEY_SIZE 64
+#define KEY_SIZE 300
 #define LDA_LINE_LEN 1024
 
 typedef struct _tm TM;

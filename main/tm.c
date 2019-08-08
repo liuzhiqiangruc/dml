@@ -9,6 +9,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include "tm.h"
 
 int main(int argc, char *argv[]){
@@ -16,7 +18,7 @@ int main(int argc, char *argv[]){
     if (!tm){
         return -1;
     }
-    srand(time(NULL));
+    srand(time(NULL) + (unsigned int) getpid());
     if (0 != tm_init(tm)){
         return -1;
     }

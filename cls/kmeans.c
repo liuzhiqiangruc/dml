@@ -11,25 +11,27 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include <time.h>
+#include "rand.h"
 #include "kmeans.h"
 
 
 /* ****************************************
  * brief  : cal a rand int for 0 ~ d
  * d      : upper bound of rand
- * ****************************************/
 static int randd(int d){
-    return (int)(0.1 * rand() / (RAND_MAX + 1.0) * d);
+    return (int)(1.0 * rand() / (RAND_MAX + 0.1) * d);
 }
+ * ****************************************/
 
 /* ****************************************
  * brief  : cal a rand doubld for 0 ~ s
  * s      : upper bound of rand
- * ****************************************/
 static double randf(double s){
     return (1.0 * rand() / (RAND_MAX + 0.1) * s);
 }
 
+ * ****************************************/
 
 /* **********************************************
  * brief   : the distance between two instance
@@ -66,6 +68,33 @@ static int nearest(double * s, double * cents, int c, int f, double * dd){
     return rc;
 }
 
+/* **************************************************
+ * find the index i which v[i] > s and v[i - 1] <= s
+ * **************************************************/
+static int binary_search(double *v, int n, double s){
+    int l, h, m;
+    if (n < 0) {return -1;}
+    if (n == 0 || v[0] > s){ return 0;}
+    if (v[n - 1] <= s) {return n - 1;}
+    l = 0, h = n;
+    while (h > l) {
+        if (h == l + 1){
+            return (v[l] > s) ? l : h;
+        }
+        m = (h + l) / 2;
+        if (v[m] > s && v[m - 1] <= s){
+            return m;
+        }
+        else if (v[m] <= s){
+            l = m + 1;
+        }
+        else if (v[m - 1] > s){
+            h = m - 1;
+        }
+    }
+    return h;
+}
+
 /* *****************************************
  * brief  : init cents for kmeans++
  * m      : the data matrix n * f
@@ -78,45 +107,47 @@ static int nearest(double * s, double * cents, int c, int f, double * dd){
  * cids   : the cent id of each instance
  * *****************************************/
 static int init_cents(double * m, int n, int f, int k, double * cents, double * centsA, int * centsC, int * cids){
-    int b = randd(n);
+    RInfo * rinfo = create_rinfo(4357U + time(NULL));
+    int sampled_i, b;
+    double t = 0.0;
     double * d = (double*)malloc(sizeof(double) * n);
-    memset(d, 0, sizeof(double) * n);
-
+    double *cd = (double*)malloc(sizeof(double) * n);
+    // first center randome selected
+    b = (int) (randomMT(rinfo) / (RAND_MAX + 1.0) * n);
     memmove(cents, m + b * f, sizeof(double) * f);
-
+    for (int i = 0; i < n; i++){
+        d[i] = dist(m + i * f, cents, f);
+        cd[i] = d[i];
+        if (i > 0){
+            cd[i] += cd[i - 1];
+        }
+    }
+    memset(cids, 0, sizeof(int) * n);
     for (int c = 1; c < k; c++){
-        memset(d,0,sizeof(double) * n);
+        t = randomMT(rinfo) / (RAND_MAX + 0.1) * cd[n - 1];
+        sampled_i = binary_search(cd, n, t);
+        memmove(cents + c * f, m + sampled_i * f, sizeof(double) * f);
         for (int i = 0; i < n; i++){
-            if (randf(1.0) > 0.99)
-                nearest(m + i * f, cents, c, f, d + i);
-            if (i > 0) d[i] += d[i-1];
-        }
-        double s = randf(d[n - 1]);
-        for (int i = 0; i < n ; i++){
-            if (d[i] > s){
-                memmove(cents + c * f, m + i * f, sizeof(double) * f);
-                break;
-            }
+            t = dist(m + i * f,  cents + c * f, f);
+            if (t < d[i]) {d[i] = t; cids[i] = c;}
+            cd[i] = d[i];
+            if (i > 0){ cd[i] += cd[i - 1]; }
         }
     }
-
     free(d); d = NULL;
-
+    free(cd); cd = NULL;
+    free(rinfo); rinfo = NULL;
     for (int i = 0; i< n; i++){
-        int cent = nearest(m + i * f, cents, k, f , NULL);
-        cids[i] = cent;
-        centsC[cent] += 1;
+        centsC[cids[i]] += 1;
         for (int j = 0; j < f; j++){
-            centsA[cent * f + j] += m[i * f + j];
+            centsA[cids[i] * f + j] += m[i * f + j];
         }
     }
-
     for (int i = 0; i < k; i ++){
         for (int j = 0; j < f; j++){
             cents[i * f + j] = centsA[i * f + j] / centsC[i];
         }
     }
-
     return 0;
 }
 
@@ -131,7 +162,7 @@ static int init_cents(double * m, int n, int f, int k, double * cents, double * 
 int kmeans(double * m, int n, int f, int k, int * c){
     double * cents  = (double*) malloc(sizeof(double) * k * f);
     double * centsA = (double*) malloc(sizeof(double) * k * f);
-    int   * centsC = (int*)malloc(sizeof(int) * k);
+    int    * centsC = (int*)malloc(sizeof(int) * k);
 
     memset(cents, 0,sizeof(double) * k * f);
     memset(centsA,0,sizeof(double) * k * f);

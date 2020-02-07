@@ -17,9 +17,10 @@
  * int     f : number of column of input
  * int     k : cluster number
  * int   * c : cluster ID from 0 ~ k-1
+ * int   ths : thread count for kmeans E step
  * return    : 0 success else failed
  * ------------------------------------------------ */
-int kmeans(double* m, int n, int f, int k, int * c);
+int kmeans(double* m, int n, int f, int k, int * c, int ths);
 
 
 #endif //KMEANS_H

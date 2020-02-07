@@ -6,32 +6,26 @@
  *   date     : 2014-09-19
  *   info     : implementation of kmeans++
  * ======================================================== */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
+#include <pthread.h>
 #include "rand.h"
 #include "kmeans.h"
 
-
-/* ****************************************
- * brief  : cal a rand int for 0 ~ d
- * d      : upper bound of rand
-static int randd(int d){
-    return (int)(1.0 * rand() / (RAND_MAX + 0.1) * d);
-}
- * ****************************************/
-
-/* ****************************************
- * brief  : cal a rand doubld for 0 ~ s
- * s      : upper bound of rand
-static double randf(double s){
-    return (1.0 * rand() / (RAND_MAX + 0.1) * s);
-}
-
- * ****************************************/
+typedef struct _thread_arg{
+    double *m;
+    double *cents;
+    int * upd;
+    int * cids;
+    int k;
+    int n;
+    int f;
+    int tid;
+    int ths;
+} ThreadArg;
 
 /* **********************************************
  * brief   : the distance between two instance
@@ -152,6 +146,32 @@ static int init_cents(double * m, int n, int f, int k, double * cents, double * 
 }
 
 /* *************************************************
+ * brief  : estep thread call
+ * *************************************************/
+static void * estep_thread_call (void * arg){
+    ThreadArg * TH = (ThreadArg*)arg;
+    double *m     = TH->m;
+    double *cents = TH->cents;
+    int    *upd   = TH->upd;
+    int    *cids  = TH->cids;
+    int     k     = TH->k;
+    int     f     = TH->f;
+    int     n     = TH->n;
+    int     tid   = TH->tid;
+    int     ths   = TH->ths;
+    int     l     = n / ths;
+    int     s     = n % ths;
+    int     begin = l * tid + (tid <= s ? tid : s);
+    int     end   = l * (tid + 1) + ((tid + 1) <= s ? (tid + 1) : s);
+    for (int i = begin; i < end; i++){
+        int old = cids[i];
+        cids[i] = nearest(m + i * f, cents, k, f, NULL);
+        if (old != cids[i]) upd += 1;
+    }
+    return NULL;
+}
+
+/* *************************************************
  * brief  : kmeans++ algorithm
  * m      : the data matrix
  * n      : data size
@@ -159,52 +179,61 @@ static int init_cents(double * m, int n, int f, int k, double * cents, double * 
  * k      : No. of cents
  * c      : the cent id for each instance
  * *************************************************/
-int kmeans(double * m, int n, int f, int k, int * c){
+int kmeans(double * m, int n, int f, int k, int * c, int ths){
+    int niters = 0, update = 0;
     double * cents  = (double*) malloc(sizeof(double) * k * f);
     double * centsA = (double*) malloc(sizeof(double) * k * f);
     int    * centsC = (int*)malloc(sizeof(int) * k);
-
     memset(cents, 0,sizeof(double) * k * f);
     memset(centsA,0,sizeof(double) * k * f);
     memset(centsC,0,sizeof(int) * k);
-
     init_cents(m, n, f, k, cents, centsA, centsC, c);
-
-    int niter = 0;
-    while (niter <  100){
-        int update = 0;
-        for (int i = 0 ; i < n; i ++){
-            int oldcent = c[i];
-            int newcent = nearest(m + i * f, cents, k, f, NULL);
-            if (newcent != oldcent) if (centsC[oldcent] > 2) {
-                update += 1;
-                centsC[oldcent] -= 1;
-                centsC[newcent] += 1;
-                for (int j = 0; j < f; j++){
-                    centsA[oldcent * f + j] -= m[i * f + j];
-                    centsA[newcent * f + j] += m[i * f + j];
-                }
-                c[i] = newcent;
+    int thread_update[32] = {0};
+    pthread_t tids[32] = {0};
+    ThreadArg args[32] = {{0}};
+    if (ths <=1 ) ths = 1;
+    if (ths >= 32) ths = 32;
+    for (int i = 0; i < ths; i++){
+        args[i].m     = m;
+        args[i].cents = cents;
+        args[i].k     = k;
+        args[i].n     = n;
+        args[i].f     = f;
+        args[i].tid   = i;
+        args[i].upd   = thread_update + i;
+        args[i].cids  = c;
+    }
+    while (++niters  <= 100){
+        update = 0;
+        for (int i = 0; i < ths; i++){
+            pthread_create(tids + i, NULL, estep_thread_call, args + i);
+        }
+        for (int i = 0; i < ths; i++){
+            pthread_join(tids[i], NULL);
+        }
+        for (int i = 0; i < ths; i++){
+            update += thread_update[i];
+        }
+        memset(centsA,0,sizeof(double) * k * f);
+        memset(centsC,0,sizeof(int) * k);
+        for (int i = 0; i< n; i++){
+            centsC[c[i]] += 1;
+            for (int j = 0; j < f; j++){
+                centsA[c[i] * f + j] += m[i * f + j];
             }
         }
-
-        for (int i = 0; i < k; i++){
+        for (int i = 0; i < k; i ++){
             for (int j = 0; j < f; j++){
                 cents[i * f + j] = centsA[i * f + j] / centsC[i];
             }
         }
-        
-        if (update <= n>>8){
+        fprintf(stderr,"kmeans iteration: %d, change instance : %d\n", niters, update);
+        if (update <= n / 256){
             break;
         }
-        niter += 1;
-        fprintf(stderr,"kmeans iteration: %d, change instance : %d\n", niter,update);
     }
-
     free(cents);  cents = NULL;
     free(centsA); centsA = NULL;
     free(centsC); centsC = NULL;
-
     return 0;
 }
-

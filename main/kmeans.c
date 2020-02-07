@@ -61,7 +61,7 @@ int main(int argc, char *argv[]){
         goto ret;
     }
 
-    kmeans(m, n, f, k, c);
+    kmeans(m, n, f, k, c, 32);
 
     sprintf(of, "%s/clsid", o);
     

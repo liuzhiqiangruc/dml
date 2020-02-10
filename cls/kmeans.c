@@ -1,6 +1,6 @@
 /* ========================================================
  *   Copyright (C) 2014 All rights reserved.
- *   
+ *
  *   filename : kmeans.c
  *   author   : liuzhiqiang01@baidu.com
  *   date     : 2014-09-19
@@ -163,10 +163,11 @@ static void * estep_thread_call (void * arg){
     int     s     = n % ths;
     int     begin = l * tid + (tid <= s ? tid : s);
     int     end   = l * (tid + 1) + ((tid + 1) <= s ? (tid + 1) : s);
+    *upd = 0;
     for (int i = begin; i < end; i++){
         int old = cids[i];
         cids[i] = nearest(m + i * f, cents, k, f, NULL);
-        if (old != cids[i]) upd += 1;
+        if (old != cids[i]) *upd += 1;
     }
     return NULL;
 }
@@ -202,6 +203,7 @@ int kmeans(double * m, int n, int f, int k, int * c, int ths){
         args[i].tid   = i;
         args[i].upd   = thread_update + i;
         args[i].cids  = c;
+        args[i].ths   = ths;
     }
     while (++niters  <= 100){
         update = 0;

@@ -20,7 +20,7 @@
  * int   ths : thread count for kmeans E step
  * return    : 0 success else failed
  * ------------------------------------------------ */
-int kmeans(double* m, int n, int f, int k, int * c, int ths);
+int kmeans(double* m, int n, int f, int k, double * cents, int * c, double * dist, int ths);
 
 
 #endif //KMEANS_H

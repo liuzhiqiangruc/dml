@@ -86,7 +86,7 @@ k2d : k2d.o
 	$(CC) -L$(LIB) $^ -lk2ds -lm -o $@
 
 kmeans : kmeans.o
-	$(CC) -L$(LIB) $^ -lkmeanss -lm -o $@
+	$(CC) -L$(LIB) $^ -lpthread -lkmeanss -lm -o $@
 
 lv : lv.o
 	$(CC) -L$(LIB) $^ -llouvains  -o $@

@@ -18,6 +18,7 @@
 typedef struct _thread_arg{
     double *m;
     double *cents;
+    double *dis;
     int * upd;
     int * cids;
     int k;
@@ -100,7 +101,7 @@ static int binary_search(double *v, int n, double s){
  * centsC : the instance count of each cent
  * cids   : the cent id of each instance
  * *****************************************/
-static int init_cents(double * m, int n, int f, int k, double * cents, double * centsA, int * centsC, int * cids){
+static int init_cents(double * m, int n, int f, int k, double * cents, int * cids){
     RInfo * rinfo = create_rinfo(4357U + time(NULL));
     int sampled_i, b;
     double t = 0.0;
@@ -131,17 +132,6 @@ static int init_cents(double * m, int n, int f, int k, double * cents, double * 
     free(d); d = NULL;
     free(cd); cd = NULL;
     free(rinfo); rinfo = NULL;
-    for (int i = 0; i< n; i++){
-        centsC[cids[i]] += 1;
-        for (int j = 0; j < f; j++){
-            centsA[cids[i] * f + j] += m[i * f + j];
-        }
-    }
-    for (int i = 0; i < k; i ++){
-        for (int j = 0; j < f; j++){
-            cents[i * f + j] = centsA[i * f + j] / centsC[i];
-        }
-    }
     return 0;
 }
 
@@ -152,6 +142,7 @@ static void * estep_thread_call (void * arg){
     ThreadArg * TH = (ThreadArg*)arg;
     double *m     = TH->m;
     double *cents = TH->cents;
+    double *dis   = TH->dis;
     int    *upd   = TH->upd;
     int    *cids  = TH->cids;
     int     k     = TH->k;
@@ -166,10 +157,38 @@ static void * estep_thread_call (void * arg){
     *upd = 0;
     for (int i = begin; i < end; i++){
         int old = cids[i];
-        cids[i] = nearest(m + i * f, cents, k, f, NULL);
+        cids[i] = nearest(m + i * f, cents, k, f, dis + i);
         if (old != cids[i]) *upd += 1;
     }
     return NULL;
+}
+
+/* *************************************************
+ * brief  : mstep thread call
+ * *************************************************/
+static void m_step_call(double *m, double *cents, int *c, int n, int f, int k){
+    double * centsA = (double*)calloc(sizeof(double), k * f);
+    int    * centsC = (int*)   calloc(sizeof(int),    k);
+    double   centsL2Norm = 0.0;
+    for (int i = 0; i< n; i++){
+        centsC[c[i]] += 1;
+        for (int j = 0; j < f; j++){
+            centsA[c[i] * f + j] += m[i * f + j];
+        }
+    }
+    for (int i = 0; i < k; i ++){
+        centsL2Norm = 0.0;
+        for (int j = 0; j < f; j++){
+            cents[i * f + j] = centsA[i * f + j] / centsC[i];
+            centsL2Norm += cents[i * f + j] * cents[i * f + j];
+        }
+        centsL2Norm = sqrt(centsL2Norm);
+        for (int j = 0; j < f; j++){
+            cents[i * f + j] /= centsL2Norm;
+        }
+    }
+    free(centsA); centsA = NULL;
+    free(centsC); centsC = NULL;
 }
 
 /* *************************************************
@@ -180,15 +199,10 @@ static void * estep_thread_call (void * arg){
  * k      : No. of cents
  * c      : the cent id for each instance
  * *************************************************/
-int kmeans(double * m, int n, int f, int k, int * c, int ths){
+int kmeans(double * m, int n, int f, int k, double * cents, int * c, double * dis, int ths){
     int niters = 0, update = 0;
-    double * cents  = (double*) malloc(sizeof(double) * k * f);
-    double * centsA = (double*) malloc(sizeof(double) * k * f);
-    int    * centsC = (int*)malloc(sizeof(int) * k);
     memset(cents, 0,sizeof(double) * k * f);
-    memset(centsA,0,sizeof(double) * k * f);
-    memset(centsC,0,sizeof(int) * k);
-    init_cents(m, n, f, k, cents, centsA, centsC, c);
+    init_cents(m, n, f, k, cents, c);
     int thread_update[32] = {0};
     pthread_t tids[32] = {0};
     ThreadArg args[32] = {{0}};
@@ -204,38 +218,27 @@ int kmeans(double * m, int n, int f, int k, int * c, int ths){
         args[i].upd   = thread_update + i;
         args[i].cids  = c;
         args[i].ths   = ths;
+        args[i].dis   = dis;
     }
     while (++niters  <= 100){
-        update = 0;
+        // m step for kmeans iteration
+        m_step_call(m, cents, c, n, f, k);
+        // e step for kmeans iteration using mutil thread
         for (int i = 0; i < ths; i++){
             pthread_create(tids + i, NULL, estep_thread_call, args + i);
         }
         for (int i = 0; i < ths; i++){
             pthread_join(tids[i], NULL);
         }
+        // No. of instance whose clsid changed
+        update = 0;
         for (int i = 0; i < ths; i++){
             update += thread_update[i];
-        }
-        memset(centsA,0,sizeof(double) * k * f);
-        memset(centsC,0,sizeof(int) * k);
-        for (int i = 0; i< n; i++){
-            centsC[c[i]] += 1;
-            for (int j = 0; j < f; j++){
-                centsA[c[i] * f + j] += m[i * f + j];
-            }
-        }
-        for (int i = 0; i < k; i ++){
-            for (int j = 0; j < f; j++){
-                cents[i * f + j] = centsA[i * f + j] / centsC[i];
-            }
         }
         fprintf(stderr,"kmeans iteration: %d, change instance : %d\n", niters, update);
         if (update <= n / 256){
             break;
         }
     }
-    free(cents);  cents = NULL;
-    free(centsA); centsA = NULL;
-    free(centsC); centsC = NULL;
     return 0;
 }

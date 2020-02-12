@@ -30,27 +30,17 @@ typedef struct _thread_arg{
 
 /* **********************************************
  * brief   : the distance between two instance
- * feature1: features of instance 1
- * feature2: features of instance 2
- * f       : features dim
- * return  : o2 dist
  * **********************************************/
 static double dist(double * feature1, double * feature2, int f){
     double d = 0.0;
     for (int i = 0; i < f; i ++){
         d += (feature1[i] - feature2[i]) * (feature1[i] - feature2[i]);
     }
-    return sqrt(d);
+    return d; // no need for sqrt
 }
 
 /* **********************************************
  * brief  : find nearest cent from c cents with s
- * s      : the sample instance
- * cents  : the cluster cents
- * c      : No. of cents
- * f      : dim of instance and cents
- * dd     : the nearest distance
- * return : the nearest cent
  * **********************************************/
 static int nearest(double * s, double * cents, int c, int f, double * dd){
     int rc = -1;
@@ -92,14 +82,6 @@ static int binary_search(double *v, int n, double s){
 
 /* *****************************************
  * brief  : init cents for kmeans++
- * m      : the data matrix n * f
- * n      : data size
- * f      : dim of data
- * k      : No. of cents
- * cents  : the cluster cents
- * centsA : the feature sum of instances in each cent
- * centsC : the instance count of each cent
- * cids   : the cent id of each instance
  * *****************************************/
 static int init_cents(double * m, int n, int f, int k, double * cents, int * cids){
     RInfo * rinfo = create_rinfo(4357U + time(NULL));
@@ -193,11 +175,6 @@ static void m_step_call(double *m, double *cents, int *c, int n, int f, int k){
 
 /* *************************************************
  * brief  : kmeans++ algorithm
- * m      : the data matrix
- * n      : data size
- * f      : dim of data
- * k      : No. of cents
- * c      : the cent id for each instance
  * *************************************************/
 int kmeans(double * m, int n, int f, int k, double * cents, int * c, double * dis, int ths){
     int niters = 0, update = 0;

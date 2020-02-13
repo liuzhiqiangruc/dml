@@ -36,7 +36,7 @@ static double dist(double * feature1, double * feature2, int f){
     for (int i = 0; i < f; i ++){
         d += (feature1[i] - feature2[i]) * (feature1[i] - feature2[i]);
     }
-    return d; // no need for sqrt
+    return d;
 }
 
 /* **********************************************
@@ -83,11 +83,10 @@ static int binary_search(double *v, int n, double s){
 /* *****************************************
  * brief  : init cents for kmeans++
  * *****************************************/
-static int init_cents(double * m, int n, int f, int k, double * cents, int * cids){
+static int init_cents(double * m, int n, int f, int k, double * cents, int * cids, double * d){
     RInfo * rinfo = create_rinfo(4357U + time(NULL));
     int sampled_i, b;
     double t = 0.0;
-    double * d = (double*)malloc(sizeof(double) * n);
     double *cd = (double*)malloc(sizeof(double) * n);
     // first center randome selected
     b = (int) (randomMT(rinfo) / (RAND_MAX + 1.0) * n);
@@ -101,7 +100,7 @@ static int init_cents(double * m, int n, int f, int k, double * cents, int * cid
     }
     memset(cids, 0, sizeof(int) * n);
     for (int c = 1; c < k; c++){
-        t = randomMT(rinfo) / (RAND_MAX + 0.1) * cd[n - 1];
+        t = randomMT(rinfo) / (RAND_MAX + 1.0) * cd[n - 1];
         sampled_i = binary_search(cd, n, t);
         memmove(cents + c * f, m + sampled_i * f, sizeof(double) * f);
         for (int i = 0; i < n; i++){
@@ -111,7 +110,6 @@ static int init_cents(double * m, int n, int f, int k, double * cents, int * cid
             if (i > 0){ cd[i] += cd[i - 1]; }
         }
     }
-    free(d); d = NULL;
     free(cd); cd = NULL;
     free(rinfo); rinfo = NULL;
     return 0;
@@ -176,10 +174,10 @@ static void m_step_call(double *m, double *cents, int *c, int n, int f, int k){
 /* *************************************************
  * brief  : kmeans++ algorithm
  * *************************************************/
-int kmeans(double * m, int n, int f, int k, double * cents, int * c, double * dis, int ths){
+int kmeans(double * m, int n, int f, int k, double * cents, int * c, double * dis, int ths, int maxiter){
     int niters = 0, update = 0;
     memset(cents, 0,sizeof(double) * k * f);
-    init_cents(m, n, f, k, cents, c);
+    init_cents(m, n, f, k, cents, c, dis);
     int thread_update[32] = {0};
     pthread_t tids[32] = {0};
     ThreadArg args[32] = {{0}};
@@ -197,7 +195,7 @@ int kmeans(double * m, int n, int f, int k, double * cents, int * c, double * di
         args[i].ths   = ths;
         args[i].dis   = dis;
     }
-    while (++niters  <= 100){
+    while (++niters  <= maxiter){
         // m step for kmeans iteration
         m_step_call(m, cents, c, n, f, k);
         // e step for kmeans iteration using mutil thread

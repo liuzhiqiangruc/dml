@@ -15,7 +15,7 @@
 
 void help(){
     fprintf(stderr, "kmeans usage:\n");
-    fprintf(stderr, "./kmeans -f [int] -k [int] -m [int] -d [string] -o [string]\n");
+    fprintf(stderr, "./kmeans -f [int] -k [int] -m [int] -n [int] -d [string] -o [string]\n");
 }
 
 int main(int argc, char *argv[]){
@@ -23,8 +23,7 @@ int main(int argc, char *argv[]){
         help();
         return -1;
     }
-    srand(time(NULL));
-    int f, k, n, i, t;
+    int f, k, n, i, t, maxn;
     int *c = NULL;
     double *m = NULL, *dist = NULL, *cents = NULL;
     char *inf = NULL, *o = ".";
@@ -34,9 +33,10 @@ int main(int argc, char *argv[]){
     f = atoi(argv[2]);
     k = atoi(argv[4]);
     t = atoi(argv[6]);
-    inf = argv[8];
-    if (argc == 11){
-        o = argv[10];
+    maxn = atoi(argv[8]);
+    inf = argv[10];
+    if (argc == 13){
+        o = argv[12];
     }
     if (NULL == (fp = fopen(inf, "r"))){
         fprintf(stderr, "can not open input file\n");
@@ -64,7 +64,7 @@ int main(int argc, char *argv[]){
         goto ret;
     }
 
-    kmeans(m, n, f, k, cents, c, dist, t);
+    kmeans(m, n, f, k, cents, c, dist, t, maxn);
 
     // output the item clusid
     sprintf(of, "%s/clsid", o);
@@ -88,7 +88,7 @@ int main(int argc, char *argv[]){
     while (i < k){
         fprintf(fp, "cluster_%04d", i);
         for (int j = 0; j < f; j++){
-            fprintf(fp, "\t%.6f", cents[i * k + j]);
+            fprintf(fp, "\t%.6f", cents[i * f + j]);
         }
         fprintf(fp, "\n");
         i += 1;

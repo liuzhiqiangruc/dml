@@ -93,6 +93,7 @@ static int init_cents(double * m, int n, int f, int k, double * cents, int * cid
     memmove(cents, m + b * f, sizeof(double) * f);
     for (int i = 0; i < n; i++){
         d[i] = dist(m + i * f, cents, f);
+        if (d[i] < 0.6) d[i] = 0;
         cd[i] = d[i];
         if (i > 0){
             cd[i] += cd[i - 1];
@@ -106,6 +107,7 @@ static int init_cents(double * m, int n, int f, int k, double * cents, int * cid
         for (int i = 0; i < n; i++){
             t = dist(m + i * f,  cents + c * f, f);
             if (t < d[i]) {d[i] = t; cids[i] = c;}
+            if (d[i] < 0.6) d[i] = 0;
             cd[i] = d[i];
             if (i > 0){ cd[i] += cd[i - 1]; }
         }
@@ -138,6 +140,7 @@ static void * estep_thread_call (void * arg){
     for (int i = begin; i < end; i++){
         int old = cids[i];
         cids[i] = nearest(m + i * f, cents, k, f, dis + i);
+        if (dis[i] > 0.8) cids[i] = -1;
         if (old != cids[i]) *upd += 1;
     }
     return NULL;
@@ -146,11 +149,13 @@ static void * estep_thread_call (void * arg){
 /* *************************************************
  * brief  : mstep thread call
  * *************************************************/
-static void m_step_call(double *m, double *cents, int *c, int n, int f, int k){
+static void m_step_call(double *m, double *cents, int *c, int n, int f, int k, int * outlier){
     double * centsA = (double*)calloc(sizeof(double), k * f);
     int    * centsC = (int*)   calloc(sizeof(int),    k);
     double   centsL2Norm = 0.0;
-    for (int i = 0; i< n; i++){
+    *outlier = n;
+    for (int i = 0; i< n; i++) if (c[i] >= 0) {
+        *outlier -= 1;
         centsC[c[i]] += 1;
         for (int j = 0; j < f; j++){
             centsA[c[i] * f + j] += m[i * f + j];
@@ -175,7 +180,7 @@ static void m_step_call(double *m, double *cents, int *c, int n, int f, int k){
  * brief  : kmeans++ algorithm
  * *************************************************/
 int kmeans(double * m, int n, int f, int k, double * cents, int * c, double * dis, int ths, int maxiter){
-    int niters = 0, update = 0;
+    int niters = 0, update = 0, outlier = 0;
     memset(cents, 0,sizeof(double) * k * f);
     init_cents(m, n, f, k, cents, c, dis);
     int thread_update[32] = {0};
@@ -197,7 +202,7 @@ int kmeans(double * m, int n, int f, int k, double * cents, int * c, double * di
     }
     while (++niters  <= maxiter){
         // m step for kmeans iteration
-        m_step_call(m, cents, c, n, f, k);
+        m_step_call(m, cents, c, n, f, k, &outlier);
         // e step for kmeans iteration using mutil thread
         for (int i = 0; i < ths; i++){
             pthread_create(tids + i, NULL, estep_thread_call, args + i);
@@ -210,7 +215,7 @@ int kmeans(double * m, int n, int f, int k, double * cents, int * c, double * di
         for (int i = 0; i < ths; i++){
             update += thread_update[i];
         }
-        fprintf(stderr,"kmeans iteration: %d, change instance : %d\n", niters, update);
+        fprintf(stderr,"kmeans iteration: %3d, change instance : %6d, outlier: %d\n", niters, update, outlier);
         if (update <= n / 256){
             break;
         }

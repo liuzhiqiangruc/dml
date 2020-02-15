@@ -177,7 +177,7 @@ int hsoft_load(HSoft ** dhsf, const char * outdir, int k){
         goto fail1;
     }
     v = 0;
-    while (NULL != fgets(out, 10000, fp)){
+    while (NULL != fgets(buf, 10000, fp)){
         v += 1;
     }
     rewind(fp);

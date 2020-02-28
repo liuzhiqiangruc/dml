@@ -64,7 +64,7 @@ int main(int argc, char *argv[]){
         goto ret;
     }
 
-    kmeans(m, n, f, k, cents, c, dist, t, maxn);
+    k = kmeans(m, n, f, k, cents, c, dist, t, maxn);
 
     // output the item clusid
     sprintf(of, "%s/clsid", o);

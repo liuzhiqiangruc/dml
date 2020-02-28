@@ -15,6 +15,8 @@
 #include "rand.h"
 #include "kmeans.h"
 
+#define ZERO 1e-10
+
 typedef struct _thread_arg{
     double *m;
     double *cents;
@@ -83,9 +85,9 @@ static int binary_search(double *v, int n, double s){
 /* *****************************************
  * brief  : init cents for kmeans++
  * *****************************************/
-static int init_cents(double * m, int n, int f, int k, double * cents, int * cids, double * d){
+static int init_cents(double * m, int n, int f, int * k, double * cents, int * cids, double * d){
     RInfo * rinfo = create_rinfo(4357U + time(NULL));
-    int sampled_i, b;
+    int sampled_i, b, c;
     double t = 0.0;
     double *cd = (double*)malloc(sizeof(double) * n);
     // first center randome selected
@@ -100,9 +102,13 @@ static int init_cents(double * m, int n, int f, int k, double * cents, int * cid
         }
     }
     memset(cids, 0, sizeof(int) * n);
-    for (int c = 1; c < k; c++){
+    for (c = 1; c < *k; c++){
+        if (cd[n - 1] <=  ZERO) break;
         t = randomMT(rinfo) / (RAND_MAX + 1.0) * cd[n - 1];
         sampled_i = binary_search(cd, n, t);
+#ifdef DEBUG
+        fprintf(stderr, "%16.3f %16.3f %12d\n", cd[n - 1], t, sampled_i);
+#endif
         memmove(cents + c * f, m + sampled_i * f, sizeof(double) * f);
         for (int i = 0; i < n; i++){
             t = dist(m + i * f,  cents + c * f, f);
@@ -112,6 +118,8 @@ static int init_cents(double * m, int n, int f, int k, double * cents, int * cid
             if (i > 0){ cd[i] += cd[i - 1]; }
         }
     }
+    fprintf(stderr, "instance : %d, generated cluster K: %d\n", n, c);
+    *k = c;
     free(cd); cd = NULL;
     free(rinfo); rinfo = NULL;
     return 0;
@@ -161,7 +169,7 @@ static void m_step_call(double *m, double *cents, int *c, int n, int f, int k, i
             centsA[c[i] * f + j] += m[i * f + j];
         }
     }
-    for (int i = 0; i < k; i ++){
+    for (int i = 0; i < k; i ++) if (centsC[i] > 0){
         centsL2Norm = 0.0;
         for (int j = 0; j < f; j++){
             cents[i * f + j] = centsA[i * f + j] / centsC[i];
@@ -182,7 +190,7 @@ static void m_step_call(double *m, double *cents, int *c, int n, int f, int k, i
 int kmeans(double * m, int n, int f, int k, double * cents, int * c, double * dis, int ths, int maxiter){
     int niters = 0, update = 0, outlier = 0;
     memset(cents, 0,sizeof(double) * k * f);
-    init_cents(m, n, f, k, cents, c, dis);
+    init_cents(m, n, f, &k, cents, c, dis);
     int thread_update[32] = {0};
     pthread_t tids[32] = {0};
     ThreadArg args[32] = {{0}};
@@ -220,5 +228,5 @@ int kmeans(double * m, int n, int f, int k, double * cents, int * c, double * di
             break;
         }
     }
-    return 0;
+    return k;
 }

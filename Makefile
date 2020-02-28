@@ -17,7 +17,7 @@ CC = gcc -std=c99 -O3
 LD = gcc -shared
 WARN = -Wall -Wno-unused-but-set-variable
 CFBASE = $(WARN) -pedantic -pipe
-CFLAGS = $(CFBASE) -fPIC -DNDEBUG -DNPRINT -DDTREE_DEBUG $(INC)
+CFLAGS = $(CFBASE) -fPIC -DDEBUG -DNPRINT -DDTREE_DEBUG $(INC)
 
 export CC LD CFLAGS MAKE
 

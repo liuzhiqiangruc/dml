@@ -85,24 +85,34 @@ static int binary_search(double *v, int n, double s){
 /* *****************************************
  * brief  : init cents for kmeans++
  * *****************************************/
-static int init_cents(double * m, int n, int f, int * k, double * cents, int * cids, double * d){
+static int init_cents(double * m, int n, int f, int k, double * cents, int c, int * cids, double * d){
     RInfo * rinfo = create_rinfo(4357U + time(NULL));
-    int sampled_i, b, c;
+    int sampled_i, b;
     double t = 0.0;
-    double *cd = (double*)malloc(sizeof(double) * n);
-    // first center randome selected
-    b = (int) (randomMT(rinfo) / (RAND_MAX + 1.0) * n);
-    memmove(cents, m + b * f, sizeof(double) * f);
-    for (int i = 0; i < n; i++){
-        d[i] = dist(m + i * f, cents, f);
-        if (d[i] < 0.6) d[i] = 0;
-        cd[i] = d[i];
-        if (i > 0){
-            cd[i] += cd[i - 1];
-        }
+    if (c > k || c < 0){
+        fprintf(stderr, "init error\n");
+        return -1;
     }
-    memset(cids, 0, sizeof(int) * n);
-    for (c = 1; c < *k; c++){
+    double *cd = (double*)malloc(sizeof(double) * n);
+    if (c == 0){ // first center randome selected
+        b = (int) (randomMT(rinfo) / (RAND_MAX + 1.0) * n);
+        memmove(cents, m + b * f, sizeof(double) * f);
+        memset(cids, 0, sizeof(int) * n);
+        for (int i = 0; i < n; i++){
+            d[i] = dist(m + i * f, cents, f);
+        }
+        c = 1;
+    }
+    // there are "c" inited centers already , must less than k
+    else if (c > 0) for (int i = 0; i < n; i++){
+        cids[i] = nearest(m + i * f, cents, c, f, d + i);
+    }
+    for (int i = 0; i < n; i++){
+        cd[i] = (d[i] >= 0.6 ? d[i] : 0.0);
+        if (i > 0) cd[i] += cd[i - 1];
+    }
+    // cluster growing from c to k at most
+    for (; c < k; c++){
         if (cd[n - 1] <=  ZERO) break;
         t = randomMT(rinfo) / (RAND_MAX + 1.0) * cd[n - 1];
         sampled_i = binary_search(cd, n, t);
@@ -113,16 +123,14 @@ static int init_cents(double * m, int n, int f, int * k, double * cents, int * c
         for (int i = 0; i < n; i++){
             t = dist(m + i * f,  cents + c * f, f);
             if (t < d[i]) {d[i] = t; cids[i] = c;}
-            if (d[i] < 0.6) d[i] = 0;
-            cd[i] = d[i];
-            if (i > 0){ cd[i] += cd[i - 1]; }
+            cd[i] = (d[i] >= 0.6 ? d[i] : 0.0);
+            if (i > 0) cd[i] += cd[i - 1];
         }
     }
     fprintf(stderr, "instance : %d, generated cluster K: %d\n", n, c);
-    *k = c;
     free(cd); cd = NULL;
     free(rinfo); rinfo = NULL;
-    return 0;
+    return c;
 }
 
 /* *************************************************
@@ -190,7 +198,7 @@ static void m_step_call(double *m, double *cents, int *c, int n, int f, int k, i
 int kmeans(double * m, int n, int f, int k, double * cents, int * c, double * dis, int ths, int maxiter){
     int niters = 0, update = 0, outlier = 0;
     memset(cents, 0,sizeof(double) * k * f);
-    init_cents(m, n, f, &k, cents, c, dis);
+    k = init_cents(m, n, f, k, cents, 0, c, dis);
     int thread_update[32] = {0};
     pthread_t tids[32] = {0};
     ThreadArg args[32] = {{0}};

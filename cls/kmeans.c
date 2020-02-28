@@ -117,7 +117,7 @@ static int init_cents(double * m, int n, int f, int k, double * cents, int c, in
         t = randomMT(rinfo) / (RAND_MAX + 1.0) * cd[n - 1];
         sampled_i = binary_search(cd, n, t);
 #ifdef DEBUG
-        fprintf(stderr, "%16.3f %16.3f %12d\n", cd[n - 1], t, sampled_i);
+        fprintf(stderr, "%4d : %16.3f %16.3f %12d\n", c, cd[n - 1], t, sampled_i);
 #endif
         memmove(cents + c * f, m + sampled_i * f, sizeof(double) * f);
         for (int i = 0; i < n; i++){
@@ -195,11 +195,16 @@ static void m_step_call(double *m, double *cents, int *c, int n, int f, int k, i
 /* *************************************************
  * brief  : kmeans++ algorithm
  * *************************************************/
-int kmeans(double * m, int n, int f, int k, double * cents, int * c, double * dis, int ths, int maxiter){
+int kmeans(double * m, int n, int f, int k, int initk, double * cents, int * c, double * dis, int ths, int maxiter){
     int niters = 0, update = 0, outlier = 0;
-    memset(cents, 0,sizeof(double) * k * f);
-    k = init_cents(m, n, f, k, cents, 0, c, dis);
-    int thread_update[32] = {0};
+    if (initk < 0 || initk > k) return -1;
+    if (initk < k){ // generate k - initk new cluster at most
+        memset(cents + initk * f, 0, sizeof(double) * (k - initk) * f);
+        k = init_cents(m, n, f, k, cents, initk, c, dis);
+    }
+    // no need "else", no new cluster generted even through init_cents process!!
+    if (initk == k) fprintf(stderr, "Just Tunning, No New Cluster Generated\n");
+    int thread_update[32] = {0};  // 32 thread at most
     pthread_t tids[32] = {0};
     ThreadArg args[32] = {{0}};
     if (ths <=1 ) ths = 1;

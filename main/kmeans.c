@@ -4,7 +4,8 @@
  *   filename : kmeans.c
  *   author   : ***
  *   date     : 2016-11-22
- *   info     : 
+ *   info     : kmeans++ exec binary, 
+ *              load data and pretrained cents
  * ======================================================== */
 
 #include <time.h>
@@ -15,7 +16,14 @@
 
 void help(){
     fprintf(stderr, "kmeans usage:\n");
-    fprintf(stderr, "./kmeans -f [int] -k [int] -m [int] -n [int] -d [string] -o [string]\n");
+    fprintf(stderr, "./kmeans -f [int] -k [int] -m [int] -n [int] -d [string] -p [string] -o [string]\n");
+    fprintf(stderr, "         -f dim\n");
+    fprintf(stderr, "         -k max cluster\n");
+    fprintf(stderr, "         -m thread count\n");
+    fprintf(stderr, "         -n iteration\n");
+    fprintf(stderr, "         -d input embeddings\n");
+    fprintf(stderr, "         -p init centers\n");
+    fprintf(stderr, "         -o output dir\n");
 }
 
 int main(int argc, char *argv[]){
@@ -23,10 +31,10 @@ int main(int argc, char *argv[]){
         help();
         return -1;
     }
-    int f, k, n, i, t, maxn;
+    int f, k, n, i, t, maxn, initk;
     int *c = NULL;
     double *m = NULL, *dist = NULL, *cents = NULL;
-    char *inf = NULL, *o = ".";
+    char *inf = NULL, *o = ".", *initc = NULL;
     char buffer[4096] = {0};
     char of[256] = {0};
     FILE * fp = NULL;
@@ -35,8 +43,9 @@ int main(int argc, char *argv[]){
     t = atoi(argv[6]);
     maxn = atoi(argv[8]);
     inf = argv[10];
-    if (argc == 13){
-        o = argv[12];
+    initc = argv[12];
+    if (argc == 15){
+        o = argv[14];
     }
     if (NULL == (fp = fopen(inf, "r"))){
         fprintf(stderr, "can not open input file\n");
@@ -64,7 +73,32 @@ int main(int argc, char *argv[]){
         goto ret;
     }
 
-    k = kmeans(m, n, f, k, cents, c, dist, t, maxn);
+    initk = 0;
+    if (NULL == (fp = fopen(initc, "r"))){
+        fprintf(stderr, "can not open the inited centers, reboot clustering\n");
+        goto train_process;
+    }
+    while(NULL != fgets(buffer, 4096, fp)){
+        initk += 1;
+    }
+    if (initk > k){
+        fprintf(stderr, " init error\n");
+        fclose(fp);
+        goto ret;
+    }
+    rewind(fp);
+    i = 0;
+    fscanf(fp, "%lf", cents);
+    while(!feof(fp)){
+        fscanf(fp, "%lf", cents + (++i));
+    }
+    fclose(fp);
+    if (i != initk * f){
+        goto ret;
+    }
+
+train_process:
+    k = kmeans(m, n, f, k, initk, cents, c, dist, t, maxn);
 
     // output the item clusid
     sprintf(of, "%s/clsid", o);

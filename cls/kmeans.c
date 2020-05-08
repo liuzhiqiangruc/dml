@@ -25,6 +25,7 @@ typedef struct _thread_arg{
     double *dis;
     int * upd;
     int * cids;
+    int * itst;
     int k;
     int n;
     int f;
@@ -145,6 +146,7 @@ static void * estep_thread_call (void * arg){
     double *dis   = TH->dis;
     int    *upd   = TH->upd;
     int    *cids  = TH->cids;
+    int    *itst  = TH->itst;
     int     k     = TH->k;
     int     f     = TH->f;
     int     n     = TH->n;
@@ -154,12 +156,24 @@ static void * estep_thread_call (void * arg){
     int     s     = n % ths;
     int     begin = l * tid + (tid <= s ? tid : s);
     int     end   = l * (tid + 1) + ((tid + 1) <= s ? (tid + 1) : s);
-    *upd = 0;
-    for (int i = begin; i < end; i++){
-        int old = cids[i];
-        cids[i] = nearest(m + i * f, cents, k, f, dis + i);
-        if (dis[i] > 0.8) cids[i] = -1;
-        if (old != cids[i]) *upd += 1;
+    int     e = 0;
+    while (1) {
+        if (*itst == 0){
+            *upd = 0;
+            for (int i = begin; i < end; i++){
+                int old = cids[i];
+                cids[i] = nearest(m + i * f, cents, k, f, dis + i);
+                if (dis[i] > 0.8) cids[i] = -1;
+                if (old != cids[i]) *upd += 1;
+            }
+            *itst = (++e);
+        }
+        else if (*itst == -1){
+            break;
+        }
+        else {
+            sleep(1);
+        }
     }
     return NULL;
 }
@@ -207,6 +221,7 @@ int kmeans(double * m, int n, int f, int k, int initk, double * cents, int * c, 
     // no need "else", no new cluster generted even through init_cents process!!
     if (initk == k) fprintf(stderr, "Just Tunning, No New Cluster Generated\n");
     int thread_update[32] = {0};  // 32 thread at most
+    int iter_process[32] = {0};
     pthread_t tids[32] = {0};
     ThreadArg args[32] = {{0}};
     if (ths <=1 ) ths = 1;
@@ -219,29 +234,48 @@ int kmeans(double * m, int n, int f, int k, int initk, double * cents, int * c, 
         args[i].f     = f;
         args[i].tid   = i;
         args[i].upd   = thread_update + i;
+        args[i].itst  = iter_process  + i;
         args[i].cids  = c;
         args[i].ths   = ths;
         args[i].dis   = dis;
     }
-    while (++niters  <= maxiter){
-        // m step for kmeans iteration
-        m_step_call(m, cents, c, n, f, k, &outlier);
-        // e step for kmeans iteration using mutil thread
+    m_step_call(m, cents, c, n, f, k, &outlier);
+    for (int i = 0; i < ths; i++){
+        pthread_create(tids + i, NULL, estep_thread_call, args + i);
+    }
+    while (1){
+        int wait = 0;
         for (int i = 0; i < ths; i++){
-            pthread_create(tids + i, NULL, estep_thread_call, args + i);
+            if ((niters +1) != iter_process[i]){
+                wait = 1;
+                break;
+            }
         }
-        for (int i = 0; i < ths; i++){
-            pthread_join(tids[i], NULL);
+        if (wait == 0){
+            // No. of instance whose clsid changed
+            update = 0;
+            for (int i = 0; i < ths; i++){
+                update += thread_update[i];
+            }
+            fprintf(stderr,"kmeans iteration: %3d, change instance : %6d, outlier: %d\n", niters, update, outlier);
+            if (update <= n / 256){
+                break;
+            }
+            m_step_call(m, cents, c, n, f, k, &outlier);
+            for (int i = 0; i < ths; i++){
+                iter_process[i] = 0;
+            }
+            niters += 1;
+            if (niters >= maxiter) {
+                break;
+            }
         }
-        // No. of instance whose clsid changed
-        update = 0;
-        for (int i = 0; i < ths; i++){
-            update += thread_update[i];
-        }
-        fprintf(stderr,"kmeans iteration: %3d, change instance : %6d, outlier: %d\n", niters, update, outlier);
-        if (update <= n / 256){
-            break;
-        }
+    }
+    for (int i = 0; i < ths; i++){
+        iter_process[i] = -1;
+    }
+    for (int i = 0; i < ths; i++){
+        pthread_join(tids[i], NULL);
     }
     return k;
 }

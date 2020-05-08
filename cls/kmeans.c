@@ -12,6 +12,7 @@
 #include <string.h>
 #include <time.h>
 #include <pthread.h>
+#include <unistd.h>
 #include "rand.h"
 #include "kmeans.h"
 

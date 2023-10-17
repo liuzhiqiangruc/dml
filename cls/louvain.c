@@ -172,7 +172,7 @@ static int first_stage(Louvain * lv){
     int *ids = NULL;
     double kv, wei, cwei, maxInWei, deltaQ, maxDeltaQ;
     double * weight = NULL;
-    ids    = (int*)   malloc(lv->clen * sizeof(int));
+    ids    = (int*)   malloc(lv->nlen * sizeof(int));
     weight = (double*)calloc(lv->nlen, sizeof(double));
     memset(ids, -1, lv->clen * sizeof(int));
     stage_two = 0;
